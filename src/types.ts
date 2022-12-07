@@ -1,7 +1,7 @@
 import {BigDecimal} from '@subsquid/big-decimal'
 import {toHex} from '@subsquid/util-internal-hex'
 import {toJSON} from '@subsquid/util-internal-json'
-import {assert} from 'console'
+import assert from 'assert'
 import {Dialect, Quote} from './dialect'
 
 export class Type<T> {

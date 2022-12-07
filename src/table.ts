@@ -2,24 +2,28 @@ import {assertNotNull} from '@subsquid/util-internal'
 import {Dialect} from './dialect'
 import {Type} from './types'
 
-export type RecordField<T> = Type<T>
-
 export type TableHeader = {
-    [k: string]: RecordField<any>
+    [k: string]: Type<any>
 }
 
 export class Table<T extends TableHeader> {
     constructor(readonly name: string, readonly header: T) {}
 }
 
-type ExcludeOptionKeys<T> = {
-    [p in keyof T]: T[p] extends RecordField<infer R> ? (null extends R ? never : T[p]) : never
+type NullableFields<T extends TableHeader> = {
+    [k in keyof T]: T[k] extends Type<infer R> ? (null extends R ? k : never) : never
 }[keyof T]
 
-export type TableRecord<T extends TableHeader> = {
-    [k in keyof Pick<T, ExcludeOptionKeys<T>>]: T[k] extends RecordField<infer R> ? R : never
+export type TableRecord<T extends TableHeader | Table<any>> = T extends Table<infer R>
+    ? ConvertFieldsToTypes<R>
+    : T extends TableHeader
+    ? ConvertFieldsToTypes<T>
+    : never
+
+type ConvertFieldsToTypes<T extends TableHeader> = {
+    [k in keyof Omit<T, NullableFields<T>>]: T[k] extends Type<infer R> ? R : never
 } & {
-    [k in keyof Omit<T, ExcludeOptionKeys<T>>]?: T[k] extends RecordField<infer R> ? R : never
+    [k in keyof Pick<T, NullableFields<T>>]?: T[k] extends Type<infer R> ? R : never
 }
 
 export class TableBuilder<T extends TableHeader> {
