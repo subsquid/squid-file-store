@@ -1,9 +1,8 @@
 import {assertNotNull} from '@subsquid/util-internal'
 import assert from 'assert'
-import {Chunk} from './chunk'
 import {Dialect, dialects} from './dialect'
 import {createFS, FS, FSOptions} from './fs'
-import {Table, TableBuilder, TableHeader, TableRecord} from './table'
+import {Chunk, Table, TableBuilder, TableHeader, TableRecord} from './table'
 import {types} from './types'
 
 export interface CsvDatabaseOptions {

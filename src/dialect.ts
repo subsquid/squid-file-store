@@ -24,6 +24,12 @@ let excel: Dialect = {
     header: true,
 }
 
+let excelTab: Dialect = {
+    ...excel,
+    delimiter: '\t',
+}
+
 export let dialects = {
     excel,
+    excelTab,
 }
