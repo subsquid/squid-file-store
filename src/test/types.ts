@@ -1,7 +1,7 @@
 import {Table, TableRecord} from '../table'
 import {Nullable, types, ArrayType} from '../types'
 
-let table = new Table('table', {
+let header = {
     a: types.string,
     b: types.int,
     c: types.float,
@@ -10,7 +10,9 @@ let table = new Table('table', {
     f: Nullable(types.string),
     g: ArrayType(types.string),
     h: ArrayType(Nullable(types.string)),
-})
+}
+
+let table = new Table('table', header)
 
 type Record = TableRecord<typeof table>
 

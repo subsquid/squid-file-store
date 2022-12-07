@@ -124,8 +124,6 @@ export class Store {
         return this._tables()
     }
 
-    write<T extends TableHeader>(table: Table<T>, record: TableRecord<T>): void
-    write<T extends TableHeader>(table: Table<T>, records: TableRecord<T>[]): void
     write<T extends TableHeader>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
         let builder = this.tables.getTableBuilder(table.name)
         builder.append(records)
