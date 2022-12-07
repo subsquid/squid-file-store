@@ -11,7 +11,9 @@
     "!src/test"
   ],
   "main": "lib/index.js",
-  "scripts": {},
+  "scripts": {
+    "build": "rm -rf lib && tsc"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/subsquid/squid-csv-store.git"
