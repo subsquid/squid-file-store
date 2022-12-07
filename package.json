@@ -1,0 +1,36 @@
+{
+  "name": "@subsquid/csv-store",
+  "version": "0.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "src",
+    "!src/test"
+  ],
+  "main": "lib/index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subsquid/squid-csv-store.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/subsquid/squid-csv-store/issues"
+  },
+  "homepage": "https://github.com/subsquid/squid-csv-store#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.224.0",
+    "@subsquid/big-decimal": "^0.0.0",
+    "@subsquid/util-internal": "^1.0.0",
+    "@subsquid/util-internal-hex": "^0.0.0",
+    "@subsquid/util-internal-json": "^0.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "16.11.56",
+    "typescript": "4.8.2"
+  }
+}
