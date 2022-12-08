@@ -1,4 +1,10 @@
-import {GetObjectCommand, PutObjectCommand, S3Client, ListObjectsCommand} from '@aws-sdk/client-s3'
+import {
+    GetObjectCommand,
+    PutObjectCommand,
+    S3Client,
+    ListObjectsCommand,
+    DeleteObjectsCommand,
+} from '@aws-sdk/client-s3'
 import assert from 'assert'
 import fs from 'fs/promises'
 import {existsSync} from 'fs'
@@ -9,15 +15,19 @@ export abstract class FS {
         throw new Error('Method not implemented.')
     }
 
-    async readFile(path: string, encoding: BufferEncoding): Promise<string> {
+    async readFile(name: string, encoding: BufferEncoding): Promise<string> {
         throw new Error('Method not implemented.')
     }
 
-    async writeFile(path: string, data: string, encoding: BufferEncoding): Promise<void> {
+    async writeFile(name: string, data: string, encoding: BufferEncoding): Promise<void> {
         throw new Error('Method not implemented.')
     }
 
     async transact(dir: string, f: (fs: FS) => Promise<void>): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
+    async remove(name: string) {
         throw new Error('Method not implemented.')
     }
 }
@@ -48,11 +58,17 @@ export class LocalFS extends FS {
         let txFs = new LocalFS(tempDir)
         try {
             await f(txFs)
+            await this.remove(dir)
             await fs.rename(tempDir, absPath)
         } catch (e) {
             await fs.rm(tempDir, {recursive: true, force: true})
             throw e
         }
+    }
+
+    async remove(name: string): Promise<void> {
+        if (!(await this.exist(name))) return
+        await fs.rm(path.join(this.dir, name), {recursive: true, force: true})
     }
 }
 
@@ -66,6 +82,7 @@ export class S3Fs extends FS {
             new ListObjectsCommand({
                 Bucket: this.bucket,
                 Prefix: this.pathJoin(this.dir, name),
+                MaxKeys: 1,
             })
         )
         return res.Contents?.length ? true : false
@@ -97,11 +114,33 @@ export class S3Fs extends FS {
 
     async transact(dir: string, f: (fs: S3Fs) => Promise<void>): Promise<void> {
         let txFs = new S3Fs(this.pathJoin(this.dir, dir), this.client, this.bucket)
-        await f(txFs) 
+        await f(txFs)
     }
 
     private pathJoin(...paths: string[]) {
         return paths.reduce((res, path, i) => res + (path.startsWith('/') || i == 0 ? path : '/' + path), '')
+    }
+
+    async remove(name: string): Promise<void> {
+        let ls = await this.client.send(
+            new ListObjectsCommand({
+                Bucket: this.bucket,
+                Prefix: this.pathJoin(this.dir, name),
+            })
+        )
+        let objects = ls.Contents?.map(({Key}) => ({Key}))
+        if (!objects || objects.length == 0) return
+
+        await this.client.send(
+            new DeleteObjectsCommand({
+                Bucket: this.bucket,
+                Delete: {
+                    Objects: objects as any,
+                    Quiet: true,
+                },
+            })
+        )
+        if (ls.IsTruncated) await this.remove(name)
     }
 }
 
@@ -130,7 +169,7 @@ export function createFS(dest: string, fsOptions?: FSOptions) {
         })
         return new S3Fs(url.pathname.slice(1), s3client, url.hostname)
     } else {
-        throw new Error(`Unexpected destination - ${dest}`)
+        throw new Error(`Unexpected destination - '${dest}'`)
     }
 }
 

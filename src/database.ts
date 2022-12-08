@@ -5,12 +5,16 @@ import {createFS, FS, FSOptions} from './fs'
 import {Chunk, Table, TableBuilder, TableHeader, TableRecord} from './table'
 import {types} from './types'
 
+const PENDING_FOLDER = 'last'
+const STATUS_TABLE = 'status.csv'
+
 export interface CsvDatabaseOptions {
     dest?: string
     encoding?: BufferEncoding
     extension?: string
     dialect?: Dialect
     chunkSize?: number
+    updateInterval?: number
     fsOptions?: FSOptions
 }
 
@@ -18,6 +22,7 @@ export class CsvDatabase {
     private encoding: BufferEncoding
     private extension: string
     private chunkSize: number
+    private updateInterval: number
     private dialect: Dialect
     private lastCommitted = -1
     private chunk: Chunk | undefined
@@ -29,18 +34,21 @@ export class CsvDatabase {
         this.dialect = options?.dialect || dialects.excel
         this.chunkSize = options?.chunkSize || 20
         this.fs = createFS(options?.dest || './data', options?.fsOptions)
+        this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
     }
 
     async connect(): Promise<number> {
-        if (await this.fs.exist('status.csv')) {
+        await this.fs.remove(PENDING_FOLDER)
+        if (await this.fs.exist(STATUS_TABLE)) {
             let rows = await this.fs
-                .readFile('status.csv', this.encoding)
+                .readFile(STATUS_TABLE, this.encoding)
                 .then((data) => data.split(dialects.excel.lineTerminator))
-            return Number(rows[2])
+            this.lastCommitted = Number(rows[2])
         } else {
             await this.updateHeight(-1)
-            return -1
+            this.lastCommitted = -1
         }
+        return this.lastCommitted
     }
 
     async close(): Promise<void> {
@@ -85,26 +93,33 @@ export class CsvDatabase {
         }
 
         open = false
-        this.lastCommitted = to
     }
 
     async advance(height: number): Promise<void> {
-        if (!this.chunk || this.chunk.getSize(this.encoding) < this.chunkSize * 1024 * 1024) return
+        if (!this.chunk) return
 
-        if (height > this.lastCommitted) {
-            this.chunk.changeRange({to: height})
+        this.chunk.changeRange({to: height})
+
+        if (this.chunk.getSize(this.encoding) >= this.chunkSize * 1024 * 1024) {
+            await this.fs.transact(this.chunk.name, async (txFs) => {
+                for (let table of this.tables) {
+                    let tablebuilder = assertNotNull(this.chunk).getTableBuilder(table.name)
+                    await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
+                }
+            })
+            await this.fs.remove(PENDING_FOLDER)
+            await this.updateHeight(height)
+            this.chunk = undefined
+            this.lastCommitted = height
+        } else if (height - this.lastCommitted >= this.updateInterval) {
+            await this.fs.transact(PENDING_FOLDER, async (txFs) => {
+                for (let table of this.tables) {
+                    let tablebuilder = assertNotNull(this.chunk).getTableBuilder(table.name)
+                    await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
+                }
+            })
             this.lastCommitted = height
         }
-
-        await this.fs.transact(this.chunk.name, async (txFs) => {
-            for (let table of this.tables) {
-                let tablebuilder = assertNotNull(this.chunk).getTableBuilder(table.name)
-                await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
-            }
-        })
-        await this.updateHeight(height)
-
-        this.chunk = undefined
     }
 
     private createChunk(from: number, to: number) {
@@ -112,8 +127,8 @@ export class CsvDatabase {
     }
 
     private async updateHeight(height: number) {
-        let statusTable = new TableBuilder({height: types.int}, this.dialect, [{height}])
-        await this.fs.writeFile(`status.csv`, statusTable.getTable(), this.encoding)
+        let statusTable = new TableBuilder({height: types.int}, dialects.excel, [{height}])
+        await this.fs.writeFile(STATUS_TABLE, statusTable.getTable(), this.encoding)
     }
 }
 

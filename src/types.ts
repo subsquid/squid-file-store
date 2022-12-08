@@ -72,7 +72,6 @@ export let BytesType = new Type<Uint8Array>({
 export let DateTimeType = new Type<Date>({
     name: 'datetime',
     serialize(value: Date, dialect: Dialect) {
-        assert(value instanceof Uint8Array, 'Invalid bytes array')
         return quoteString(value.toISOString(), dialect)
     },
 })
