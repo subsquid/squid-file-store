@@ -24,7 +24,7 @@ export let StringType = new Type<string>({
 export let IntType = new Type<number>({
     name: 'int',
     serialize(value: number, dialect: Dialect) {
-        assert(Number.isInteger(value))
+        assert(Number.isInteger(value), 'Invalid int')
         return quoteString(value.toString(), dialect, true)
     },
 })
@@ -32,6 +32,7 @@ export let IntType = new Type<number>({
 export let FloatType = new Type<number>({
     name: 'float',
     serialize(value: number, dialect: Dialect) {
+        assert(typeof value === 'number', 'Invalid float')
         return quoteString(value.toString(), dialect, true)
     },
 })
@@ -39,7 +40,7 @@ export let FloatType = new Type<number>({
 export let BigIntType = new Type<bigint>({
     name: 'bigint',
     serialize(value: bigint, dialect: Dialect) {
-        assert(typeof value === 'bigint')
+        assert(typeof value === 'bigint', 'Invalid bigint')
         return quoteString(value.toString(), dialect, true)
     },
 })
@@ -47,7 +48,7 @@ export let BigIntType = new Type<bigint>({
 export let BigDecimalType = new Type<BigDecimal>({
     name: 'bigdecimal',
     serialize(value: BigDecimal, dialect: Dialect) {
-        assert(value instanceof BigDecimal)
+        assert(value instanceof BigDecimal, 'Invalid bigdecimal')
         return quoteString(value.toString(), dialect, true)
     },
 })
@@ -55,7 +56,7 @@ export let BigDecimalType = new Type<BigDecimal>({
 export let BooleanType = new Type<boolean>({
     name: 'boolean',
     serialize(value: boolean, dialect: Dialect) {
-        assert(typeof value === 'boolean')
+        assert(typeof value === 'boolean', 'Invalid boolean')
         return quoteString(value.toString(), dialect)
     },
 })
@@ -63,6 +64,7 @@ export let BooleanType = new Type<boolean>({
 export let BytesType = new Type<Uint8Array>({
     name: 'bytes',
     serialize(value: Uint8Array, dialect: Dialect) {
+        assert(value instanceof Uint8Array, 'Invalid bytes array')
         return quoteString(toHex(value), dialect)
     },
 })
@@ -70,6 +72,7 @@ export let BytesType = new Type<Uint8Array>({
 export let DateTimeType = new Type<Date>({
     name: 'datetime',
     serialize(value: Date, dialect: Dialect) {
+        assert(value instanceof Uint8Array, 'Invalid bytes array')
         return quoteString(value.toISOString(), dialect)
     },
 })
@@ -111,8 +114,11 @@ export let types = {
 }
 
 function hasSpecialChar(str: string, dialect: Dialect) {
-    return [dialect.delimiter, dialect.arrayDelimiter, dialect.lineTerminator, dialect.quoteChar].some((c) =>
-        str.includes(c)
+    return (
+        str.includes(dialect.delimiter) ||
+        str.includes(dialect.arrayDelimiter) ||
+        str.includes(dialect.lineTerminator) ||
+        str.includes(dialect.quoteChar)
     )
 }
 
