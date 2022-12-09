@@ -1,4 +1,3 @@
-import {assertNotNull} from '@subsquid/util-internal'
 import assert from 'assert'
 import {Dialect, dialects} from './dialect'
 import {createFS, FS, FSOptions} from './fs'
@@ -6,15 +5,40 @@ import {Chunk, Table, TableBuilder, TableHeader, TableRecord} from './table'
 import {types} from './types'
 
 const PENDING_FOLDER = 'last'
-const STATUS_TABLE = 'status.csv'
+const STATUS_TABLE = 'status'
 
 export interface CsvDatabaseOptions {
+    /**
+     * Local or s3 destination.
+     * For s3 use "s3://*bucketName/path"
+     * @Default ./data
+     */
     dest?: string
+    /**
+     * @Default utf-8
+     */
     encoding?: BufferEncoding
+    /**
+     * Output files extension.
+     * @Default csv
+     */
     extension?: string
+    /**
+     * @Default excel
+     */
     dialect?: Dialect
+    /**
+     * Minimal folder size (MB).
+     * @Default 20
+     */
     chunkSize?: number
+    /**
+     * Pending data output interval (blocks).
+     */
     updateInterval?: number
+    /**
+     * Options for different file systems. Only s3 options supported now.
+     */
     fsOptions?: FSOptions
 }
 
@@ -24,7 +48,7 @@ export class CsvDatabase {
     private chunkSize: number
     private updateInterval: number
     private dialect: Dialect
-    private lastCommitted = -1
+    private lastOutputed = -1
     private chunk: Chunk | undefined
     private fs: FS
 
@@ -39,21 +63,21 @@ export class CsvDatabase {
 
     async connect(): Promise<number> {
         await this.fs.remove(PENDING_FOLDER)
-        if (await this.fs.exist(STATUS_TABLE)) {
+        if (await this.fs.exist(`${STATUS_TABLE}.${this.extension}`)) {
             let rows = await this.fs
-                .readFile(STATUS_TABLE, this.encoding)
-                .then((data) => data.split(dialects.excel.lineTerminator))
-            this.lastCommitted = Number(rows[2])
+                .readFile(`${STATUS_TABLE}.${this.extension}`, this.encoding)
+                .then((data) => data.split(this.dialect.lineTerminator))
+            this.lastOutputed = Number(rows[2])
         } else {
             await this.updateHeight(-1)
-            this.lastCommitted = -1
+            this.lastOutputed = -1
         }
-        return this.lastCommitted
+        return this.lastOutputed
     }
 
     async close(): Promise<void> {
         this.chunk = undefined
-        this.lastCommitted = -1
+        this.lastOutputed = -1
     }
 
     async transact(from: number, to: number, cb: (store: Store) => Promise<void>): Promise<void> {
@@ -77,7 +101,7 @@ export class CsvDatabase {
         if (!this.chunk) {
             this.chunk = this.createChunk(from, to)
         } else {
-            this.chunk.changeRange({to: to})
+            this.chunk.expandRange(to)
         }
 
         let store = new Store(() => {
@@ -98,27 +122,16 @@ export class CsvDatabase {
     async advance(height: number): Promise<void> {
         if (!this.chunk) return
 
-        this.chunk.changeRange({to: height})
-
+        this.chunk.expandRange(height)
         if (this.chunk.getSize(this.encoding) >= this.chunkSize * 1024 * 1024) {
-            await this.fs.transact(this.chunk.name, async (txFs) => {
-                for (let table of this.tables) {
-                    let tablebuilder = assertNotNull(this.chunk).getTableBuilder(table.name)
-                    await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
-                }
-            })
-            await this.fs.remove(PENDING_FOLDER)
+            await this.outputChunk(this.chunk.name, this.chunk)
             await this.updateHeight(height)
+            await this.fs.remove(PENDING_FOLDER)
             this.chunk = undefined
-            this.lastCommitted = height
-        } else if (height - this.lastCommitted >= this.updateInterval) {
-            await this.fs.transact(PENDING_FOLDER, async (txFs) => {
-                for (let table of this.tables) {
-                    let tablebuilder = assertNotNull(this.chunk).getTableBuilder(table.name)
-                    await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
-                }
-            })
-            this.lastCommitted = height
+            this.lastOutputed = height
+        } else if (height - this.lastOutputed >= this.updateInterval) {
+            await this.outputChunk(PENDING_FOLDER, this.chunk)
+            this.lastOutputed = height
         }
     }
 
@@ -126,9 +139,18 @@ export class CsvDatabase {
         return new Chunk(from, to, new Map(this.tables.map((t) => [t.name, new TableBuilder(t.header, this.dialect)])))
     }
 
+    private async outputChunk(path: string, chunk: Chunk) {
+        await this.fs.transact(path, async (txFs) => {
+            for (let table of this.tables) {
+                let tablebuilder = chunk.getTableBuilder(table.name)
+                await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
+            }
+        })
+    }
+
     private async updateHeight(height: number) {
-        let statusTable = new TableBuilder({height: types.int}, dialects.excel, [{height}])
-        await this.fs.writeFile(STATUS_TABLE, statusTable.getTable(), this.encoding)
+        let statusTable = new TableBuilder({height: types.int}, this.dialect, [{height}])
+        await this.fs.writeFile(`${STATUS_TABLE}.${this.extension}`, statusTable.getTable(), this.encoding)
     }
 }
 

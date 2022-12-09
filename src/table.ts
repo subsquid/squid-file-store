@@ -71,9 +71,8 @@ export class Chunk {
         return assertNotNull(this.tables.get(name), `Table ${name} does not exist`)
     }
 
-    changeRange(range: {from?: number; to?: number}) {
-        if (range.from) this.from = range.from
-        if (range.to) this.to = range.to
+    expandRange(to: number) {
+        this.to = to
     }
 
     getSize(encoding: BufferEncoding) {
