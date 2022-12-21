@@ -28,7 +28,6 @@ export let IntType = new Type<number>({
         return quoteString(value.toString(), dialect, true)
     },
 })
-
 export let FloatType = new Type<number>({
     name: 'float',
     serialize(value: number, dialect: Dialect) {
@@ -36,7 +35,6 @@ export let FloatType = new Type<number>({
         return quoteString(value.toString(), dialect, true)
     },
 })
-
 export let BigIntType = new Type<bigint>({
     name: 'bigint',
     serialize(value: bigint, dialect: Dialect) {
@@ -44,11 +42,18 @@ export let BigIntType = new Type<bigint>({
         return quoteString(value.toString(), dialect, true)
     },
 })
-
 export let BigDecimalType = new Type<BigDecimal>({
     name: 'bigdecimal',
     serialize(value: BigDecimal, dialect: Dialect) {
         assert(value instanceof BigDecimal, 'Invalid bigdecimal')
+        return quoteString(value.toString(), dialect, true)
+    },
+})
+
+export let NumericType = new Type<number | bigint | BigDecimal>({
+    name: 'number',
+    serialize(value: number | bigint | BigDecimal, dialect: Dialect) {
+        assert(typeof value === 'number' || typeof value === 'bigint' || value instanceof BigDecimal, 'Invalid number')
         return quoteString(value.toString(), dialect, true)
     },
 })
@@ -107,6 +112,7 @@ export let types = {
     float: FloatType,
     bigint: BigIntType,
     bigdecimal: BigDecimalType,
+    numeric: NumericType,
     bytes: BytesType,
     datetime: DateTimeType,
     boolean: BooleanType,
