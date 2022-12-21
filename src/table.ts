@@ -32,20 +32,20 @@ export class TableBuilder<T extends TableHeader> {
     constructor(private header: TableHeader, private dialect: Dialect, records: TableRecord<T>[] = []) {
         if (this.dialect.header) {
             let serializedHeader = Object.keys(this.header).join(this.dialect.delimiter) + this.dialect.lineTerminator
-            let serializedTypes =
-                Object.values(this.header)
-                    .map((t) => t.name)
-                    .join(this.dialect.delimiter) + this.dialect.lineTerminator
-            this.records.push(serializedHeader, serializedTypes)
+            this.records.push(serializedHeader)
         }
         this.append(records)
     }
 
     getSize(encoding: BufferEncoding) {
-        return this.records.reduce((size, record) => size + Buffer.byteLength(record, encoding), 0)
+        let size = 0
+        for (let record of this.records) {
+            size += Buffer.byteLength(record, encoding)
+        }
+        return size
     }
 
-    getTable() {
+    toTable() {
         return this.records.join('')
     }
 
@@ -58,9 +58,13 @@ export class TableBuilder<T extends TableHeader> {
     }
 
     private serializeRecord(record: TableRecord<T>) {
-        return Object.entries(this.header)
-            .map(([field, fieldData]) => fieldData.serialize(record[field as keyof typeof record], this.dialect))
-            .join(this.dialect.delimiter)
+        let fields = Object.entries(this.header)
+        let serializedFields = new Array<string>(fields.length)
+        for (let i = 0; i < fields.length; i++) {
+            let [fieldName, fieldData] = fields[i]
+            serializedFields[i] = fieldData.serialize(record[fieldName], this.dialect)
+        }
+        return serializedFields.join(this.dialect.delimiter)
     }
 }
 

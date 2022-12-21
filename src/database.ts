@@ -143,14 +143,14 @@ export class CsvDatabase {
         await this.fs.transact(path, async (txFs) => {
             for (let table of this.tables) {
                 let tablebuilder = chunk.getTableBuilder(table.name)
-                await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.getTable(), this.encoding)
+                await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.toTable(), this.encoding)
             }
         })
     }
 
     private async updateHeight(height: number) {
         let statusTable = new TableBuilder({height: types.int}, this.dialect, [{height}])
-        await this.fs.writeFile(`${STATUS_TABLE}.${this.extension}`, statusTable.getTable(), this.encoding)
+        await this.fs.writeFile(`${STATUS_TABLE}.${this.extension}`, statusTable.toTable(), this.encoding)
     }
 }
 
