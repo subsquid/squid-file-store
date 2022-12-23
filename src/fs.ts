@@ -11,6 +11,10 @@ import {existsSync} from 'fs'
 import path from 'path'
 
 export abstract class FS {
+    async init(): Promise<void> {
+        throw new Error('Method not implemented.')
+    }
+
     async exist(name: string): Promise<boolean> {
         throw new Error('Method not implemented.')
     }
@@ -27,7 +31,15 @@ export abstract class FS {
         throw new Error('Method not implemented.')
     }
 
-    async remove(name: string) {
+    async mkdir(dir: string) {
+        throw new Error('Method not implemented.')
+    }
+
+    async remove(dir: string) {
+        throw new Error('Method not implemented.')
+    }
+
+    abs(name: string) {
         throw new Error('Method not implemented.')
     }
 }
@@ -35,6 +47,11 @@ export abstract class FS {
 export class LocalFS extends FS {
     constructor(protected dir: string) {
         super()
+        dir = path.resolve(dir)
+    }
+
+    async init(): Promise<void> {
+        await fs.mkdir(this.dir, {recursive: true})
     }
 
     async exist(name: string) {
@@ -42,19 +59,19 @@ export class LocalFS extends FS {
     }
 
     async readFile(name: string, encoding: BufferEncoding): Promise<string> {
-        return fs.readFile(path.join(this.dir, name), encoding)
+        await this.mkdir(path.dirname(name))
+        return fs.readFile(this.abs(name), encoding)
     }
 
     async writeFile(name: string, data: string, encoding: BufferEncoding): Promise<void> {
-        let absPath = path.join(this.dir, name)
-        await fs.mkdir(path.dirname(absPath), {recursive: true})
-        return fs.writeFile(absPath, data, encoding)
+        await this.mkdir(path.dirname(name))
+        return fs.writeFile(this.abs(name), data, encoding)
     }
 
     async transact(dir: string, f: (fs: LocalFS) => Promise<void>) {
-        let absPath = path.join(this.dir, dir)
+        let absPath = this.abs(this.dir, dir)
         let tempName = `${path.basename(absPath)}-temp-${Date.now()}`
-        let tempDir = path.join(path.dirname(absPath), tempName)
+        let tempDir = this.abs(path.dirname(absPath), tempName)
         let txFs = new LocalFS(tempDir)
         try {
             await f(txFs)
@@ -66,9 +83,17 @@ export class LocalFS extends FS {
         }
     }
 
+    async mkdir(dir: string) {
+        await fs.mkdir(this.abs(this.dir, dir), {recursive: true})
+    }
+
     async remove(name: string): Promise<void> {
         if (!(await this.exist(name))) return
-        await fs.rm(path.join(this.dir, name), {recursive: true, force: true})
+        await fs.rm(this.abs(this.dir, name), {recursive: true, force: true})
+    }
+
+    abs(...paths: string[]) {
+        return path.join(this.dir, ...paths)
     }
 }
 
@@ -76,6 +101,8 @@ export class S3Fs extends FS {
     constructor(private dir: string, private client: S3Client, private bucket: string) {
         super()
     }
+
+    async init(): Promise<void> {}
 
     async exist(name: string) {
         let res = await this.client.send(
@@ -102,21 +129,6 @@ export class S3Fs extends FS {
         }
     }
 
-    async writeFile(name: string, data: string, encoding: BufferEncoding): Promise<void> {
-        await this.client.send(
-            new PutObjectCommand({
-                Bucket: this.bucket,
-                Key: this.pathJoin(this.dir, name),
-                Body: Buffer.from(data, encoding),
-            })
-        )
-    }
-
-    async transact(dir: string, f: (fs: S3Fs) => Promise<void>): Promise<void> {
-        let txFs = new S3Fs(this.pathJoin(this.dir, dir), this.client, this.bucket)
-        await f(txFs)
-    }
-
     private pathJoin(...paths: string[]) {
         return paths.reduce((res, path, i) => res + (path.startsWith('/') || i == 0 ? path : '/' + path), '')
     }
@@ -141,6 +153,10 @@ export class S3Fs extends FS {
             })
         )
         if (ls.IsTruncated) await this.remove(name)
+    }
+
+    abs(...paths: string[]) {
+        return this.pathJoin(this.dir, ...paths)
     }
 }
 

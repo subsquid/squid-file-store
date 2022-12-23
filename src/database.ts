@@ -3,6 +3,7 @@ import {Dialect, dialects} from './dialect'
 import {createFS, FS, FSOptions} from './fs'
 import {Chunk, Table, TableBuilder, TableHeader, TableRecord} from './table'
 import {types} from './types'
+import * as duckdb from './util/duckdb-promise'
 
 const PENDING_FOLDER = 'last'
 const STATUS_TABLE = 'status'
@@ -42,7 +43,7 @@ export interface CsvDatabaseOptions {
     fsOptions?: FSOptions
 }
 
-export class CsvDatabase {
+export class Database {
     private encoding: BufferEncoding
     private extension: string
     private chunkSize: number
@@ -50,6 +51,7 @@ export class CsvDatabase {
     private dialect: Dialect
     private lastOutputed = -1
     private chunk: Chunk | undefined
+    private db: duckdb.Database
     private fs: FS
 
     constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
@@ -57,26 +59,36 @@ export class CsvDatabase {
         this.encoding = options?.encoding || 'utf-8'
         this.dialect = options?.dialect || dialects.excel
         this.chunkSize = options?.chunkSize || 20
-        this.fs = createFS(options?.dest || './data', options?.fsOptions)
         this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
+        this.fs = createFS(options?.dest || './data', options?.fsOptions)
+        this.db = new duckdb.Database(':memory:')
     }
 
     async connect(): Promise<number> {
+        await this.fs.init()
         await this.fs.remove(PENDING_FOLDER)
-        if (await this.fs.exist(`${STATUS_TABLE}.${this.extension}`)) {
-            let rows = await this.fs
-                .readFile(`${STATUS_TABLE}.${this.extension}`, this.encoding)
-                .then((data) => data.split(this.dialect.lineTerminator))
-            this.lastOutputed = Number(rows[2])
-        } else {
-            await this.updateHeight(-1)
-            this.lastOutputed = -1
+
+        await this.db.run(`CREATE SCHEMA IF NOT EXISTS status`)
+        await this.db.run(`CREATE TABLE squid_status.status(height INTEGER NOT NULL)`)
+        try {
+            await this.db.run(`COPY squid_status.status FROM ${this.fs.abs(`${STATUS_TABLE}.${this.extension}`)}`)
+        } catch (e) {
+            if (!(e instanceof duckdb.DuckDbError)) throw e
         }
+        let status = await this.db.all(`SELECT height FROM squid_status.status`)
+        if (status.length == 0) {
+            await this.db.run(`INSERT INTO squid_status.status (height) VALUES (-1)`)
+            this.lastOutputed = -1
+        } else {
+            this.lastOutputed = status[0].height
+        }
+
         return this.lastOutputed
     }
 
     async close(): Promise<void> {
         this.chunk = undefined
+        await this.db.close()
         this.lastOutputed = -1
     }
 
@@ -104,9 +116,9 @@ export class CsvDatabase {
             this.chunk.expandRange(to)
         }
 
-        let store = new Store(() => {
+        let store = new Store(async () => {
             assert(open, `Transaction was already closed`)
-            return this.chunk as Chunk
+            return this.db.connect()
         })
 
         try {
@@ -155,11 +167,7 @@ export class CsvDatabase {
 }
 
 export class Store {
-    constructor(private _tables: () => Chunk) {}
-
-    private get tables() {
-        return this._tables()
-    }
+    constructor(private con: () => Promise<duckdb.Connection>) {}
 
     write<T extends TableHeader>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
         let builder = this.tables.getTableBuilder(table.name)
