@@ -1,5 +1,5 @@
 import {Table, TableRecord} from '../table'
-import {Nullable, types, ArrayType} from '../types'
+import {List, NotNull, Struct, types} from '../types'
 
 let header = {
     a: types.string,
@@ -7,9 +7,11 @@ let header = {
     c: types.float,
     d: types.boolean,
     e: types.bigint,
-    f: Nullable(types.string),
-    g: ArrayType(types.string),
-    h: ArrayType(Nullable(types.string)),
+    f: NotNull(types.string),
+    g: List(types.string),
+    h: Struct({
+        a: types.string,
+    }),
 }
 
 let table = new Table('table', header)
@@ -22,17 +24,7 @@ let record: Record = {
     c: 0.1,
     d: true,
     e: 1n,
-    g: ['g'],
-    h: ['h', null, undefined],
-}
-
-record = {
-    a: 'a',
-    b: 1,
-    c: 0.1,
-    d: true,
-    e: 1n,
     f: 'f',
     g: ['g'],
-    h: ['h', null, undefined],
+    h: {a: 'a'},
 }

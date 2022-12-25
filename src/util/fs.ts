@@ -8,7 +8,7 @@ import {
 import assert from 'assert'
 import fs from 'fs/promises'
 import {existsSync} from 'fs'
-import path from 'path'
+import path from 'upath'
 
 export abstract class FS {
     async init(): Promise<void> {
@@ -27,10 +27,6 @@ export abstract class FS {
         throw new Error('Method not implemented.')
     }
 
-    async transact(dir: string, f: (fs: FS) => Promise<void>): Promise<void> {
-        throw new Error('Method not implemented.')
-    }
-
     async mkdir(dir: string) {
         throw new Error('Method not implemented.')
     }
@@ -39,7 +35,7 @@ export abstract class FS {
         throw new Error('Method not implemented.')
     }
 
-    abs(name: string) {
+    abs(...paths: string[]) {
         throw new Error('Method not implemented.')
     }
 }
@@ -47,7 +43,6 @@ export abstract class FS {
 export class LocalFS extends FS {
     constructor(protected dir: string) {
         super()
-        dir = path.resolve(dir)
     }
 
     async init(): Promise<void> {
@@ -68,32 +63,21 @@ export class LocalFS extends FS {
         return fs.writeFile(this.abs(name), data, encoding)
     }
 
-    async transact(dir: string, f: (fs: LocalFS) => Promise<void>) {
-        let absPath = this.abs(this.dir, dir)
-        let tempName = `${path.basename(absPath)}-temp-${Date.now()}`
-        let tempDir = this.abs(path.dirname(absPath), tempName)
-        let txFs = new LocalFS(tempDir)
-        try {
-            await f(txFs)
-            await this.remove(dir)
-            await fs.rename(tempDir, absPath)
-        } catch (e) {
-            await fs.rm(tempDir, {recursive: true, force: true})
-            throw e
-        }
-    }
-
     async mkdir(dir: string) {
-        await fs.mkdir(this.abs(this.dir, dir), {recursive: true})
+        await fs.mkdir(this.abs(dir), {recursive: true})
     }
 
     async remove(name: string): Promise<void> {
-        if (!(await this.exist(name))) return
-        await fs.rm(this.abs(this.dir, name), {recursive: true, force: true})
+        let p = this.abs(this.dir, name)
+        await fs.rm(this.abs(name), {recursive: true, force: true})
+    }
+
+    relative(...paths: string[]) {
+        return path.join(this.dir, ...paths)
     }
 
     abs(...paths: string[]) {
-        return path.join(this.dir, ...paths)
+        return path.resolve(this.dir, ...paths)
     }
 }
 
@@ -108,7 +92,7 @@ export class S3Fs extends FS {
         let res = await this.client.send(
             new ListObjectsCommand({
                 Bucket: this.bucket,
-                Prefix: this.pathJoin(this.dir, name),
+                Prefix: this.relative(name),
                 MaxKeys: 1,
             })
         )
@@ -119,7 +103,7 @@ export class S3Fs extends FS {
         let res = await this.client.send(
             new GetObjectCommand({
                 Bucket: this.bucket,
-                Key: this.pathJoin(this.dir, name),
+                Key: this.relative(name),
             })
         )
         if (res.Body) {
@@ -129,15 +113,11 @@ export class S3Fs extends FS {
         }
     }
 
-    private pathJoin(...paths: string[]) {
-        return paths.reduce((res, path, i) => res + (path.startsWith('/') || i == 0 ? path : '/' + path), '')
-    }
-
     async remove(name: string): Promise<void> {
         let ls = await this.client.send(
             new ListObjectsCommand({
                 Bucket: this.bucket,
-                Prefix: this.pathJoin(this.dir, name),
+                Prefix: this.relative(name),
             })
         )
         let objects = ls.Contents?.map(({Key}) => ({Key}))
@@ -155,21 +135,26 @@ export class S3Fs extends FS {
         if (ls.IsTruncated) await this.remove(name)
     }
 
+    async mkdir(dir: string) {}
+
+    relative(...paths: string[]) {
+        return path.join(this.dir, ...paths)
+    }
+
     abs(...paths: string[]) {
-        return this.pathJoin(this.dir, ...paths)
+        return `s3://` + path.join(this.bucket, this.dir, ...paths)
     }
 }
 
 export interface S3Options {
-    endpoint: string
-    region: string
-    accessKey: string
-    secretKey: string
+    endpoint?: string
+    region?: string
+    accessKeyId: string
+    secretAccessKey: string
+    sessionToken?: string
 }
 
-export type FSOptions = S3Options
-
-export function createFS(dest: string, fsOptions?: FSOptions) {
+export function createFS(dest: string, fsOptions?: S3Options) {
     let url = parseUrl(dest)
     if (!url) {
         return new LocalFS(dest)
@@ -179,8 +164,9 @@ export function createFS(dest: string, fsOptions?: FSOptions) {
             region: fsOptions.region,
             endpoint: fsOptions.endpoint,
             credentials: {
-                secretAccessKey: fsOptions.secretKey,
-                accessKeyId: fsOptions.accessKey,
+                secretAccessKey: fsOptions.secretAccessKey,
+                accessKeyId: fsOptions.accessKeyId,
+                sessionToken: fsOptions.sessionToken,
             },
         })
         return new S3Fs(url.pathname.slice(1), s3client, url.hostname)

@@ -1,109 +1,148 @@
 import {BigDecimal} from '@subsquid/big-decimal'
-import {toHex} from '@subsquid/util-internal-hex'
-import {toJSON} from '@subsquid/util-internal-json'
+import {assertNotNull} from '@subsquid/util-internal'
 import assert from 'assert'
-import {Dialect, Quote} from './dialect'
 
-export class Type<T> {
-    readonly name: string
-    readonly serialize: (value: T, dialect: Dialect) => string
+export class Type<T, R = T> {
+    readonly dbType: string
+    readonly serialize: (value: T) => R
 
-    constructor(options: {name: string; serialize: (value: T, dialect: Dialect) => string}) {
-        this.name = options.name
+    constructor(options: {dbType: string; serialize: (value: T) => R}) {
+        this.dbType = options.dbType
         this.serialize = options.serialize
     }
 }
 
 export let StringType = new Type<string>({
-    name: 'string',
-    serialize(value: string, dialect: Dialect) {
-        return quoteString(value, dialect)
+    dbType: 'STRING',
+    serialize(value: string) {
+        return value
     },
 })
 
 export let IntType = new Type<number>({
-    name: 'int',
-    serialize(value: number, dialect: Dialect) {
+    dbType: 'INT',
+    serialize(value: number) {
         assert(Number.isInteger(value), 'Invalid int')
-        return quoteString(value.toString(), dialect, true)
-    },
-})
-export let FloatType = new Type<number>({
-    name: 'float',
-    serialize(value: number, dialect: Dialect) {
-        assert(typeof value === 'number', 'Invalid float')
-        return quoteString(value.toString(), dialect, true)
-    },
-})
-export let BigIntType = new Type<bigint>({
-    name: 'bigint',
-    serialize(value: bigint, dialect: Dialect) {
-        assert(typeof value === 'bigint', 'Invalid bigint')
-        return quoteString(value.toString(), dialect, true)
-    },
-})
-export let BigDecimalType = new Type<BigDecimal>({
-    name: 'bigdecimal',
-    serialize(value: BigDecimal, dialect: Dialect) {
-        assert(value instanceof BigDecimal, 'Invalid bigdecimal')
-        return quoteString(value.toString(), dialect, true)
+        return value
     },
 })
 
-export let NumericType = new Type<number | bigint | BigDecimal>({
-    name: 'number',
-    serialize(value: number | bigint | BigDecimal, dialect: Dialect) {
-        assert(typeof value === 'number' || typeof value === 'bigint' || value instanceof BigDecimal, 'Invalid number')
-        return quoteString(value.toString(), dialect, true)
+export let FloatType = new Type<number>({
+    dbType: 'REAL',
+    serialize(value: number) {
+        assert(typeof value === 'number', 'Invalid float')
+        return value
+    },
+})
+
+export let BigIntType = new Type<bigint, string>({
+    dbType: 'BIGINT',
+    serialize(value: bigint) {
+        assert(typeof value === 'bigint', 'Invalid bigint')
+        return value.toString()
+    },
+})
+
+export let BigDecimalType = new Type<BigDecimal, string>({
+    dbType: 'DOUBLE',
+    serialize(value: BigDecimal) {
+        assert(value instanceof BigDecimal, 'Invalid bigdecimal')
+        return value.toString()
     },
 })
 
 export let BooleanType = new Type<boolean>({
-    name: 'boolean',
-    serialize(value: boolean, dialect: Dialect) {
+    dbType: 'BOOLEAN',
+    serialize(value: boolean) {
         assert(typeof value === 'boolean', 'Invalid boolean')
-        return quoteString(value.toString(), dialect)
+        return value
     },
 })
 
-export let BytesType = new Type<Uint8Array>({
-    name: 'bytes',
-    serialize(value: Uint8Array, dialect: Dialect) {
+export let BytesType = new Type<Uint8Array, ArrayBuffer>({
+    dbType: 'BLOB',
+    serialize(value: Uint8Array) {
         assert(value instanceof Uint8Array, 'Invalid bytes array')
-        return quoteString(toHex(value), dialect)
+        return value.buffer
     },
 })
 
-export let DateTimeType = new Type<Date>({
-    name: 'datetime',
-    serialize(value: Date, dialect: Dialect) {
-        return quoteString(value.toISOString(), dialect)
+export let DateTimeType = new Type<Date, string>({
+    dbType: 'TIMESTAMPTZ',
+    serialize(value: Date) {
+        return value.toISOString()
     },
 })
 
-export let JSONType = new Type<any>({
-    name: 'json',
-    serialize(value: any, dialect: Dialect) {
-        return quoteString(JSON.stringify(toJSON(value)), dialect)
-    },
-})
+class StructType<T extends Record<string, any>> extends Type<T, string> {
+    readonly isStruct = true
 
-export let ArrayType = <T>(itemType: Type<T>): Type<T[]> => {
-    return new Type({
-        name: `array<${itemType.name}>`,
-        serialize(value: T[], dialect: Dialect) {
-            return value.map((i) => itemType.serialize(i, dialect)).join('|')
-        },
-    })
+    constructor(structType: {
+        [k in keyof T]: Type<T[k], any>
+    }) {
+        let fields: [string, Type<any>][] = Object.entries(structType)
+        super({
+            dbType: `STRUCT(${fields.map(([name, type]) => `"${name}" ${type.dbType}`)})`,
+            serialize(struct: T) {
+                let res: string[] = []
+                for (let [name, type] of fields) {
+                    let value = struct[name]
+                    res.push(`'${name}': '${value == null ? null : type.serialize(value)}'`)
+                }
+                return `{${res.join(`, `)}}`
+            },
+        })
+    }
 }
 
-export let Nullable = <T>(type: Type<T>): Type<T | null | undefined> => {
-    return new Type({
-        name: `nullable<${type.name}>`,
-        serialize(value: T | null | undefined, dialect: Dialect) {
-            return value == null ? '' : type.serialize(value, dialect)
-        },
-    })
+export let Struct = <T extends Record<string, any>>(structType: {
+    [k in keyof T]: Type<T[k], any>
+}): Type<T, string> => {
+    return new StructType(structType)
+}
+
+class ListType<T> extends Type<T[], string> {
+    readonly isList = true
+
+    constructor(itemType: Type<T, any>) {
+        super({
+            dbType: `${itemType.dbType}[]`,
+            serialize(value: T[]) {
+                return `[${value.map((i) => (i == null ? null : itemType.serialize(i))).join(`, `)}]`
+            },
+        })
+    }
+}
+
+export let List = <T>(itemType: Type<T, any>): Type<T[], string> => {
+    return new ListType(itemType)
+}
+
+class NotNullType<T, R> extends Type<T, R> {
+    readonly isNotNull = true
+
+    constructor(type: Type<T, R>) {
+        super({
+            dbType: `${type.dbType} NOT NULL`,
+            serialize(value: T) {
+                return assertNotNull(type.serialize(value))
+            },
+        })
+    }
+}
+
+export let NotNull = <T>(type: Type<T, any>): NotNullType<T, any> => {
+    return new NotNullType(type)
+}
+
+type NonNullableFields<T extends Record<string, Type<any, any>>> = {
+    [k in keyof T]: T[k] extends NotNullType<any, any> ? k : never
+}[keyof T]
+
+export type ConvertFieldsToTypes<T extends Record<string, Type<any>>> = {
+    [k in keyof Omit<T, NonNullableFields<T>>]?: T[k] extends Type<infer R, any> ? R | null | undefined : never
+} & {
+    [k in keyof Pick<T, NonNullableFields<T>>]: T[k] extends Type<infer R, any> ? R : never
 }
 
 export let types = {
@@ -112,41 +151,19 @@ export let types = {
     float: FloatType,
     bigint: BigIntType,
     bigdecimal: BigDecimalType,
-    numeric: NumericType,
     bytes: BytesType,
     datetime: DateTimeType,
     boolean: BooleanType,
 }
 
-function hasSpecialChar(str: string, dialect: Dialect) {
-    return (
-        str.includes(dialect.delimiter) ||
-        str.includes(dialect.arrayDelimiter) ||
-        str.includes(dialect.lineTerminator) ||
-        str.includes(dialect.quoteChar)
-    )
+let a = {
+    block: Struct({
+        height: types.int,
+        timestamp: types.datetime,
+    }),
+    extrinsicHash: types.string,
+    from: types.string,
+    to: types.string,
+    amount: NotNull(types.bigint),
 }
-
-function quoteString(str: string, dialect: Dialect, numeric = false) {
-    switch (dialect.quoting) {
-        case Quote.ALL:
-        case Quote.NONNUMERIC:
-            if (!numeric) return `${dialect.quoteChar}${str}${dialect.quoteChar}`
-        case Quote.MINIMAL:
-            if (hasSpecialChar(str, dialect)) {
-                return `${dialect.quoteChar}${str}${dialect.quoteChar}`
-            } else {
-                return str
-            }
-        case Quote.NONE:
-            return str
-        default:
-            throw new UnexpectedQuoting(dialect.quoting)
-    }
-}
-
-class UnexpectedQuoting extends Error {
-    constructor(value: Quote) {
-        super(`Unexpected Quoting case: ${value}`)
-    }
-}
+type A = NonNullableFields<typeof a>

@@ -37,7 +37,8 @@ export class Connection {
     }
 
     async run(sql: string, params: any[] = []): Promise<Statement> {
-        return this.con.then((con) => conRun(con, sql, ...params)).then((st) => new Statement(st))
+        return this.con.then((con) => conRun(con, sql, ...params))
+        .then((st) => new Statement(st))
     }
 }
 
