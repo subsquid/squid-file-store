@@ -85,7 +85,7 @@ export class CsvDatabase {
 
         await this.createTables()
         await this.con.run(`CREATE SCHEMA squid`)
-        await this.con.run(`CREATE TABLE squid.status("height" UINTEGER)`)
+        await this.con.run(`CREATE TABLE squid.status("height" UINTEGER, "chunks" TEXT[])`)
         await this.con.run(
             `CREATE TABLE squid.chunk("from" UINTEGER NOT NULL, "to" UINTEGER NOT NULL, "size" UINTEGER NOT NULL)`
         )
@@ -104,7 +104,7 @@ export class CsvDatabase {
                 throw e
             }
         } else {
-            await this.con.run(`INSERT INTO squid.status VALUES (NULL)`)
+            await this.con.run(`INSERT INTO squid.status VALUES (NULL, [])`)
             this.lastUpdated = -1
         }
 
@@ -168,7 +168,7 @@ export class CsvDatabase {
             await this.outputTables(folderName)
             await this.clearTables()
             await this.con.run(`DELETE FROM squid.chunk`)
-            await this.con.run(`UPDATE squid.status SET height=${chunk.to}`)
+            await this.con.run(`UPDATE squid.status SET height=${chunk.to}, chunks=array_append(chunks, '${folderName}')`)
             await this.con.run(
                 `COPY squid.status TO '${this.fs.abs(
                     `${STATUS_TABLE}.${this.outputOptions.extension}`
