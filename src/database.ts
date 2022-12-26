@@ -243,7 +243,7 @@ export class Store {
         let size = 0
         for (let record of records) {
             let values = table.serializeRecord(record)
-            await st.run(...values)
+            await st.run(values)
             size += Buffer.byteLength(values.join())
         }
 

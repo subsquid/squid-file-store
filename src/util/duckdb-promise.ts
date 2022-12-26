@@ -96,12 +96,12 @@ export class Statement {
         this.st = st
     }
 
-    async all(...args: any[]): Promise<duckdb.TableData> {
-        return stAll(this.st, ...args)
+    async all(params: any[]): Promise<duckdb.TableData> {
+        return stAll(this.st, ...params)
     }
 
-    async run(...args: any[]): Promise<Statement> {
-        await stRun(this.st, ...args)
+    async run(params: any[]): Promise<Statement> {
+        await stRun(this.st, params)
         return this
     }
 
