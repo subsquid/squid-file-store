@@ -1,6 +1,6 @@
 import assert from 'assert'
 import {BigDecimal} from '@subsquid/big-decimal'
-import {Type} from './types'
+import {Type} from './utils'
 
 export let StringType = new Type<string>({
     dbType: 'STRING',

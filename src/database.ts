@@ -4,7 +4,7 @@ import {Dialect, dialects} from './util/dialect'
 import {createFS, FS, S3Fs, S3Options} from './util/fs'
 import {Table, TableHeader, TableRecord} from './table'
 import * as duckdb from './util/duckdb-promise'
-import {Type} from './types'
+import {Type} from './table'
 
 const PENDING_FOLDER = 'last'
 const STATUS_TABLE = 'status'
@@ -168,7 +168,9 @@ export class CsvDatabase {
             await this.outputTables(folderName)
             await this.clearTables()
             await this.con.run(`DELETE FROM squid.chunk`)
-            await this.con.run(`UPDATE squid.status SET height=${chunk.to}, chunks=array_append(chunks, '${folderName}')`)
+            await this.con.run(
+                `UPDATE squid.status SET height=${chunk.to}, chunks=array_append(chunks, '${folderName}')`
+            )
             await this.con.run(
                 `COPY squid.status TO '${this.fs.abs(
                     `${STATUS_TABLE}.${this.outputOptions.extension}`
@@ -184,19 +186,17 @@ export class CsvDatabase {
     private async createTables() {
         for (let table of this.tables) {
             let fields: [string, Type<any>][] = Object.entries(table.header)
-            await this.con.run(
-                `CREATE TABLE ${table.name}(${fields.map(([name, type]) => `"${name}" ${type.dbType}`).join(`, `)})`
-            )
+            await this.con.run(`CREATE TABLE ${table.name}(${table.serializeFieldTypes()})`)
         }
     }
 
-    private async clearTables() {
+    async clearTables() {
         for (let table of this.tables) {
             await this.con.run(`DELETE FROM ${table.name}`)
         }
     }
 
-    private async outputTables(path: string) {
+    async outputTables(path: string) {
         await this.fs.mkdir(path)
 
         let outputOptions: string[] = []
@@ -242,14 +242,9 @@ export class Store {
 
         let size = 0
         for (let record of records) {
-            let serializedFields = new Array(fields.length)
-            for (let i = 0; i < fields.length; i++) {
-                let [fieldName, fieldData] = fields[i]
-                let value = record[fieldName]
-                serializedFields[i] = value == null ? null : fieldData.serialize(record[fieldName])
-            }
-            await st.run(...serializedFields)
-            size += Buffer.byteLength(serializedFields.join())
+            let values = table.serializeRecord(record)
+            await st.run(...values)
+            size += Buffer.byteLength(values.join())
         }
 
         await this.con().run(`UPDATE squid.chunk SET size = size + ${size}`)
