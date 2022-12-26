@@ -1,33 +1,15 @@
-import {
-    GetObjectCommand,
-    PutObjectCommand,
-    S3Client,
-    ListObjectsCommand,
-    DeleteObjectsCommand,
-} from '@aws-sdk/client-s3'
+import {GetObjectCommand, S3Client, ListObjectsCommand, DeleteObjectsCommand} from '@aws-sdk/client-s3'
 import assert from 'assert'
 import fs from 'fs/promises'
 import {existsSync} from 'fs'
 import path from 'upath'
 
 export abstract class FS {
-    async init(): Promise<void> {
-        throw new Error('Method not implemented.')
-    }
-
     async exist(name: string): Promise<boolean> {
         throw new Error('Method not implemented.')
     }
 
-    async readFile(name: string, encoding: BufferEncoding): Promise<string> {
-        throw new Error('Method not implemented.')
-    }
-
-    async writeFile(name: string, data: string, encoding: BufferEncoding): Promise<void> {
-        throw new Error('Method not implemented.')
-    }
-
-    async mkdir(dir: string) {
+    async ensure(dir: string) {
         throw new Error('Method not implemented.')
     }
 
@@ -41,34 +23,32 @@ export abstract class FS {
 }
 
 export class LocalFS extends FS {
+    private initialized = false
+
     constructor(protected dir: string) {
         super()
     }
 
-    async init(): Promise<void> {
-        await fs.mkdir(this.dir, {recursive: true})
+    private async init(): Promise<LocalFS> {
+        if (!this.initialized) {
+            await fs.mkdir(this.dir, {recursive: true})
+            this.initialized = true
+        }
+        return this
     }
 
     async exist(name: string) {
+        await this.init()
         return existsSync(path.join(this.dir, name))
     }
 
-    async readFile(name: string, encoding: BufferEncoding): Promise<string> {
-        await this.mkdir(path.dirname(name))
-        return fs.readFile(this.abs(name), encoding)
-    }
-
-    async writeFile(name: string, data: string, encoding: BufferEncoding): Promise<void> {
-        await this.mkdir(path.dirname(name))
-        return fs.writeFile(this.abs(name), data, encoding)
-    }
-
-    async mkdir(dir: string) {
+    async ensure(dir: string) {
+        await this.init()
         await fs.mkdir(this.abs(dir), {recursive: true})
     }
 
     async remove(name: string): Promise<void> {
-        let p = this.abs(this.dir, name)
+        await this.init()
         await fs.rm(this.abs(name), {recursive: true, force: true})
     }
 
@@ -85,8 +65,6 @@ export class S3Fs extends FS {
     constructor(private dir: string, private client: S3Client, private bucket: string) {
         super()
     }
-
-    async init(): Promise<void> {}
 
     async exist(name: string) {
         let res = await this.client.send(
@@ -135,7 +113,7 @@ export class S3Fs extends FS {
         if (ls.IsTruncated) await this.remove(name)
     }
 
-    async mkdir(dir: string) {}
+    async ensure(dir: string) {}
 
     relative(...paths: string[]) {
         return path.join(this.dir, ...paths)

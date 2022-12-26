@@ -4,15 +4,13 @@ import {Dialect, dialects} from './util/dialect'
 import {createFS, FS, S3Fs, S3Options} from './util/fs'
 import {Table, TableHeader, TableRecord} from './table'
 import * as duckdb from './util/duckdb-promise'
-import {Type} from './table'
 
 const PENDING_FOLDER = 'last'
 const STATUS_TABLE = 'status'
 
 interface DatabaseOptions {
     /**
-     * Local or s3 destination.
-     * For s3 use 's3://*bucketName/path'
+     * Local or s3 destination. For s3 use 's3://bucket/path'
      * @Default ./data
      */
     dest?: string
@@ -36,6 +34,7 @@ interface OutputOptions {
 }
 
 abstract class BaseDatabase {
+    protected dest: string
     protected chunkSize: number
     protected updateInterval: number
     protected s3Options?: S3Options
@@ -43,35 +42,37 @@ abstract class BaseDatabase {
 
     protected lastUpdated = -1
 
-    protected fs: FS
-    protected _con?: duckdb.Database
+    protected _fs?: FS
+    protected get fs() {
+        return assertNotNull(this._fs, 'Not connected to database')
+    }
 
+    protected _con?: duckdb.Database
     protected get con() {
         return assertNotNull(this._con, 'Not connected to database')
     }
 
     constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
+        this.dest = options?.dest || './data'
         this.chunkSize = options?.chunkSize || 20
         this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
         this.s3Options = options?.s3Options
         this.outputOptions = {extension: ''}
-        this.fs = createFS(options?.dest || './data', options?.s3Options)
     }
 
     async connect(): Promise<number> {
-        await this.fs.init()
-        await this.fs.remove(PENDING_FOLDER)
-
         this._con = new duckdb.Database(':memory:')
-
-        if (this.fs instanceof S3Fs) await this.setupS3()
-
         await this.createTables()
         await this.con.run(`CREATE SCHEMA squid`)
         await this.con.run(`CREATE TABLE squid.status("height" UINTEGER, "chunks" STRING[])`)
         await this.con.run(
             `CREATE TABLE squid.chunk("from" UINTEGER NOT NULL, "to" UINTEGER NOT NULL, "size" UINTEGER NOT NULL)`
         )
+
+        this._fs = createFS(this.dest, this.s3Options)
+        await this.fs.remove(PENDING_FOLDER)
+
+        if (this.fs instanceof S3Fs) await this.setupS3()
 
         if (await this.fs.exist(`${STATUS_TABLE}.${this.outputOptions.extension}`)) {
             try {
@@ -157,7 +158,7 @@ abstract class BaseDatabase {
             await this.con.run(
                 `COPY squid.status TO '${this.fs.abs(
                     `${STATUS_TABLE}.${this.outputOptions.extension}`
-                )}'  WITH (HEADER true)`
+                )}' WITH (${this.getOutputOptions()})`
             )
             this.lastUpdated = height
         } else if (height - this.lastUpdated >= this.updateInterval) {
@@ -168,7 +169,6 @@ abstract class BaseDatabase {
 
     private async createTables() {
         for (let table of this.tables) {
-            let fields: [string, Type<any>][] = Object.entries(table.header)
             await this.con.run(`CREATE TABLE "${table.name}"(${table.serializeFieldTypes()})`)
         }
     }
@@ -180,8 +180,7 @@ abstract class BaseDatabase {
     }
 
     async outputTables(path: string) {
-        await this.fs.mkdir(path)
-
+        await this.fs.ensure(path)
         for (let table of this.tables) {
             await this.con.run(
                 `COPY "${table.name}" TO '${this.fs.abs(
@@ -212,7 +211,7 @@ abstract class BaseDatabase {
 interface CsvOutputOptions {
     /**
      * Output files extension.
-     * @Default csv
+     * @Default 'csv'
      */
     extension?: string
     /**
@@ -260,10 +259,13 @@ export enum Compression {
 interface ParquetOutputOptions {
     /**
      * Output files extension.
-     * @Default csv
+     * @Default 'parquet'
      */
     extension?: string
-
+    /**
+     * Output files extension.
+     * @Default None
+     */
     compression?: Compression
 }
 
