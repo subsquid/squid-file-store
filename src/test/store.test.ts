@@ -7,16 +7,16 @@ describe('Store', function () {
     let table = new Table('csv-test', {
         a: types.string,
         b: types.int,
-        c: types.float,
+        c: types.real,
         d: types.boolean,
-        e: types.bigint,
+        e: types.bigInt,
         f: {type: types.string, nullable: true},
         g: List(types.string),
         h: Struct({
             a: types.string,
             b: {type: types.boolean, nullable: true},
         }),
-        j: {type: types.bigdecimal, nullable: false},
+        j: {type: types.smallInt, nullable: false},
         k: List(types.int, {nullable: true}),
     })
 
@@ -31,7 +31,7 @@ describe('Store', function () {
         f: 'f',
         g: ['g'],
         h: {a: 'a'},
-        j: BigDecimal('0.1'),
+        j: 4,
         k: [1, 1],
     }
 
@@ -43,7 +43,7 @@ describe('Store', function () {
         e: 1000000000000n,
         g: [],
         h: {a: 'a', b: false},
-        j: BigDecimal('0.1'),
+        j: -5,
         k: [1, null, 54687664],
     }
 

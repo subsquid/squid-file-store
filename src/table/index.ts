@@ -1,14 +1,5 @@
 import {assert} from 'console'
-import {
-    StringType,
-    IntType,
-    FloatType,
-    BigIntType,
-    BigDecimalType,
-    BytesType,
-    DateTimeType,
-    BooleanType,
-} from './scalars'
+import * as scalars from './scalars'
 import {ConvertFieldsToTypes, Field, getFieldData} from './utils'
 
 export type TableHeader = Record<string, Field>
@@ -55,14 +46,23 @@ export type TableRecord<T extends TableHeader | Table<any>> = T extends Table<in
     : never
 
 export let types = {
-    string: StringType,
-    int: IntType,
-    float: FloatType,
-    bigint: BigIntType,
-    bigdecimal: BigDecimalType,
-    bytes: BytesType,
-    datetime: DateTimeType,
-    boolean: BooleanType,
+    string: scalars.StringType,
+    tinyInt: scalars.TinyIntType,
+    smallInt: scalars.SmallIntType,
+    int: scalars.IntType,
+    bigInt: scalars.BigIntType,
+    hugeInt: scalars.HugeIntType,
+    uTinyInt: scalars.UTinyIntType,
+    uSmallInt: scalars.USmallIntType,
+    uInt: scalars.UIntType,
+    uBigInt: scalars.UBigIntType,
+    real: scalars.RealType,
+    double: scalars.DoubleType,
+    bytes: scalars.BlobType,
+    date: scalars.DateType,
+    timestamp: scalars.TimestampType,
+    timestampz: scalars.TimestampZType,
+    boolean: scalars.BooleanType,
 }
 
 export * from './utils'
