@@ -17,10 +17,9 @@ export class StructType<T extends Record<string, Field>> extends Type<ConvertFie
                 for (let i = 0; i < fields.length; i++) {
                     let field = fields[i]
                     let value = struct[field.name as keyof typeof struct]
-                    let serializedValue =
-                        value == null ? null : field.data.type.serialize(struct[field.name as keyof typeof struct])
-                    assert(!field.data.nullable || serializedValue != null)
-                    res[i] = serializedValue
+                    assert(value != null || field.data.nullable, `NULL value in not nullable field '${field.name}'`)
+                    let serializedValue = value == null ? 'NULL' : field.data.type.serialize(value)
+                    res[i] = `"${field.name}": ${serializedValue}`
                 }
                 return `{${res.join(`, `)}}`
             },

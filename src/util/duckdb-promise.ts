@@ -101,7 +101,7 @@ export class Statement {
     }
 
     async run(params: any[]): Promise<Statement> {
-        await stRun(this.st, params)
+        await stRun(this.st, ...params)
         return this
     }
 

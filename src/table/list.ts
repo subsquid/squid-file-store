@@ -1,18 +1,18 @@
 import {Type} from './utils'
 
-export class ListType<T> extends Type<(T | null | undefined)[], string> {
+export class ListType<T, N extends boolean = true> extends Type<(N extends true ? T | null | undefined : T)[], string> {
     readonly isList = true
 
-    constructor(itemType: Type<T, any>) {
+    constructor(itemType: Type<T, any>, options?: {nullable?: N}) {
         super({
             dbType: `${itemType.dbType}[]`,
             serialize(value: (T | null | undefined)[]) {
-                return `[${value.map((i) => (i == null ? null : itemType.serialize(i))).join(`, `)}]`
+                return `[${value.map((i) => (i == null ? 'NULL' : itemType.serialize(i))).join(`, `)}]`
             },
         })
     }
 }
 
-export let List = <T>(itemType: Type<T, any>) => {
-    return new ListType(itemType)
+export let List = <T, N extends boolean = true>(itemType: Type<T, any>, options?: {nullable?: N}) => {
+    return new ListType(itemType, options)
 }

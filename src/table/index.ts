@@ -35,7 +35,6 @@ export class Table<T extends TableHeader> {
             let field = fields[i]
             let value = record[field.name]
             let serializedValue = value == null ? null : field.data.type.serialize(value)
-            assert(!field.data.nullable || serializedValue != null)
             res[i] = serializedValue
         }
         return res

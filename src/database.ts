@@ -186,13 +186,13 @@ export class CsvDatabase {
     private async createTables() {
         for (let table of this.tables) {
             let fields: [string, Type<any>][] = Object.entries(table.header)
-            await this.con.run(`CREATE TABLE ${table.name}(${table.serializeFieldTypes()})`)
+            await this.con.run(`CREATE TABLE "${table.name}"(${table.serializeFieldTypes()})`)
         }
     }
 
     async clearTables() {
         for (let table of this.tables) {
-            await this.con.run(`DELETE FROM ${table.name}`)
+            await this.con.run(`DELETE FROM "${table.name}"`)
         }
     }
 
@@ -208,7 +208,7 @@ export class CsvDatabase {
 
         for (let table of this.tables) {
             await this.con.run(
-                `COPY ${table.name} TO '${this.fs.abs(
+                `COPY "${table.name}" TO '${this.fs.abs(
                     path,
                     `${table.name}.${this.outputOptions.extension}`
                 )}' WITH (${outputOptions.join(', ')})`
@@ -237,7 +237,7 @@ export class Store {
 
         let fields = Object.entries(table.header)
         let st = await this.con().prepare(
-            `INSERT INTO ${table.name} VALUES (${new Array(fields.length).fill('?').join(`, `)})`
+            `INSERT INTO "${table.name}" VALUES (${new Array(fields.length).fill('?').join(`, `)})`
         )
 
         let size = 0
