@@ -1,4 +1,4 @@
-import {GetObjectCommand, S3Client, ListObjectsCommand, DeleteObjectsCommand} from '@aws-sdk/client-s3'
+import {S3Client, ListObjectsCommand, DeleteObjectsCommand} from '@aws-sdk/client-s3'
 import assert from 'assert'
 import fs from 'fs/promises'
 import {existsSync} from 'fs'
@@ -75,20 +75,6 @@ export class S3Fs extends FS {
             })
         )
         return res.Contents?.length ? true : false
-    }
-
-    async readFile(name: string, encoding: BufferEncoding): Promise<string> {
-        let res = await this.client.send(
-            new GetObjectCommand({
-                Bucket: this.bucket,
-                Key: this.relative(name),
-            })
-        )
-        if (res.Body) {
-            return res.Body.transformToString(encoding)
-        } else {
-            throw new Error()
-        }
     }
 
     async remove(name: string): Promise<void> {
