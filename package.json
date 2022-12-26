@@ -12,7 +12,8 @@
   ],
   "main": "lib/index.js",
   "scripts": {
-    "build": "rm -rf lib && tsc"
+    "build": "rm -rf lib && tsc",
+    "test": "npx mocha lib/test/*.test.js --exit --timeout 5000"
   },
   "repository": {
     "type": "git",
@@ -33,7 +34,9 @@
     "upath": "^2.0.1"
   },
   "devDependencies": {
+    "@types/mocha": "^10.0.1",
     "@types/node": "16.11.56",
+    "mocha": "^10.2.0",
     "typescript": "4.8.2"
   },
   "peerDependencies": {
