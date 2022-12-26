@@ -1,7 +1,7 @@
-import {ConvertFieldsToTypes, Type} from './types'
+import {ConvertFieldsToTypes, Type, TypeField} from './types'
 
 export type TableHeader = {
-    [k: string]: Type<any, any>
+    [k: string]: TypeField
 }
 
 export class Table<T extends TableHeader> {
