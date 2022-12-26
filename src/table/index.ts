@@ -56,7 +56,7 @@ export let types = {
     uSmallInt: scalars.USmallIntType,
     uInt: scalars.UIntType,
     uBigInt: scalars.UBigIntType,
-    real: scalars.RealType,
+    float: scalars.FloatType,
     double: scalars.DoubleType,
     bytes: scalars.BlobType,
     date: scalars.DateType,

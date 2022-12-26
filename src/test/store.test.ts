@@ -4,10 +4,10 @@ import {Table, TableRecord} from '../table'
 import {List, Struct, types} from '../table'
 
 describe('Store', function () {
-    let table = new Table('csv-test', {
+    let table = new Table('test', {
         a: types.string,
         b: types.int,
-        c: types.real,
+        c: types.float,
         d: types.boolean,
         e: types.bigInt,
         f: {type: types.string, nullable: true},

@@ -72,7 +72,7 @@ export let HugeIntType = new Type<bigint, string>({
     },
 })
 
-export let RealType = new Type<number>({
+export let FloatType = new Type<number>({
     dbType: 'REAL',
     serialize(value: number) {
         return value
