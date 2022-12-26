@@ -31,47 +31,30 @@ interface DatabaseOptions {
     s3Options?: S3Options
 }
 
-interface CsvOutputOptions {
-    /**
-     * Output files extension.
-     * @Default csv
-     */
+interface OutputOptions {
     extension?: string
-    /**
-     * @Default excel
-     */
-    dialect?: Dialect
-    /**
-     * @Default true
-     */
-    header?: boolean
 }
 
-interface CsvDatabaseOptions extends DatabaseOptions {
-    outputOptions?: CsvOutputOptions
-}
+abstract class BaseDatabase {
+    protected chunkSize: number
+    protected updateInterval: number
+    protected s3Options?: S3Options
+    protected outputOptions: OutputOptions
 
-export class CsvDatabase {
-    private chunkSize: number
-    private updateInterval: number
-    private s3Options?: S3Options
+    protected lastUpdated = -1
 
-    private outputOptions: Required<CsvOutputOptions>
+    protected fs: FS
+    protected _con?: duckdb.Database
 
-    private lastUpdated = -1
-
-    private fs: FS
-
-    private _con?: duckdb.Database
-    private get con() {
+    protected get con() {
         return assertNotNull(this._con, 'Not connected to database')
     }
 
     constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
-        this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
         this.chunkSize = options?.chunkSize || 20
         this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
         this.s3Options = options?.s3Options
+        this.outputOptions = {extension: ''}
         this.fs = createFS(options?.dest || './data', options?.s3Options)
     }
 
@@ -85,7 +68,7 @@ export class CsvDatabase {
 
         await this.createTables()
         await this.con.run(`CREATE SCHEMA squid`)
-        await this.con.run(`CREATE TABLE squid.status("height" UINTEGER, "chunks" TEXT[])`)
+        await this.con.run(`CREATE TABLE squid.status("height" UINTEGER, "chunks" STRING[])`)
         await this.con.run(
             `CREATE TABLE squid.chunk("from" UINTEGER NOT NULL, "to" UINTEGER NOT NULL, "size" UINTEGER NOT NULL)`
         )
@@ -95,7 +78,7 @@ export class CsvDatabase {
                 await this.con.run(
                     `COPY squid.status FROM '${this.fs.abs(
                         `${STATUS_TABLE}.${this.outputOptions.extension}`
-                    )}' WITH (HEADER true)`
+                    )}' WITH (${this.getOutputOptions().join(', ')})`
                 )
                 let status = await this.con.all(`SELECT height FROM squid.status`).then((r) => assertNotNull(r[0]))
                 this.lastUpdated = status.height
@@ -104,7 +87,7 @@ export class CsvDatabase {
                 throw e
             }
         } else {
-            await this.con.run(`INSERT INTO squid.status VALUES (NULL, [])`)
+            await this.con.run(`INSERT INTO squid.status VALUES (?, ?)`, [null, '[]'])
             this.lastUpdated = -1
         }
 
@@ -199,19 +182,12 @@ export class CsvDatabase {
     async outputTables(path: string) {
         await this.fs.mkdir(path)
 
-        let outputOptions: string[] = []
-        outputOptions.push(`HEADER ${this.outputOptions.header}`)
-        let dialect = this.outputOptions.dialect
-        outputOptions.push(`DELIMITER  '${dialect.delimiter}'`)
-        outputOptions.push(`QUOTE  '${dialect.quoteChar}'`)
-        if (dialect.escapeChar != null) outputOptions.push(`ESCAPE  '${dialect.escapeChar}'`)
-
         for (let table of this.tables) {
             await this.con.run(
                 `COPY "${table.name}" TO '${this.fs.abs(
                     path,
                     `${table.name}.${this.outputOptions.extension}`
-                )}' WITH (${outputOptions.join(', ')})`
+                )}' WITH (${this.getOutputOptions().join(', ')})`
             )
         }
     }
@@ -226,6 +202,88 @@ export class CsvDatabase {
         if (s3Options.endpoint)
             await this.con.run(`SET s3_endpoint='${s3Options.endpoint.replace(/(^\w+:|^)\/\//, '')}'`)
         if (s3Options.sessionToken) await this.con.run(`SET s3_session_token='${s3Options.sessionToken}'`)
+    }
+
+    protected getOutputOptions(): string[] {
+        return []
+    }
+}
+
+interface CsvOutputOptions {
+    /**
+     * Output files extension.
+     * @Default csv
+     */
+    extension?: string
+    /**
+     * @Default excel
+     */
+    dialect?: Dialect
+    /**
+     * @Default true
+     */
+    header?: boolean
+}
+
+interface CsvDatabaseOptions extends DatabaseOptions {
+    outputOptions?: CsvOutputOptions
+}
+
+export class CsvDatabase extends BaseDatabase {
+    protected outputOptions: Required<CsvOutputOptions>
+
+    constructor(tables: Table<any>[], options?: CsvDatabaseOptions) {
+        super(tables, options)
+        this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
+    }
+
+    protected getOutputOptions() {
+        let res: string[] = []
+        res.push(`FORMAT 'CSV'`)
+        res.push(`HEADER ${this.outputOptions.header}`)
+        res.push(`DELIMITER  '${this.outputOptions.dialect.delimiter}'`)
+        res.push(`QUOTE  '${this.outputOptions.dialect.quoteChar}'`)
+        if (this.outputOptions.dialect.escapeChar != null) {
+            res.push(`ESCAPE  '${this.outputOptions.dialect.escapeChar}'`)
+        }
+        return res
+    }
+}
+
+export enum Compression {
+    None = 'UNCOMPRESSED',
+    Zstd = 'ZSTD',
+    Snappy = 'SNAPPY',
+    Gzip = 'GZIP',
+}
+
+interface ParquetOutputOptions {
+    /**
+     * Output files extension.
+     * @Default csv
+     */
+    extension?: string
+
+    compression?: Compression
+}
+
+interface ParquetDatabaseOptions extends DatabaseOptions {
+    outputOptions?: ParquetOutputOptions
+}
+
+export class ParquetDatabase extends BaseDatabase {
+    protected outputOptions: Required<ParquetOutputOptions>
+
+    constructor(tables: Table<any>[], options?: ParquetDatabaseOptions) {
+        super(tables, options)
+        this.outputOptions = {extension: 'parquet', compression: Compression.None, ...options?.outputOptions}
+    }
+
+    protected getOutputOptions() {
+        let res: string[] = []
+        res.push(`FORMAT 'PARQUET'`)
+        res.push(`CODEC  '${this.outputOptions.compression}'`)
+        return res
     }
 }
 
