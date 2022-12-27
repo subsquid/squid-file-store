@@ -1,3 +1,5 @@
+moved to https://github.com/subsquid/squid-duckdb-store
+
 # @subsquid/csv-store
 
 This package provides CSV based database access to squid mapping.
