@@ -21,6 +21,7 @@ interface CsvOutputOptions {
 }
 
 export interface CsvDatabaseOptions {
+    tables: Table<any>[]
     /**
      * Local or s3 destination. For s3 use 's3://bucket/path'
      * @Default ./data
@@ -50,6 +51,8 @@ interface DatabaseStatus {
 }
 
 export class CsvDatabase {
+    protected tables: Table<any>[]
+
     protected dest: string
     protected chunkSize: number
     protected updateInterval: number
@@ -60,7 +63,8 @@ export class CsvDatabase {
     protected chunk?: Chunk
     protected status?: DatabaseStatus
 
-    constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
+    constructor(options: CsvDatabaseOptions) {
+        this.tables = options.tables
         this.dest = options?.dest || './data'
         this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
         this.updateInterval = options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
