@@ -80,14 +80,14 @@ export class LocalFS extends FS {
     }
 
     async transact(dir: string, f: (fs: LocalFS) => Promise<void>) {
-        let absPath = path.join(this.dir, dir)
-        let tempName = `${path.basename(absPath)}-temp-${Date.now()}`
-        let tempDir = path.join(path.dirname(absPath), tempName)
+        let relativePath = this.relative(dir)
+        let tempName = `${path.basename(relativePath)}-temp-${Date.now()}`
+        let tempDir = path.join(path.dirname(relativePath), tempName)
         let txFs = new LocalFS(tempDir)
         try {
             await f(txFs)
             await this.remove(dir)
-            await fs.rename(tempDir, absPath)
+            await fs.rename(tempDir, relativePath)
         } catch (e) {
             await fs.rm(tempDir, {recursive: true, force: true})
             throw e
@@ -123,7 +123,7 @@ export class S3Fs extends FS {
         let res = await this.client.send(
             new GetObjectCommand({
                 Bucket: this.bucket,
-                Key: this.relative(this.dir, name),
+                Key: this.relative(name),
             })
         )
         if (res.Body) {
@@ -137,14 +137,14 @@ export class S3Fs extends FS {
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: this.relative(this.dir, name),
+                Key: this.relative(name),
                 Body: Buffer.from(data, 'utf-8'),
             })
         )
     }
 
     async transact(dir: string, f: (fs: S3Fs) => Promise<void>): Promise<void> {
-        let txFs = new S3Fs(this.relative(this.dir, dir), this.client, this.bucket)
+        let txFs = new S3Fs(this.relative(dir), this.client, this.bucket)
         await f(txFs)
     }
 
