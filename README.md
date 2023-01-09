@@ -8,9 +8,9 @@ This package provides CSV based database access to squid mapping.
 
 ```ts
 const Transfers = new Table('transfers', {
-    blockNumber: types.int,
-    timestamp: types.datetime,
-    extrinsicHash: Nullable(types.string),
+    blockNumber: types.number,
+    timestamp: types.timestamp,
+    extrinsicHash: {type: types.string, nullable: true},
     from: types.string,
     to: types.string,
     amount: types.bigint,
@@ -18,8 +18,8 @@ const Transfers = new Table('transfers', {
 
 const db = new CsvDatabase([Transfers], {
     dest: `./data`,
-    chunkSize: 10,
-    updateInterval: 100_000,
+    chunkSizeMb: 10,
+    syncIntervalBlocks: 1_000,
 })
 
 processor.run(db, async (ctx) => {
