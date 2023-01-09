@@ -1,5 +1,3 @@
-moved to https://github.com/subsquid/squid-duckdb-store
-
 # @subsquid/csv-store
 
 This package provides CSV based database access to squid mapping.
@@ -16,7 +14,8 @@ const Transfers = new Table('transfers', {
     amount: types.bigint,
 })
 
-const db = new CsvDatabase([Transfers], {
+const db = new CsvDatabase({
+    tables: [Transfers],
     dest: `./data`,
     chunkSizeMb: 10,
     syncIntervalBlocks: 1_000,
