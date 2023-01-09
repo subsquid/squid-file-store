@@ -1,26 +1,13 @@
 import assert from 'assert'
-import {Dialect, dialects} from './dialect'
-import {createFS, FS, FSOptions} from './fs'
-import {Chunk, Table, TableBuilder, TableHeader, TableRecord} from './table'
-import {types} from './types'
+import {Dialect, dialects} from './util/dialect'
+import {createFS, FS, S3Options} from './util/fs'
+import {Table, TableHeader, TableRecord} from './table'
+import {Chunk} from './chunk'
 
-const PENDING_FOLDER = 'last'
-const STATUS_TABLE = 'status'
-
-export interface CsvDatabaseOptions {
-    /**
-     * Local or s3 destination.
-     * For s3 use "s3://*bucketName/path"
-     * @Default ./data
-     */
-    dest?: string
-    /**
-     * @Default utf-8
-     */
-    encoding?: BufferEncoding
+interface CsvOutputOptions {
     /**
      * Output files extension.
-     * @Default csv
+     * @Default 'csv'
      */
     extension?: string
     /**
@@ -28,80 +15,83 @@ export interface CsvDatabaseOptions {
      */
     dialect?: Dialect
     /**
+     * @Default true
+     */
+    header?: boolean
+}
+
+export interface CsvDatabaseOptions {
+    /**
+     * Local or s3 destination. For s3 use 's3://bucket/path'
+     * @Default ./data
+     */
+    dest?: string
+    /**
      * Minimal folder size (MB).
      * @Default 20
      */
     chunkSize?: number
-    /**
-     * Pending data output interval (blocks).
-     */
+
     updateInterval?: number
     /**
      * Options for different file systems. Only s3 options supported now.
      */
-    fsOptions?: FSOptions
+    s3Options?: S3Options
+
+    outputOptions?: CsvOutputOptions
+}
+
+interface DatabaseStatus {
+    height: number
+    chunks: string[]
 }
 
 export class CsvDatabase {
-    private encoding: BufferEncoding
-    private extension: string
-    private chunkSize: number
-    private updateInterval: number
-    private dialect: Dialect
-    private lastOutputed = -1
-    private chunk: Chunk | undefined
-    private fs: FS
+    protected dest: string
+    protected chunkSize: number
+    protected updateInterval: number
+    protected s3Options?: S3Options
+    protected outputOptions: Required<CsvOutputOptions>
+
+    protected fs: FS
+    protected chunk?: Chunk
+    protected status?: DatabaseStatus
 
     constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
-        this.extension = options?.extension || 'csv'
-        this.encoding = options?.encoding || 'utf-8'
-        this.dialect = options?.dialect || dialects.excel
-        this.chunkSize = options?.chunkSize || 20
-        this.fs = createFS(options?.dest || './data', options?.fsOptions)
+        this.dest = options?.dest || './data'
+        this.chunkSize = options?.chunkSize && options.chunkSize > 0 ? options.chunkSize : 20
         this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
+        this.s3Options = options?.s3Options
+        this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
+
+        this.fs = createFS(this.dest, this.s3Options)
     }
 
     async connect(): Promise<number> {
-        await this.fs.remove(PENDING_FOLDER)
-        if (await this.fs.exist(`${STATUS_TABLE}.${this.extension}`)) {
-            let rows = await this.fs
-                .readFile(`${STATUS_TABLE}.${this.extension}`, this.encoding)
-                .then((data) => data.split(this.dialect.lineTerminator))
-            this.lastOutputed = Number(rows[2])
+        if (await this.fs.exist(`status.json`)) {
+            let status: DatabaseStatus = await this.fs.readFile(`status.json`).then(JSON.parse)
+            this.status = status
         } else {
-            await this.updateHeight(-1)
-            this.lastOutputed = -1
+            this.status = {
+                height: -1,
+                chunks: [],
+            }
         }
-        return this.lastOutputed
+        return this.status.height
     }
 
     async close(): Promise<void> {
         this.chunk = undefined
-        this.lastOutputed = -1
+        this.status = undefined
     }
 
     async transact(from: number, to: number, cb: (store: Store) => Promise<void>): Promise<void> {
-        let retries = 3
-        while (true) {
-            try {
-                return await this.runTransaction(from, to, cb)
-            } catch (e: any) {
-                if (retries) {
-                    retries -= 1
-                } else {
-                    throw e
-                }
-            }
-        }
-    }
-
-    private async runTransaction(from: number, to: number, cb: (store: Store) => Promise<void>): Promise<void> {
         let open = true
 
-        if (!this.chunk) {
-            this.chunk = this.createChunk(from, to)
+        if (this.chunk == null) {
+            this.chunk = new Chunk(from, to, this.tables, this.outputOptions)
         } else {
-            this.chunk.expandRange(to)
+            this.chunk.to = to
         }
 
         let store = new Store(() => {
@@ -119,50 +109,44 @@ export class CsvDatabase {
         open = false
     }
 
-    async advance(height: number): Promise<void> {
-        if (!this.chunk) return
+    async advance(height: number, isHead?: boolean): Promise<void> {
+        assert(this.status != null, `Not connected to database`)
 
-        this.chunk.expandRange(height)
-        if (this.chunk.getSize(this.encoding) >= this.chunkSize * 1024 * 1024) {
-            await this.outputChunk(this.chunk.name, this.chunk)
-            await this.updateHeight(height)
-            await this.fs.remove(PENDING_FOLDER)
-            this.chunk = undefined
-            this.lastOutputed = height
-        } else if (height - this.lastOutputed >= this.updateInterval) {
-            await this.outputChunk(PENDING_FOLDER, this.chunk)
-            this.lastOutputed = height
+        if (this.chunk == null) return
+
+        if (this.chunk.to < height) {
+            this.chunk.to = height
         }
-    }
 
-    private createChunk(from: number, to: number) {
-        return new Chunk(from, to, new Map(this.tables.map((t) => [t.name, new TableBuilder(t.header, this.dialect)])))
+        if (
+            this.chunk.size >= this.chunkSize * 1024 * 1024 ||
+            (isHead && height - this.chunk.from >= this.updateInterval)
+        ) {
+            let folderName =
+                this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
+            await this.outputChunk(folderName, this.chunk)
+            this.status.height = height
+            this.status.chunks.push(folderName)
+            await this.fs.writeFile(`status.json`, JSON.stringify(this.status, null, 4))
+            this.chunk = undefined
+        }
     }
 
     private async outputChunk(path: string, chunk: Chunk) {
         await this.fs.transact(path, async (txFs) => {
             for (let table of this.tables) {
                 let tablebuilder = chunk.getTableBuilder(table.name)
-                await txFs.writeFile(`${table.name}.${this.extension}`, tablebuilder.toTable(), this.encoding)
+                await txFs.writeFile(`${table.name}.${this.outputOptions.extension}`, tablebuilder.data)
             }
         })
-    }
-
-    private async updateHeight(height: number) {
-        let statusTable = new TableBuilder({height: types.int}, this.dialect, [{height}])
-        await this.fs.writeFile(`${STATUS_TABLE}.${this.extension}`, statusTable.toTable(), this.encoding)
     }
 }
 
 export class Store {
-    constructor(private _tables: () => Chunk) {}
-
-    private get tables() {
-        return this._tables()
-    }
+    constructor(private chunk: () => Chunk) {}
 
     write<T extends TableHeader>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
-        let builder = this.tables.getTableBuilder(table.name)
+        let builder = this.chunk().getTableBuilder(table.name)
         builder.append(records)
     }
 }

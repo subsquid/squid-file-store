@@ -1,3 +1,3 @@
 export * from './database'
-export * from './types'
+export * from './table'
 export {Table, TableHeader, TableRecord} from './table'
