@@ -27,12 +27,15 @@ export interface CsvDatabaseOptions {
      */
     dest?: string
     /**
-     * Minimal folder size (MB).
+     * Approximate folder size (MB).
      * @Default 20
      */
-    chunkSize?: number
-
-    updateInterval?: number
+    chunkSizeMb?: number
+    /**
+     * How often output result after reaching chain head (blocks).
+     * @Default Infinity
+     */
+    syncIntervalBlocks?: number
     /**
      * Options for different file systems. Only s3 options supported now.
      */
@@ -59,8 +62,8 @@ export class CsvDatabase {
 
     constructor(private tables: Table<any>[], options?: CsvDatabaseOptions) {
         this.dest = options?.dest || './data'
-        this.chunkSize = options?.chunkSize && options.chunkSize > 0 ? options.chunkSize : 20
-        this.updateInterval = options?.updateInterval && options.updateInterval > 0 ? options.updateInterval : Infinity
+        this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
+        this.updateInterval = options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
         this.s3Options = options?.s3Options
         this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
 

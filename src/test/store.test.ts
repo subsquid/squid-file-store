@@ -18,5 +18,5 @@ describe('CSV', function () {
 export function initDatabase() {
     rmSync('./src/test/data/status.json', {force: true})
 
-    return new CsvDatabase([table], {dest: './src/test/data', updateInterval: 1})
+    return new CsvDatabase([table], {dest: './src/test/data', syncIntervalBlocks: 1})
 }
