@@ -128,7 +128,7 @@ export class CsvDatabase {
 
         if (
             this.chunk.size >= this.chunkSize * 1024 * 1024 ||
-            (isHead && height - this.chunk.from >= this.updateInterval)
+            (isHead && height - this.chunk.from >= this.updateInterval && this.chunk.size > 0)
         ) {
             let folderName =
                 this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
