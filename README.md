@@ -22,7 +22,7 @@ const db = new CsvDatabase({
 })
 
 processor.run(db, async (ctx) => {
-    let transfersData = getTransfers(ctx)
+    let transfersData: TableRecord<typeof Transfers>[] = getTransfers(ctx)
     ctx.store.write(Transfers, transfersData)
 })
 ```
