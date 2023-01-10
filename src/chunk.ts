@@ -7,8 +7,8 @@ import {Dialect} from './util/dialect'
 export class Chunk {
     private tableBuilders: Map<string, TableBuilder<any>>
 
-    constructor(public from: number, public to: number, tables: Table<any>[], options: TableBuilderOptions) {
-        this.tableBuilders = new Map(tables.map((t) => [t.name, new TableBuilder(t, options)]))
+    constructor(public from: number, public to: number, tables: Table<any>[]) {
+        this.tableBuilders = new Map(tables.map((t) => [t.name, new TableBuilder(t)]))
     }
 
     getTableBuilder<T extends TableHeader>(name: string): TableBuilder<T> {
@@ -24,29 +24,44 @@ export class Chunk {
     }
 }
 
-export interface TableBuilderOptions {
+export interface TableOutputOptions {
     dialect: Dialect
     header: boolean
 }
 
 export class TableBuilder<T extends TableHeader> {
-    private records: string[] = []
+    private records: string[][] = []
     private _size = 0
 
-    constructor(private table: Table<T>, private options: TableBuilderOptions) {
-        if (this.options.header) {
-            let dialect = this.options.dialect
-            let serializedHeader = this.table.fields.map((f) => toSnakeCase(f.name)).join(dialect.delimiter) + '\n'
-            this.records.push(serializedHeader)
-        }
-    }
+    constructor(private table: Table<T>) {}
 
     get size() {
         return this._size
     }
 
-    get data() {
-        return this.records.join('')
+    toTable(options: TableOutputOptions) {
+        let res = new Array<string>(options.header ? this.records.length + 1 : this.records.length)
+
+        if (options.header) {
+            let header = new Array<string>(this.table.fields.length)
+            for (let i = 0; i < this.table.fields.length; i++) {
+                let field = this.table.fields[i]
+                let normalizedName = toSnakeCase(field.name)
+                header[i] = this.hasSpecialChar(normalizedName, options.dialect) ? `${normalizedName}` : normalizedName
+            }
+            res[0] = header.join(options.dialect.delimiter)
+        }
+
+        for (let i = res.length; i < this.records.length; i++) {
+            let serializedRecord = new Array<string>(this.table.fields.length)
+            for (let j = 0; j < this.table.fields.length; j++) {
+                let value = this.records[i][j]
+                serializedRecord[j] = this.hasSpecialChar(value, options.dialect) ? `${value}` : value
+            }
+            res[i] = serializedRecord.join(options.dialect.delimiter)
+        }
+
+        return this.records.join('\n')
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): void {
@@ -58,16 +73,14 @@ export class TableBuilder<T extends TableHeader> {
                 let value = record[field.name]
                 assert(value != null || field.data.nullable, `Null value in non-nullable field "${field.name}"`)
                 let serializedValue = value == null ? `` : field.data.type.serialize(value)
-                values.push(this.hasSpecialChar(serializedValue) ? `'${serializedValue}'` : serializedValue)
+                values.push(serializedValue)
+                this._size += Buffer.byteLength(serializedValue)
             }
-            let serializedRecord = values.join(this.options.dialect.delimiter) + '\n'
-            this.records.push(serializedRecord)
-            this._size += Buffer.byteLength(serializedRecord)
+            this.records.push(values)
         }
     }
 
-    private hasSpecialChar(str: string) {
-        let dialect = this.options.dialect
+    private hasSpecialChar(str: string, dialect: Dialect) {
         return str.includes(dialect.delimiter) || str.includes('\n') || str.includes(dialect.quoteChar)
     }
 }

@@ -67,7 +67,8 @@ export class CsvDatabase {
         this.tables = options.tables
         this.dest = options?.dest || './data'
         this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
-        this.updateInterval = options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
+        this.updateInterval =
+            options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
         this.s3Options = options?.s3Options
         this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
 
@@ -96,7 +97,7 @@ export class CsvDatabase {
         let open = true
 
         if (this.chunk == null) {
-            this.chunk = new Chunk(from, to, this.tables, this.outputOptions)
+            this.chunk = new Chunk(from, to, this.tables)
         } else {
             this.chunk.to = to
         }
@@ -143,7 +144,10 @@ export class CsvDatabase {
         await this.fs.transact(path, async (txFs) => {
             for (let table of this.tables) {
                 let tablebuilder = chunk.getTableBuilder(table.name)
-                await txFs.writeFile(`${table.name}.${this.outputOptions.extension}`, tablebuilder.data)
+                await txFs.writeFile(
+                    `${table.name}.${this.outputOptions.extension}`,
+                    tablebuilder.toTable(this.outputOptions)
+                )
             }
         })
     }
