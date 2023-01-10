@@ -47,7 +47,7 @@ export class TableBuilder<T extends TableHeader> {
             for (let i = 0; i < this.table.fields.length; i++) {
                 let field = this.table.fields[i]
                 let normalizedName = toSnakeCase(field.name)
-                header[i] = this.hasSpecialChar(normalizedName, options.dialect) ? `${normalizedName}` : normalizedName
+                header[i] = this.hasSpecialChar(normalizedName, options.dialect) ? `'${normalizedName}'` : normalizedName
             }
             res[0] = header.join(options.dialect.delimiter)
         }
@@ -56,7 +56,7 @@ export class TableBuilder<T extends TableHeader> {
             let serializedRecord = new Array<string>(this.table.fields.length)
             for (let j = 0; j < this.table.fields.length; j++) {
                 let value = this.records[i][j]
-                serializedRecord[j] = this.hasSpecialChar(value, options.dialect) ? `${value}` : value
+                serializedRecord[j] = this.hasSpecialChar(value, options.dialect) ? `'${value}'` : value
             }
             res[i] = serializedRecord.join(options.dialect.delimiter)
         }
