@@ -8,3 +8,6 @@
 /.idea
 package-lock.json
 pnpm-lock.yaml
+
+**/*.csv
+.env

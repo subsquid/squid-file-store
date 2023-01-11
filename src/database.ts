@@ -1,6 +1,6 @@
 import assert from 'assert'
 import {Dialect, dialects} from './util/dialect'
-import {createFS, FS, S3Options} from './util/fs'
+import {createFS, FS, fsTransact, S3Options} from './util/fs'
 import {Table, TableHeader, TableRecord} from './table'
 import {Chunk} from './chunk'
 import {getSystemErrorMap} from 'util'
@@ -138,7 +138,7 @@ export class CsvDatabase {
     }
 
     private async outputChunk(path: string, chunk: Chunk) {
-        await this.fs.transact(path, async (txFs) => {
+        await fsTransact(this.fs, path, async (txFs) => {
             for (let table of this.tables) {
                 let tablebuilder = chunk.getTableBuilder(table.name)
                 await txFs.writeFile(
@@ -161,14 +161,12 @@ export class Store {
 
 const defaultHooks: DatabaseHooks = {
     async onConnect(fs) {
-        try {
-            return fs.readFile(`status.txt`).then(Number)
-        } catch (e) {
-            if (e) {
-                return -1
-            } else {
-                throw e
-            }
+        if (await fs.exists(`status.txt`)) {
+            let height = await fs.readFile(`status.json`).then(Number)
+            assert(Number.isNaN(height))
+            return height
+        } else {
+            return -1
         }
     },
     async onFlush(fs, height, isHead) {
