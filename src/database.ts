@@ -3,6 +3,7 @@ import {Dialect, dialects} from './util/dialect'
 import {createFS, FS, S3Options} from './util/fs'
 import {Table, TableHeader, TableRecord} from './table'
 import {Chunk} from './chunk'
+import {getSystemErrorMap} from 'util'
 
 interface CsvOutputOptions {
     /**
@@ -18,6 +19,11 @@ interface CsvOutputOptions {
      * @Default true
      */
     header?: boolean
+}
+
+interface DatabaseHooks {
+    onConnect(fs: FS): Promise<number>
+    onFlush(fs: FS, height: number, isHead: boolean): Promise<void>
 }
 
 export interface CsvDatabaseOptions {
@@ -38,16 +44,13 @@ export interface CsvDatabaseOptions {
      */
     syncIntervalBlocks?: number
     /**
-     * Options for different file systems. Only s3 options supported now.
+     * S3 connection options.
      */
     s3Options?: S3Options
 
     outputOptions?: CsvOutputOptions
-}
 
-interface DatabaseStatus {
-    height: number
-    chunks: string[]
+    hooks?: DatabaseHooks
 }
 
 export class CsvDatabase {
@@ -61,7 +64,9 @@ export class CsvDatabase {
 
     protected fs: FS
     protected chunk?: Chunk
-    protected status?: DatabaseStatus
+    protected lastBlock?: number
+
+    protected hooks: DatabaseHooks
 
     constructor(options: CsvDatabaseOptions) {
         this.tables = options.tables
@@ -71,26 +76,19 @@ export class CsvDatabase {
             options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
         this.s3Options = options?.s3Options
         this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
+        this.hooks = options.hooks || defaultHooks
 
         this.fs = createFS(this.dest, this.s3Options)
     }
 
     async connect(): Promise<number> {
-        if (await this.fs.exist(`status.json`)) {
-            let status: DatabaseStatus = await this.fs.readFile(`status.json`).then(JSON.parse)
-            this.status = status
-        } else {
-            this.status = {
-                height: -1,
-                chunks: [],
-            }
-        }
-        return this.status.height
+        this.lastBlock = await this.hooks.onConnect(this.fs)
+        return this.lastBlock
     }
 
     async close(): Promise<void> {
         this.chunk = undefined
-        this.status = undefined
+        this.lastBlock = undefined
     }
 
     async transact(from: number, to: number, cb: (store: Store) => Promise<void>): Promise<void> {
@@ -118,7 +116,7 @@ export class CsvDatabase {
     }
 
     async advance(height: number, isHead?: boolean): Promise<void> {
-        assert(this.status != null, `Not connected to database`)
+        assert(this.lastBlock != null, `Not connected to database`)
 
         if (this.chunk == null) return
 
@@ -133,9 +131,8 @@ export class CsvDatabase {
             let folderName =
                 this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
             await this.outputChunk(folderName, this.chunk)
-            this.status.height = height
-            this.status.chunks.push(folderName)
-            await this.fs.writeFile(`status.json`, JSON.stringify(this.status, null, 4))
+            this.lastBlock = height
+            await this.hooks.onFlush(this.fs, height, isHead ?? false)
             this.chunk = undefined
         }
     }
@@ -160,4 +157,21 @@ export class Store {
         let builder = this.chunk().getTableBuilder(table.name)
         builder.append(records)
     }
+}
+
+const defaultHooks: DatabaseHooks = {
+    async onConnect(fs) {
+        try {
+            return fs.readFile(`status.txt`).then(Number)
+        } catch (e) {
+            if (e) {
+                return -1
+            } else {
+                throw e
+            }
+        }
+    },
+    async onFlush(fs, height, isHead) {
+        await fs.writeFile(`status.txt`, height.toString())
+    },
 }
