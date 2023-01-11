@@ -163,7 +163,7 @@ const defaultHooks: DatabaseHooks = {
     async onConnect(fs) {
         if (await fs.exists(`status.txt`)) {
             let height = await fs.readFile(`status.json`).then(Number)
-            assert(Number.isNaN(height))
+            assert(Number.isSafeInteger(height))
             return height
         } else {
             return -1
