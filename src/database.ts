@@ -83,6 +83,17 @@ export class CsvDatabase {
 
     async connect(): Promise<number> {
         this.lastBlock = await this.hooks.onConnect(this.fs)
+
+        let names = await this.fs.readdir('./')
+        for (let name of names) {
+            if (!/^(\d+)-(\d+)$/.test(name)) continue
+
+            let chunkStart = Number(name.split('-')[0])
+            if (chunkStart > this.lastBlock) {
+                await this.fs.rm(name)
+            }
+        }
+
         return this.lastBlock
     }
 
@@ -132,8 +143,9 @@ export class CsvDatabase {
                 this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
             await this.outputChunk(folderName, this.chunk)
             this.lastBlock = height
-            await this.hooks.onFlush(this.fs, height, isHead ?? false)
             this.chunk = undefined
+
+            await this.hooks.onFlush(this.fs, height, isHead ?? false)
         }
     }
 
@@ -169,7 +181,7 @@ const defaultHooks: DatabaseHooks = {
             return -1
         }
     },
-    async onFlush(fs, height, isHead) {
+    async onFlush(fs, height) {
         await fs.writeFile(`status.txt`, height.toString())
     },
 }
