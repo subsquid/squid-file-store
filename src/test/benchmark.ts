@@ -6,12 +6,18 @@ async function test() {
     let db = initDatabase()
 
     await db.connect()
+    console.time(`total`)
+    console.time(`writing`)
     await db.transact(0, 0, async (store) => {
         for (let i = 0; i < 1_000_000; i++) {
             store.write(Transfers, record)
         }
     })
+    console.timeEnd(`writing`)
+    console.time(`saving`)
     await db.advance(1, true)
+    console.timeEnd(`saving`)
+    console.timeEnd(`total`)
     await db.close()
 }
 
