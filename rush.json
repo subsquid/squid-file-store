@@ -447,19 +447,19 @@
       // },
       {
         "packageName": "@subsquid/bigdata-store",
-        "projectFolder": "squid-bigdata-store",
+        "projectFolder": "bigdata-store",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
         "packageName": "@subsquid/bigdata-table",
-        "projectFolder": "squid-bigdata-table",
+        "projectFolder": "bigdata-table",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
         "packageName": "@subsquid/bigdata-csv",
-        "projectFolder": "squid-bigdata-csv",
+        "projectFolder": "bigdata-csv",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       }
