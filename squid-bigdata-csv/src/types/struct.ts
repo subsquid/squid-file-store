@@ -1,6 +1,6 @@
-import assert from 'assert'
-import {ConvertFieldsToTypes, Type, Field} from './utils'
-import {getFieldData} from './utils'
+// import assert from 'assert'
+// import {ConvertFieldsToTypes, Type, Field} from './utils'
+// import {getFieldData} from './utils'
 
 // export class StructType<T extends Record<string, Field>> extends Type<ConvertFieldsToTypes<T>, string> {
 //     readonly isStruct = true

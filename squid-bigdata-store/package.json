@@ -1,0 +1,45 @@
+{
+  "name": "@subsquid/bigdata-store",
+  "version": "0.1.1",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "src",
+    "!src/test"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "test": "npx mocha lib/test/*.test.js --exit --timeout 5000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subsquid/squid-csv-store.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/subsquid/squid-csv-store/issues"
+  },
+  "homepage": "https://github.com/subsquid/squid-csv-store#readme",
+  "dependencies": {
+    "@aws-sdk/client-s3": "^3.245.0",
+    "@subsquid/util-internal": "^1.0.0",
+    "@subsquid/util-internal-hex": "^0.0.0",
+    "@subsquid/util-internal-json": "^0.2.0",
+    "@subsquid/util-naming": "^0.0.0",
+    "upath": "^2.0.1",
+    "@subsquid/bigdata-table": "~0.0.0",
+    "@subsquid/bigdata-csv": "~0.0.0"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.1",
+    "@types/node": "16.11.56",
+    "dotenv": "^16.0.3",
+    "mocha": "^10.2.0",
+    "typescript": "4.8.2"
+  }
+}

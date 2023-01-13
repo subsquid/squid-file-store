@@ -1,6 +1,7 @@
+import {types, List, CsvTable} from '@subsquid/bigdata-csv'
+import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
 import {CsvDatabase} from '../database'
-import {Table, types, List, TableRecord} from '../table'
 
 describe('CSV', function () {
     it('output', async function () {
@@ -25,7 +26,7 @@ export function initDatabase() {
     })
 }
 
-export let table = new Table('test', {
+export let table = new CsvTable('test', {
     string: types.string,
     int: types.number,
     float: types.number,

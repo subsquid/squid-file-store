@@ -1,13 +1,30 @@
-/node_modules
-/lib
-/builds
+**/node_modules/
 
-/**Versions.json
+# Build artifacts
+/*/lib/
+/test/*/lib
+/util/*/lib
 
-# IDE files
-/.idea
-package-lock.json
-pnpm-lock.yaml
+# Large files not needed in docker containers
+/test/data/chain
+
+# Rush temporary files
+/common/deploy/
+/common/temp/
+/common/autoinstallers/*/.npmrc
+**/.rush/temp/
+
+# IDE and tools
+.git
+.idea
+*.log
+
+
+# Ignore Dockerfile, so that we can work on it without full rebuild each time
+Dockerfile
+docker-compose.yml
+/ops/docker-publish.sh
 
 **/*.csv
-.env
+**/*.parquet
+**/.env

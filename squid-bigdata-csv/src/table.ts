@@ -1,39 +1,38 @@
-import {assertNotNull} from '@subsquid/util-internal'
 import {toSnakeCase} from '@subsquid/util-naming'
 import assert from 'assert'
-import {Table, TableHeader, TableRecord} from './table'
-import {Dialect} from './util/dialect'
-
-export class Chunk {
-    private tableBuilders: Map<string, TableBuilder<any>>
-
-    constructor(public from: number, public to: number, tables: Table<any>[]) {
-        this.tableBuilders = new Map(tables.map((t) => [t.name, new TableBuilder(t)]))
-    }
-
-    getTableBuilder<T extends TableHeader>(name: string): TableBuilder<T> {
-        return assertNotNull(this.tableBuilders.get(name), `Table "${name}" does not exist`)
-    }
-
-    get size() {
-        let total = 0
-        for (let table of this.tableBuilders.values()) {
-            total += table.size
-        }
-        return total
-    }
-}
+import {
+    TableHeader,
+    Table,
+    TableRecord,
+    TableBuilder,
+    FieldData,
+    Type,
+    Field,
+    ConvertFieldsToTypes,
+} from '@subsquid/bigdata-table'
+import {Dialect} from './dialect'
+import {CsvType} from './types'
 
 export interface TableOutputOptions {
     dialect: Dialect
     header: boolean
 }
 
-export class TableBuilder<T extends TableHeader> {
+export interface CsvTableHeader extends TableHeader {
+    [field: string]: Field<CsvType<any>>
+}
+
+export class CsvTable<T extends CsvTableHeader> extends Table<T> {
+    createTableBuilder(): CsvTableBuilder<T> {
+        return new CsvTableBuilder(this)
+    }
+}
+
+export class CsvTableBuilder<T extends CsvTableHeader> implements TableBuilder<T> {
     private records: string[][] = []
     private _size = 0
 
-    constructor(private table: Table<T>) {}
+    constructor(private table: CsvTable<T>) {}
 
     get size() {
         return this._size
@@ -47,7 +46,9 @@ export class TableBuilder<T extends TableHeader> {
             for (let i = 0; i < this.table.fields.length; i++) {
                 let field = this.table.fields[i]
                 let normalizedName = toSnakeCase(field.name)
-                header[i] = this.hasSpecialChar(normalizedName, options.dialect) ? `'${normalizedName}'` : normalizedName
+                header[i] = this.hasSpecialChar(normalizedName, options.dialect)
+                    ? `'${normalizedName}'`
+                    : normalizedName
             }
             res[0] = header.join(options.dialect.delimiter)
         }
@@ -64,23 +65,42 @@ export class TableBuilder<T extends TableHeader> {
         return this.records.join('\n')
     }
 
-    append(records: TableRecord<T> | TableRecord<T>[]): void {
+    append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
         records = Array.isArray(records) ? records : [records]
 
         for (let record of records) {
             let values: string[] = []
             for (let field of this.table.fields) {
                 let value = record[field.name]
-                assert(value != null || field.data.nullable, `Null value in non-nullable field "${field.name}"`)
+                if (value == null) {
+                    assert(value != null || field.data.nullable, `Null value in non-nullable field "${field.name}"`)
+                } else {
+                    field.data.type.validate(value)
+                }
                 let serializedValue = value == null ? `` : field.data.type.serialize(value)
                 values.push(serializedValue)
                 this._size += Buffer.byteLength(serializedValue)
             }
             this.records.push(values)
         }
+
+        return this
     }
 
     private hasSpecialChar(str: string, dialect: Dialect) {
         return str.includes(dialect.delimiter) || str.includes('\n') || str.includes(dialect.quoteChar)
     }
 }
+
+// let type: CsvType<string> = {
+//     validate: (v) => v,
+//     serialize: () => 'a',
+// }
+
+// let a = new CsvTable('aaa', {
+//     a: type,
+// })
+
+// type B = typeof a extends Table<infer R> ? R : never
+
+// type A = TableRecord<typeof a>

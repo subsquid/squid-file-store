@@ -1,6 +1,7 @@
+import {CsvTable, types} from '@subsquid/bigdata-csv'
+import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
 import {CsvDatabase} from '../database'
-import {Table, TableRecord, types} from '../table'
 
 async function test() {
     let db = initDatabase()
@@ -31,7 +32,7 @@ export function initDatabase() {
     })
 }
 
-export const Transfers = new Table('transfers', {
+export const Transfers = new CsvTable('transfers', {
     blockNumber: types.number,
     timestamp: types.timestamp,
     extrinsicHash: {type: types.string, nullable: true},

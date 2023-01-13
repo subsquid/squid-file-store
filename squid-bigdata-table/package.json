@@ -1,0 +1,32 @@
+{
+  "name": "@subsquid/bigdata-table",
+  "version": "0.0.0",
+  "description": "",
+  "publishConfig": {
+    "access": "public"
+  },
+  "files": [
+    "lib",
+    "src",
+    "!src/test"
+  ],
+  "main": "lib/index.js",
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "test": "npx mocha lib/test/*.test.js --exit --timeout 5000"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/subsquid/squid-csv-store.git"
+  },
+  "author": "",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/subsquid/squid-csv-store/issues"
+  },
+  "homepage": "https://github.com/subsquid/squid-csv-store#readme",
+  "devDependencies": {
+    "@types/node": "16.11.56",
+    "typescript": "4.8.2"
+  }
+}
