@@ -1,4 +1,4 @@
-import {Table, TableSchema, TableBuilderContructor, TableBuilder} from '@subsquid/bigdata-table'
+import {Table, TableSchema, TableBuilder} from '@subsquid/bigdata-table'
 import {assertNotNull} from '@subsquid/util-internal'
 
 export class Chunk {

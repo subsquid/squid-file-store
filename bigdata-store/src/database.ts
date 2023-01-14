@@ -2,7 +2,6 @@ import assert from 'assert'
 import {createFS, FS, fsTransact, S3Options} from './util/fs'
 import {Chunk} from './chunk'
 import {Table, TableSchema, TableRecord} from '@subsquid/bigdata-table'
-import {Dialect, dialects} from '@subsquid/bigdata-csv'
 
 interface DatabaseHooks {
     onConnect(fs: FS): Promise<number>
