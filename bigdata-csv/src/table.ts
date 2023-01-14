@@ -47,7 +47,7 @@ class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
                     ? `'${normalizedName}'`
                     : normalizedName
             }
-            this.records.push(header.join(this.options.dialect.delimiter))
+            this.records.push(header.join(this.options.dialect.delimiter) + '\n')
         }
     }
 
