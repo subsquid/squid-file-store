@@ -1,4 +1,4 @@
-import {CsvTable, types} from '@subsquid/bigdata-csv'
+import {Column, CsvTable, types} from '@subsquid/bigdata-csv'
 import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
 import {CsvDatabase} from '../database'
@@ -33,12 +33,12 @@ export function initDatabase() {
 }
 
 export const Transfers = new CsvTable('transfers', {
-    blockNumber: types.number,
-    timestamp: types.timestamp,
-    extrinsicHash: {type: types.string, nullable: true},
-    from: types.string,
-    to: types.string,
-    amount: types.bigint,
+    blockNumber: Column(types.number),
+    timestamp: Column(types.timestamp),
+    extrinsicHash: Column(types.string, {nullable: true}),
+    from: Column(types.string),
+    to: Column(types.string),
+    amount: Column(types.bigint),
 })
 
 export let record: TableRecord<typeof Transfers> = {

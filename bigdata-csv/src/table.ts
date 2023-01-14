@@ -1,87 +1,85 @@
 import {toSnakeCase} from '@subsquid/util-naming'
 import assert from 'assert'
-import {
-    TableHeader,
-    Table,
-    TableRecord,
-    TableBuilder,
-    FieldData,
-    Type,
-    Field,
-    ConvertFieldsToTypes,
-} from '@subsquid/bigdata-table'
-import {Dialect} from './dialect'
+import {TableSchema, Table, TableRecord, TableBuilder, Column, ColumnData, ColumnOptions} from '@subsquid/bigdata-table'
+import {Dialect, dialects} from './dialect'
 import {CsvType} from './types'
 
-export interface TableOutputOptions {
-    dialect: Dialect
-    header: boolean
+export interface TableOptions {
+    extension?: string
+    dialect?: Dialect
+    header?: boolean
 }
 
-export interface CsvTableHeader extends TableHeader {
-    [field: string]: Field<CsvType<any>>
-}
+export type CsvColumnData<T extends CsvType<any> = CsvType<any>, O extends ColumnOptions = ColumnOptions> = ColumnData<
+    T,
+    O
+>
 
-export class CsvTable<T extends CsvTableHeader> extends Table<T> {
+export type CsvTableSchema = TableSchema<CsvColumnData>
+
+export class CsvTable<T extends CsvTableSchema> extends Table<T> {
+    private options: Required<TableOptions>
+    constructor(readonly name: string, protected schema: T, options?: TableOptions) {
+        super(name, schema)
+        this.options = {extension: 'csv', header: true, dialect: dialects.excel, ...options}
+    }
+
     createTableBuilder(): CsvTableBuilder<T> {
-        return new CsvTableBuilder(this)
+        return new CsvTableBuilder(this.columns, this.options)
+    }
+
+    getFileExtension() {
+        return this.options.extension
     }
 }
 
-export class CsvTableBuilder<T extends CsvTableHeader> implements TableBuilder<T> {
-    private records: string[][] = []
+class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
+    private records: string[] = []
     private _size = 0
 
-    constructor(private table: CsvTable<T>) {}
+    constructor(private columns: Column<CsvColumnData>[], private options: Required<TableOptions>) {
+        if (this.options.header) {
+            let header = new Array<string>(this.columns.length)
+            for (let i = 0; i < this.columns.length; i++) {
+                let column = this.columns[i]
+                let normalizedName = toSnakeCase(column.name)
+                header[i] = this.hasSpecialChar(normalizedName, this.options.dialect)
+                    ? `'${normalizedName}'`
+                    : normalizedName
+            }
+            this.records.push(header.join(this.options.dialect.delimiter))
+        }
+    }
 
     get size() {
         return this._size
     }
 
-    toTable(options: TableOutputOptions) {
-        let res = new Array<string>(options.header ? this.records.length + 1 : this.records.length)
-
-        if (options.header) {
-            let header = new Array<string>(this.table.fields.length)
-            for (let i = 0; i < this.table.fields.length; i++) {
-                let field = this.table.fields[i]
-                let normalizedName = toSnakeCase(field.name)
-                header[i] = this.hasSpecialChar(normalizedName, options.dialect)
-                    ? `'${normalizedName}'`
-                    : normalizedName
-            }
-            res[0] = header.join(options.dialect.delimiter)
-        }
-
-        for (let i = res.length; i < this.records.length; i++) {
-            let serializedRecord = new Array<string>(this.table.fields.length)
-            for (let j = 0; j < this.table.fields.length; j++) {
-                let value = this.records[i][j]
-                serializedRecord[j] = this.hasSpecialChar(value, options.dialect) ? `'${value}'` : value
-            }
-            res[i] = serializedRecord.join(options.dialect.delimiter)
-        }
-
-        return this.records.join('\n')
+    toTable() {
+        return this.records.join('')
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
         records = Array.isArray(records) ? records : [records]
 
         for (let record of records) {
-            let values: string[] = []
-            for (let field of this.table.fields) {
-                let value = record[field.name]
+            let serializedValues: string[] = []
+            for (let column of this.columns) {
+                let value = record[column.name]
                 if (value == null) {
-                    assert(value != null || field.data.nullable, `Null value in non-nullable field "${field.name}"`)
+                    assert(
+                        value != null || column.data.options.nullable,
+                        `Null value in non-nullable column "${column.name}"`
+                    )
                 } else {
-                    field.data.type.validate(value)
+                    column.data.type.validate(value)
                 }
-                let serializedValue = value == null ? `` : field.data.type.serialize(value)
-                values.push(serializedValue)
-                this._size += Buffer.byteLength(serializedValue)
+                let serializedValue = value == null ? `` : column.data.type.serialize(value)
+                serializedValues.push(this.hasSpecialChar(serializedValue, this.options.dialect) ? `'${value}'` : value)
             }
-            this.records.push(values)
+            let serializedRecord = serializedValues.join(this.options.dialect.delimiter) + '\n'
+            this.records.push(serializedRecord)
+            this._size += Buffer.byteLength(serializedRecord)
         }
 
         return this
@@ -92,15 +90,25 @@ export class CsvTableBuilder<T extends CsvTableHeader> implements TableBuilder<T
     }
 }
 
+export function Column<T extends CsvType<any>>(type: T): CsvColumnData<T>
+export function Column<T extends CsvType<any>, O extends ColumnOptions>(type: T, options?: O): CsvColumnData<T, O>
+export function Column<T extends CsvType<any>>(type: T, options?: ColumnOptions) {
+    return {
+        type,
+        options: options || {},
+    }
+}
+
 // let type: CsvType<string> = {
-//     validate: (v) => v,
+//     validate: (v) => v as string,
 //     serialize: () => 'a',
 // }
 
 // let a = new CsvTable('aaa', {
-//     a: type,
+//     a: Column(type),
+//     b: Column(type, {nullable: true}),
 // })
 
-// type B = typeof a extends Table<infer R> ? R : never
+// // type B = typeof a extends Table<infer R> ? R : never
 
 // type A = TableRecord<typeof a>

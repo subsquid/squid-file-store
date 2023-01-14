@@ -2,63 +2,65 @@ export type Type<T> = {
     validate(value: unknown): T
 }
 
-export interface FieldData<T extends Type<any>> {
-    type: T
+export interface ColumnOptions {
     nullable?: boolean
 }
 
-export type Field<T extends Type<any> = Type<any>> = T | FieldData<T>
+export interface ColumnData<T extends Type<any> = Type<any>, O extends ColumnOptions = ColumnOptions> {
+    type: T
+    options: O
+}
 
-type NullableFields<T extends Record<string, Field>> = {
-    [F in keyof T]: T[F] extends {nullable: true} ? F : never
+type NullableColumns<T extends Record<string, ColumnData>> = {
+    [F in keyof T]: T[F] extends ColumnData<any, infer R> ? (R extends {nullable: true} ? F : never) : never
 }[keyof T]
 
-export type ConvertFieldsToTypes<T extends Record<string, Field>> = {
-    [F in Exclude<keyof T, NullableFields<T>>]: T[F] extends Field<Type<infer R>> ? R : never
+export type ConvertColumnsToTypes<T extends Record<string, ColumnData>> = {
+    [F in Exclude<keyof T, NullableColumns<T>>]: T[F] extends ColumnData<Type<infer R>> ? R : never
 } & {
-    [F in Extract<keyof T, NullableFields<T>>]?: T[F] extends Field<Type<infer R>> ? R | null | undefined : never
+    [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
 }
 
-export function getFieldData<T extends Type<any>>(field: Field<T>): FieldData<T> {
-    return 'type' in field ? field : {type: field}
+export interface TableSchema<C extends ColumnData> {
+    [column: string]: C
 }
 
-export interface TableHeader<> {
-    [field: string]: Field<Type<any>>
+export interface Column<C extends ColumnData> {
+    name: string
+    data: C
 }
-export abstract class Table<T extends TableHeader> {
-    readonly fields: Readonly<{
-        name: string
-        data: any
-    }>[] = []
 
-    constructor(readonly name: string, protected header: T) {
-        for (let field in header) {
-            this.fields.push({
-                name: field,
-                data: getFieldData(header[field]),
+export abstract class Table<T extends TableSchema<ColumnData>> {
+    readonly columns: Column<T[Extract<keyof T, string>]>[] = []
+
+    constructor(readonly name: string, protected schema: T) {
+        for (let column in schema) {
+            this.columns.push({
+                name: column,
+                data: schema[column],
             })
         }
     }
 
     abstract createTableBuilder(): TableBuilder<T>
+    abstract getFileExtension(): string
 }
 
-export type TableRecord<T extends TableHeader | Table<any>> = T extends Table<infer R>
-    ? ConvertFieldsToTypes<R>
-    : T extends TableHeader
-    ? ConvertFieldsToTypes<T>
+export type TableRecord<T extends TableSchema<any> | Table<any>> = T extends Table<infer R>
+    ? ConvertColumnsToTypes<R>
+    : T extends TableSchema<any>
+    ? ConvertColumnsToTypes<T>
     : never
 
-export interface TableBuilder<T extends TableHeader> {
+export interface TableBuilder<T extends TableSchema<any>> {
     get size(): number
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T>
-    toTable(options: any): string
+    toTable(): string
 }
 
 export interface TableBuilderContructor {
-    new <T extends TableHeader>(table: Table<TableHeader>): TableBuilder<T>
+    new <T extends TableSchema<any>>(table: Table<T>): TableBuilder<T>
 }
 
 // let a = new Table('aaa', {

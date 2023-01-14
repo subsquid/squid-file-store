@@ -1,24 +1,8 @@
 import assert from 'assert'
 import {createFS, FS, fsTransact, S3Options} from './util/fs'
 import {Chunk} from './chunk'
-import {Table, TableHeader, TableRecord} from '@subsquid/bigdata-table'
-import {CsvTableBuilder, Dialect, dialects} from '@subsquid/bigdata-csv'
-
-interface CsvOutputOptions {
-    /**
-     * Output files extension.
-     * @Default 'csv'
-     */
-    extension?: string
-    /**
-     * @Default excel
-     */
-    dialect?: Dialect
-    /**
-     * @Default true
-     */
-    header?: boolean
-}
+import {Table, TableSchema, TableRecord} from '@subsquid/bigdata-table'
+import {Dialect, dialects} from '@subsquid/bigdata-csv'
 
 interface DatabaseHooks {
     onConnect(fs: FS): Promise<number>
@@ -47,8 +31,6 @@ export interface CsvDatabaseOptions {
      */
     s3Options?: S3Options
 
-    outputOptions?: CsvOutputOptions
-
     hooks?: DatabaseHooks
 }
 
@@ -59,7 +41,6 @@ export class CsvDatabase {
     protected chunkSize: number
     protected updateInterval: number
     protected s3Options?: S3Options
-    protected outputOptions: Required<CsvOutputOptions>
 
     protected fs: FS
     protected chunk?: Chunk
@@ -74,7 +55,6 @@ export class CsvDatabase {
         this.updateInterval =
             options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
         this.s3Options = options?.s3Options
-        this.outputOptions = {extension: 'csv', header: true, dialect: dialects.excel, ...options?.outputOptions}
         this.hooks = options.hooks || defaultHooks
 
         this.fs = createFS(this.dest, this.s3Options)
@@ -153,8 +133,8 @@ export class CsvDatabase {
             for (let table of this.tables) {
                 let tablebuilder = chunk.getTableBuilder(table.name)
                 await txFs.writeFile(
-                    `${table.name}.${this.outputOptions.extension}`,
-                    tablebuilder.toTable(this.outputOptions)
+                    `${table.name}.${table.getFileExtension()}`,
+                    tablebuilder.toTable()
                 )
             }
         })
@@ -164,7 +144,7 @@ export class CsvDatabase {
 export class Store {
     constructor(private chunk: () => Chunk) {}
 
-    write<T extends TableHeader>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
+    write<T extends TableSchema<any>>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
         let builder = this.chunk().getTableBuilder(table.name)
         builder.append(records)
     }

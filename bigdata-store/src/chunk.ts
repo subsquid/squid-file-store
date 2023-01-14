@@ -1,4 +1,4 @@
-import {Table, TableHeader, TableBuilderContructor, TableBuilder} from '@subsquid/bigdata-table'
+import {Table, TableSchema, TableBuilderContructor, TableBuilder} from '@subsquid/bigdata-table'
 import {assertNotNull} from '@subsquid/util-internal'
 
 export class Chunk {
@@ -8,7 +8,7 @@ export class Chunk {
         this.tableBuilders = new Map(tables.map((t) => [t.name, t.createTableBuilder()]))
     }
 
-    getTableBuilder<T extends TableHeader>(name: string): TableBuilder<T> {
+    getTableBuilder<T extends TableSchema<any>>(name: string): TableBuilder<T> {
         return assertNotNull(this.tableBuilders.get(name), `Table "${name}" does not exist`)
     }
 
