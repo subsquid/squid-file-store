@@ -34,7 +34,7 @@ class ParquetTableBuilder<T extends ParquetTableSchema> implements TableBuilder<
 
     constructor(private columns: Column<ParquetColumnData>[], private options: Required<TableOptions>) {
         for (let column of columns) {
-            this.columnBuilders[column.name] = makeBuilder({type: column.data.type.getArrowDataType()})
+            this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
         }
     }
 
@@ -52,7 +52,7 @@ class ParquetTableBuilder<T extends ParquetTableSchema> implements TableBuilder<
             columnsData[column.name] = this.columnBuilders[column.name].flush()
         }
         let arrowTable = new ArrowTable(columnsData)
-        return writeParquet(tableToIPC(arrowTable), new WriterPropertiesBuilder().setCompression(0).build())
+        return writeParquet(tableToIPC(arrowTable))
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
@@ -63,10 +63,7 @@ class ParquetTableBuilder<T extends ParquetTableSchema> implements TableBuilder<
             for (let record of records) {
                 let value = record[column.name]
                 if (value == null) {
-                    assert(
-                        value != null || column.data.options.nullable,
-                        `Null value in non-nullable column "${column.name}"`
-                    )
+                    assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
                 } else {
                     column.data.type.validate(value)
                 }

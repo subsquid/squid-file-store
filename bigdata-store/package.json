@@ -28,7 +28,7 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.245.0",
     "@subsquid/bigdata-table": "^0.0.0",
-    "@subsquid/util-internal": "^1.0.0",
+    "@subsquid/util-internal": "~1.0.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
