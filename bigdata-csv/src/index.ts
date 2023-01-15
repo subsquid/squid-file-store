@@ -5,6 +5,7 @@ export let types = {
     number: scalars.NumberType(),
     bigint: scalars.BigIntType(),
     timestamp: scalars.TimestampType(),
+    datetime: scalars.DateTimeType(),
     boolean: scalars.BooleanType(),
 }
 

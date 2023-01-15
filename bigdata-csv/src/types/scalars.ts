@@ -3,7 +3,7 @@ import {CsvType} from './type'
 
 export let StringType = (): CsvType<string> => ({
     serialize(value) {
-        return value
+        return this.validate(value)
     },
     validate(value) {
         assert(typeof value === 'string')
@@ -13,7 +13,7 @@ export let StringType = (): CsvType<string> => ({
 
 export let NumberType = (): CsvType<number> => ({
     serialize(value: number) {
-        return value.toString()
+        return this.validate(value).toString()
     },
     validate(value) {
         assert(typeof value === 'number')
@@ -23,7 +23,7 @@ export let NumberType = (): CsvType<number> => ({
 
 export let BigIntType = (): CsvType<bigint> => ({
     serialize(value: bigint) {
-        return value.toString()
+        return this.validate(value).toString()
     },
     validate(value) {
         assert(typeof value === 'bigint')
@@ -34,7 +34,7 @@ export let BigIntType = (): CsvType<bigint> => ({
 export let BooleanType = (): CsvType<boolean> => ({
     serialize(value: boolean) {
         assert(typeof value === 'boolean', 'Invalid boolean')
-        return value.toString()
+        return this.validate(value).toString()
     },
     validate(value) {
         assert(typeof value === 'boolean')
@@ -44,7 +44,17 @@ export let BooleanType = (): CsvType<boolean> => ({
 
 export let TimestampType = (): CsvType<Date> => ({
     serialize(value: Date) {
-        return value.toISOString()
+        return this.validate(value).valueOf().toString()
+    },
+    validate(value) {
+        assert(value instanceof Date)
+        return value
+    },
+})
+
+export let DateTimeType = (): CsvType<Date> => ({
+    serialize(value: Date) {
+        return this.validate(value).toISOString()
     },
     validate(value) {
         assert(value instanceof Date)

@@ -36,6 +36,7 @@ export let table = new CsvTable('test', {
     nullableString: Column(types.string, {nullable: true}),
     list: Column(JSONType<string[]>()),
     nullableList: Column(JSONType<(string | null)[]>()),
+    json: Column(JSONType<{foo: string; bar?: bigint}>()),
 })
 
 type Record = TableRecord<typeof table>
@@ -50,6 +51,7 @@ export let record1: Record = {
     nullableString: null,
     list: ['a', 'b', 'c'],
     nullableList: ['a', null, 'c'],
+    json: {foo: 'something', bar: 1000000n}
 }
 
 export let record2: Record = {
@@ -62,4 +64,5 @@ export let record2: Record = {
     nullableString: null,
     list: ['{}', ',', '"'],
     nullableList: [null, null, null],
+    json: {foo: 'something'}
 }
