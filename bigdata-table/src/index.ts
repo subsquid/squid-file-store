@@ -56,7 +56,7 @@ export interface TableBuilder<T extends TableSchema<any>> {
     get size(): number
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T>
-    toTable(): string
+    toTable(): string | Uint8Array
 }
 
 export interface TableBuilderContructor {

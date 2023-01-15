@@ -462,6 +462,12 @@
         "projectFolder": "bigdata-csv",
         "shouldPublish": true,
         "versionPolicyName": "npm"
+      },
+      {
+        "packageName": "@subsquid/bigdata-parquet",
+        "projectFolder": "bigdata-parquet",
+        "shouldPublish": true,
+        "versionPolicyName": "npm"
       }
     ]
   }
