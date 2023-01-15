@@ -75,7 +75,11 @@ class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
                     column.data.type.validate(value)
                 }
                 let serializedValue = value == null ? `` : column.data.type.serialize(value)
-                serializedValues.push(this.hasSpecialChar(serializedValue, this.options.dialect) ? `'${value}'` : value)
+                serializedValues.push(
+                    this.hasSpecialChar(serializedValue, this.options.dialect)
+                        ? `'${serializedValue}'`
+                        : serializedValue
+                )
             }
             let serializedRecord = serializedValues.join(this.options.dialect.delimiter) + '\n'
             this.records.push(serializedRecord)

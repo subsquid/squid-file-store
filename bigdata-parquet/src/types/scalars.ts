@@ -1,4 +1,4 @@
-import {Int16, Int32, Int64, Int8, Uint16, Uint32, Uint64, Uint8, Utf8} from 'apache-arrow'
+import {Int16, Int32, Int64, Int8, Uint16, Uint32, Uint64, Uint8, Utf8, DecimalBuilder} from 'apache-arrow'
 import assert from 'assert'
 import {ParquetType} from './type'
 

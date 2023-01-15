@@ -27,7 +27,8 @@
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
     "@subsquid/util-naming": "^0.0.0",
-    "@subsquid/bigdata-table": "~0.0.0"
+    "@subsquid/bigdata-table": "~0.0.0",
+    "@subsquid/util-internal-json": "~0.2.0"
   },
   "devDependencies": {
     "@types/node": "16.11.56",

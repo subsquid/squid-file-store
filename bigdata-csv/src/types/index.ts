@@ -1,3 +1,3 @@
 export * from './scalars'
-export * from './list'
+export * from './json'
 export * from './type'
