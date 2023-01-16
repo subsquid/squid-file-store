@@ -39,11 +39,15 @@
     "typescript": "4.8.2"
   },
   "peerDependencies": {
-    "@subsquid/bigdata-csv": "^0.0.0"
+    "@subsquid/bigdata-csv": "^0.0.0",
+    "@subsquid/bigdata-parquet": "^0.0.0"
   },
   "peerDependenciesMeta": {
     "@subsquid/bigdata-csv": {
-      "optional": false
+      "optional": true
+    },
+    "@subsquid/bigdata-parquet": {
+      "optional": true
     }
   }
 }

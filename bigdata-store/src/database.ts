@@ -133,7 +133,7 @@ export class CsvDatabase {
                 let tablebuilder = chunk.getTableBuilder(table.name)
                 await txFs.writeFile(
                     `${table.name}.${table.getFileExtension()}`,
-                    tablebuilder.toTable()
+                    tablebuilder.flush()
                 )
             }
         })

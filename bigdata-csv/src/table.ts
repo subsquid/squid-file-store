@@ -1,6 +1,14 @@
 import {toSnakeCase} from '@subsquid/util-naming'
 import assert from 'assert'
-import {TableSchema, Table, TableRecord, TableBuilder, Column, ColumnData, ColumnOptions} from '@subsquid/bigdata-table'
+import {
+    TableSchema,
+    Table as BaseTable,
+    TableRecord,
+    ITableBuilder,
+    Column,
+    ColumnData,
+    ColumnOptions,
+} from '@subsquid/bigdata-table'
 import {Dialect, dialects} from './dialect'
 import {CsvType} from './types'
 
@@ -10,22 +18,17 @@ export interface TableOptions {
     header?: boolean
 }
 
-export type CsvColumnData<T extends CsvType<any> = CsvType<any>, O extends ColumnOptions = ColumnOptions> = ColumnData<
-    T,
-    O
->
+type CsvColumnData<T extends CsvType<any> = CsvType<any>, O extends ColumnOptions = ColumnOptions> = ColumnData<T, O>
 
-export type CsvTableSchema = TableSchema<CsvColumnData>
-
-export class CsvTable<T extends CsvTableSchema> extends Table<T> {
+export class Table<T extends TableSchema<CsvColumnData>> extends BaseTable<T> {
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
         super(name, schema)
         this.options = {extension: 'csv', header: true, dialect: dialects.excel, ...options}
     }
 
-    createTableBuilder(): CsvTableBuilder<T> {
-        return new CsvTableBuilder(this.columns, this.options)
+    createTableBuilder(): TableBuilder<T> {
+        return new TableBuilder(this.columns, this.options)
     }
 
     getFileExtension() {
@@ -33,7 +36,7 @@ export class CsvTable<T extends CsvTableSchema> extends Table<T> {
     }
 }
 
-class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
+class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilder<T> {
     private records: string[] = []
     private _size = 0
 
@@ -55,8 +58,11 @@ class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
         return this._size
     }
 
-    toTable() {
-        return this.records.join('')
+    flush() {
+        let records = this.records
+        this.records = []
+        this._size = 0
+        return records.join('')
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
@@ -67,12 +73,7 @@ class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
             for (let column of this.columns) {
                 let value = record[column.name]
                 if (value == null) {
-                    assert(
-                        value != null || column.data.options.nullable,
-                        `Null value in non-nullable column "${column.name}"`
-                    )
-                } else {
-                    column.data.type.validate(value)
+                    assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
                 }
                 let serializedValue = value == null ? `` : column.data.type.serialize(value)
                 serializedValues.push(
@@ -94,12 +95,15 @@ class CsvTableBuilder<T extends CsvTableSchema> implements TableBuilder<T> {
     }
 }
 
-export function Column<T extends CsvType<any>>(type: T): CsvColumnData<T>
-export function Column<T extends CsvType<any>, O extends ColumnOptions>(type: T, options?: O): CsvColumnData<T, O>
+export function Column<T extends CsvType<any>>(type: T): ColumnData<T>
+export function Column<T extends CsvType<any>, O extends ColumnOptions>(
+    type: T,
+    options?: O
+): ColumnData<T, O & ColumnOptions>
 export function Column<T extends CsvType<any>>(type: T, options?: ColumnOptions) {
     return {
         type,
-        options: options || {},
+        options: {nullable: false, ...options},
     }
 }
 
@@ -108,7 +112,7 @@ export function Column<T extends CsvType<any>>(type: T, options?: ColumnOptions)
 //     serialize: () => 'a',
 // }
 
-// let a = new CsvTable('aaa', {
+// let a = new Table('aaa', {
 //     a: Column(type),
 //     b: Column(type, {nullable: true}),
 // })

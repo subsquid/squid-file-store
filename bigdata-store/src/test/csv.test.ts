@@ -1,4 +1,4 @@
-import {types, JSONType, CsvTable, Column} from '@subsquid/bigdata-csv'
+import {Table, Column, StringType, IntegerType, DecimalType, DateTimeType, BooleanType} from '@subsquid/bigdata-csv'
 import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
 import {CsvDatabase} from '../database'
@@ -17,26 +17,23 @@ describe('CSV', function () {
 })
 
 export function initDatabase() {
-    rmSync('./src/test/data', {force: true, recursive: true})
+    rmSync('./src/test/data/csv', {force: true, recursive: true})
 
     return new CsvDatabase({
         tables: [table],
-        dest: './src/test/data',
+        dest: './src/test/data/csv',
         syncIntervalBlocks: 1,
     })
 }
 
-export let table = new CsvTable('test', {
-    string: Column(types.string),
-    int: Column(types.number),
-    float: Column(types.number),
-    bigint: Column(types.bigint),
-    boolean: Column(types.boolean),
-    timestamp: Column(types.timestamp),
-    nullableString: Column(types.string, {nullable: true}),
-    list: Column(JSONType<string[]>()),
-    nullableList: Column(JSONType<(string | null)[]>()),
-    json: Column(JSONType<{foo: string; bar?: bigint}>()),
+export let table = new Table('test', {
+    string: Column(StringType()),
+    int: Column(IntegerType()),
+    bigint: Column(IntegerType()),
+    decimal: Column(DecimalType()),
+    boolean: Column(BooleanType()),
+    timestamp: Column(DateTimeType()),
+    nullableString: Column(StringType(), {nullable: true}),
 })
 
 type Record = TableRecord<typeof table>
@@ -45,24 +42,18 @@ export let record1: Record = {
     string: 'string',
     int: 3,
     bigint: 4n,
-    float: 0.1,
+    decimal: 0.1,
     boolean: true,
     timestamp: new Date(),
     nullableString: null,
-    list: ['a', 'b', 'c'],
-    nullableList: ['a', null, 'c'],
-    json: {foo: 'something', bar: 1000000n}
 }
 
 export let record2: Record = {
     string: 'string',
     int: 34684631,
     bigint: 448468676564n,
-    float: 0.1111111111111,
+    decimal: 0.1111111111111,
     boolean: true,
     timestamp: new Date(),
     nullableString: null,
-    list: ['{}', ',', '"'],
-    nullableList: [null, null, null],
-    json: {foo: 'something'}
 }

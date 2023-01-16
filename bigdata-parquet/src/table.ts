@@ -1,27 +1,43 @@
 import assert from 'assert'
-import {TableSchema, Table, TableRecord, TableBuilder, Column, ColumnData, ColumnOptions} from '@subsquid/bigdata-table'
+import {
+    TableSchema,
+    Table as BaseTable,
+    TableRecord,
+    ITableBuilder,
+    Column,
+    ColumnData,
+    ColumnOptions,
+} from '@subsquid/bigdata-table'
 import {ParquetType} from './types'
-import {Builder, Data, makeBuilder, Table as ArrowTable, tableToIPC} from 'apache-arrow'
-import {readParquet, writeParquet, Compression, WriterPropertiesBuilder} from 'parquet-wasm/node/arrow1'
+import {Builder, makeBuilder, Table as ArrowTable, tableToIPC} from 'apache-arrow'
+import {writeParquet, WriterProperties, WriterPropertiesBuilder, Compression} from 'parquet-wasm/node/arrow1'
 
-export interface TableOptions {}
+export {Compression} from 'parquet-wasm/node/arrow1'
 
-export type ParquetColumnData<
+export interface TableOptions {
+    compression?: Compression
+    dictionary?: boolean
+}
+
+export interface ParquetColumnOptions extends ColumnOptions {
+    compression?: Compression
+    dictionary?: boolean
+}
+
+type ParquetColumnData<
     T extends ParquetType<any> = ParquetType<any>,
-    O extends ColumnOptions = ColumnOptions
+    O extends ParquetColumnOptions = ParquetColumnOptions
 > = ColumnData<T, O>
 
-export type ParquetTableSchema = TableSchema<ParquetColumnData>
-
-export class ParquetTable<T extends ParquetTableSchema> extends Table<T> {
+export class Table<T extends TableSchema<ParquetColumnData>> extends BaseTable<T> {
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
         super(name, schema)
-        this.options = {}
+        this.options = {compression: Compression.UNCOMPRESSED, dictionary: false, ...options}
     }
 
-    createTableBuilder(): ParquetTableBuilder<T> {
-        return new ParquetTableBuilder(this.columns, this.options)
+    createTableBuilder(): TableBuilder<T> {
+        return new TableBuilder(this.columns, this.options)
     }
 
     getFileExtension() {
@@ -29,61 +45,72 @@ export class ParquetTable<T extends ParquetTableSchema> extends Table<T> {
     }
 }
 
-class ParquetTableBuilder<T extends ParquetTableSchema> implements TableBuilder<T> {
+class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBuilder<T> {
     private columnBuilders: Record<string, Builder> = {}
+    private writeProperties: WriterProperties
+    private _size = 0
 
     constructor(private columns: Column<ParquetColumnData>[], private options: Required<TableOptions>) {
+        let writePropertiesBuilder = new WriterPropertiesBuilder()
         for (let column of columns) {
             this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
+            writePropertiesBuilder.setColumnDictionaryEnabled(column.name, column.data.options.dictionary)
+            writePropertiesBuilder.setColumnCompression(column.name, column.data.options.compression)
         }
+        writePropertiesBuilder.setCompression(options.compression)
+        writePropertiesBuilder.setDictionaryEnabled(options.dictionary)
+        this.writeProperties = writePropertiesBuilder.build()
     }
 
     get size() {
-        let size = 0
-        for (let column in this.columnBuilders) {
-            size += this.columnBuilders[column].byteLength
-        }
-        return size
+        return this._size
     }
 
-    toTable() {
-        let columnsData: Record<string, Data> = {}
+    flush() {
+        this._size = 0
+
+        let columnsData: Record<string, any> = {}
         for (let column of this.columns) {
             columnsData[column.name] = this.columnBuilders[column.name].flush()
         }
         let arrowTable = new ArrowTable(columnsData)
-        return writeParquet(tableToIPC(arrowTable))
+
+        return writeParquet(
+            tableToIPC(arrowTable),
+            this.writeProperties
+        )
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
         records = Array.isArray(records) ? records : [records]
 
+        let newSize = 0
         for (let column of this.columns) {
             let columnBuilder = this.columnBuilders[column.name]
             for (let record of records) {
                 let value = record[column.name]
                 if (value == null) {
                     assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
-                } else {
-                    column.data.type.validate(value)
                 }
-                columnBuilder.append(value)
+                columnBuilder.append(value == null ? null : column.data.type.prepare(value))
             }
+            newSize += columnBuilder.byteLength
         }
+        this._size = newSize
 
         return this
     }
 }
 
 export function Column<T extends ParquetType<any>>(type: T): ParquetColumnData<T>
-export function Column<T extends ParquetType<any>, O extends ColumnOptions>(
+export function Column<T extends ParquetType<any>, O extends ParquetColumnOptions>(
     type: T,
     options?: O
-): ParquetColumnData<T, O>
-export function Column<T extends ParquetType<any>>(type: T, options?: ColumnOptions) {
+): ParquetColumnData<T, O & ParquetColumnOptions>
+export function Column<T extends ParquetType<any>>(type: T, options?: ParquetColumnOptions) {
     return {
         type,
-        options: options || {},
+        options: {compression: Compression.UNCOMPRESSED, dictionary: false, ...options},
     }
 }
 

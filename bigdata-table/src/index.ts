@@ -8,7 +8,7 @@ export interface ColumnOptions {
 
 export interface ColumnData<T extends Type<any> = Type<any>, O extends ColumnOptions = ColumnOptions> {
     type: T
-    options: O
+    options: Required<O>
 }
 
 type NullableColumns<T extends Record<string, ColumnData>> = {
@@ -42,7 +42,7 @@ export abstract class Table<T extends TableSchema<ColumnData>> {
         }
     }
 
-    abstract createTableBuilder(): TableBuilder<T>
+    abstract createTableBuilder(): ITableBuilder<T>
     abstract getFileExtension(): string
 }
 
@@ -52,15 +52,11 @@ export type TableRecord<T extends TableSchema<any> | Table<any>> = T extends Tab
     ? ConvertColumnsToTypes<T>
     : never
 
-export interface TableBuilder<T extends TableSchema<any>> {
+export interface ITableBuilder<T extends TableSchema<any>> {
     get size(): number
 
-    append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T>
-    toTable(): string | Uint8Array
-}
-
-export interface TableBuilderContructor {
-    new <T extends TableSchema<any>>(table: Table<T>): TableBuilder<T>
+    append(records: TableRecord<T> | TableRecord<T>[]): ITableBuilder<T>
+    flush(): string | Uint8Array
 }
 
 // let a = new Table('aaa', {
