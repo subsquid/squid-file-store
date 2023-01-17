@@ -1,7 +1,7 @@
 import {Table, Column, StringType, IntegerType, DecimalType, DateTimeType, BooleanType} from '@subsquid/bigdata-csv'
 import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
-import {CsvDatabase} from '../database'
+import {Database} from '../database'
 
 describe('CSV', function () {
     it('output', async function () {
@@ -19,7 +19,7 @@ describe('CSV', function () {
 export function initDatabase() {
     rmSync('./src/test/data/csv', {force: true, recursive: true})
 
-    return new CsvDatabase({
+    return new Database({
         tables: [table],
         dest: './src/test/data/csv',
         syncIntervalBlocks: 1,

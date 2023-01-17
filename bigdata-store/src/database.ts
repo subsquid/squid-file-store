@@ -8,7 +8,7 @@ interface DatabaseHooks {
     onFlush(fs: FS, height: number, isHead: boolean): Promise<void>
 }
 
-export interface CsvDatabaseOptions {
+export interface DatabaseOptions {
     tables: Table<any>[]
     /**
      * Local or s3 destination. For s3 use 's3://bucket/path'
@@ -33,7 +33,7 @@ export interface CsvDatabaseOptions {
     hooks?: DatabaseHooks
 }
 
-export class CsvDatabase {
+export class Database {
     protected tables: Table<any>[]
 
     protected dest: string
@@ -47,7 +47,7 @@ export class CsvDatabase {
 
     protected hooks: DatabaseHooks
 
-    constructor(options: CsvDatabaseOptions) {
+    constructor(options: DatabaseOptions) {
         this.tables = options.tables
         this.dest = options?.dest || './data'
         this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20

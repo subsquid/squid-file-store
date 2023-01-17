@@ -12,7 +12,7 @@ import {
 } from '@subsquid/bigdata-parquet'
 import {TableRecord} from '@subsquid/bigdata-table'
 import {rmSync} from 'fs'
-import {CsvDatabase} from '../database'
+import {Database} from '../database'
 
 describe('Parquet', function () {
     it('output', async function () {
@@ -30,7 +30,7 @@ describe('Parquet', function () {
 export function initDatabase() {
     rmSync('./src/test/data/parquet', {force: true, recursive: true})
 
-    return new CsvDatabase({
+    return new Database({
         tables: [table],
         dest: './src/test/data/parquet',
         syncIntervalBlocks: 1,

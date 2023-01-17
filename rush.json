@@ -474,6 +474,12 @@
         "projectFolder": "bigdata-s3",
         "shouldPublish": true,
         "versionPolicyName": "npm"
+      },
+      {
+        "packageName": "test",
+        "projectFolder": "test",
+        "shouldPublish": false,
+        "versionPolicyName": "npm"
       }
     ]
   }
