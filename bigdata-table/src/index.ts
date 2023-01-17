@@ -11,16 +11,6 @@ export interface ColumnData<T extends Type<any> = Type<any>, O extends ColumnOpt
     options: Required<O>
 }
 
-type NullableColumns<T extends Record<string, ColumnData>> = {
-    [F in keyof T]: T[F] extends ColumnData<any, infer R> ? (R extends {nullable: true} ? F : never) : never
-}[keyof T]
-
-export type ConvertColumnsToTypes<T extends Record<string, ColumnData>> = {
-    [F in Exclude<keyof T, NullableColumns<T>>]: T[F] extends ColumnData<Type<infer R>> ? R : never
-} & {
-    [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
-}
-
 export interface TableSchema<C extends ColumnData> {
     [column: string]: C
 }
@@ -46,6 +36,16 @@ export abstract class Table<T extends TableSchema<ColumnData>> {
     abstract getFileExtension(): string
 }
 
+type NullableColumns<T extends Record<string, ColumnData>> = {
+    [F in keyof T]: T[F] extends ColumnData<any, infer R> ? (R extends {nullable: true} ? F : never) : never
+}[keyof T]
+
+export type ConvertColumnsToTypes<T extends Record<string, ColumnData>> = {
+    [F in Exclude<keyof T, NullableColumns<T>>]: T[F] extends ColumnData<Type<infer R>> ? R : never
+} & {
+    [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
+}
+
 export type TableRecord<T extends TableSchema<any> | Table<any>> = T extends Table<infer R>
     ? ConvertColumnsToTypes<R>
     : T extends TableSchema<any>
@@ -58,9 +58,3 @@ export interface ITableBuilder<T extends TableSchema<any>> {
     append(records: TableRecord<T> | TableRecord<T>[]): ITableBuilder<T>
     flush(): string | Uint8Array
 }
-
-// let a = new Table('aaa', {
-//     a: {} as Type<string>
-// })
-
-// type A = TableRecord<typeof a>

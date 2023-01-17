@@ -24,7 +24,7 @@ export class LocalFS implements FS {
         return fs.readFile(this.abs(name), 'utf-8')
     }
 
-    async writeFile(name: string, data: string): Promise<void> {
+    async writeFile(name: string, data: string | Uint8Array): Promise<void> {
         let absPath = this.abs(name)
         await this.mkdir(path.dirname(absPath))
         return fs.writeFile(absPath, data, 'utf-8')
