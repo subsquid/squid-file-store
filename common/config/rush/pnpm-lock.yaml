@@ -8,11 +8,11 @@ specifiers:
   '@rush-temp/bigdata-store': file:./projects/bigdata-store.tgz
   '@rush-temp/bigdata-table': file:./projects/bigdata-table.tgz
   '@rush-temp/test': file:./projects/test.tgz
-  '@subsquid/archive-registry': 1.0.16
-  '@subsquid/ss58': 0.1.2
-  '@subsquid/substrate-metadata-explorer': 1.0.9
-  '@subsquid/substrate-processor': 2.0.2
-  '@subsquid/substrate-typegen': 1.5.1
+  '@subsquid/archive-registry': ^2.0.1
+  '@subsquid/ss58': ^0.1.2
+  '@subsquid/substrate-metadata-explorer': ^1.0.9
+  '@subsquid/substrate-processor': ^2.2.0
+  '@subsquid/substrate-typegen': ^2.1.0
   '@subsquid/util-internal': ^1.0.0
   '@subsquid/util-internal-json': ~0.2.0
   '@subsquid/util-naming': ^0.0.0
@@ -33,11 +33,11 @@ dependencies:
   '@rush-temp/bigdata-store': file:projects/bigdata-store.tgz
   '@rush-temp/bigdata-table': file:projects/bigdata-table.tgz
   '@rush-temp/test': file:projects/test.tgz
-  '@subsquid/archive-registry': 1.0.16
+  '@subsquid/archive-registry': 2.0.1
   '@subsquid/ss58': 0.1.2
   '@subsquid/substrate-metadata-explorer': 1.0.9
-  '@subsquid/substrate-processor': 2.0.2
-  '@subsquid/substrate-typegen': 1.5.1
+  '@subsquid/substrate-processor': 2.2.0
+  '@subsquid/substrate-typegen': 2.1.0
   '@subsquid/util-internal': 1.0.0
   '@subsquid/util-internal-json': 0.2.0
   '@subsquid/util-naming': 0.0.0
@@ -1016,8 +1016,12 @@ packages:
       tslib: 2.4.1
     dev: false
 
-  /@subsquid/archive-registry/1.0.16:
-    resolution: {integrity: sha512-0H/9fKLa/VxZtfn6n1ewuXXDqoNxBeugexifWNxMqN2hh6ID7YrgOOGfBdKd+jCoSbUcAlt3CchAHoEOlmcNTA==}
+  /@exodus/schemasafe/1.0.0-rc.9:
+    resolution: {integrity: sha512-dGGHpb61hLwifAu7sotuHFDBw6GTdpG8aKC0fsK17EuTzMRvUrH7lEAr6LTJ+sx3AZYed9yZ77rltVDHyg2hRg==}
+    dev: false
+
+  /@subsquid/archive-registry/2.0.1:
+    resolution: {integrity: sha512-gxzeymTJ3PVv+VVHBfhMXjvy8mdS0/nJOKcP8Mpv4cktNDbne01GM1vMtj58ZRRL+A/GuU6jjEJZlPZWajLnrg==}
     dependencies:
       node-abort-controller: 3.0.1
       node-fetch: 2.6.8
@@ -1093,10 +1097,10 @@ packages:
       '@subsquid/util-naming': 0.0.1
     dev: false
 
-  /@subsquid/substrate-processor/2.0.2:
-    resolution: {integrity: sha512-hMYg7cba0VdtuJf0Pd3kP9sGSXaqVE5c4V7O3VvL3CCil9kL9nA8zbQkLJ6hmkBtLR+jB7x5r2X52RNMR725eQ==}
+  /@subsquid/substrate-processor/2.2.0:
+    resolution: {integrity: sha512-7SW2w3vXfoT1zp0oerwm5eDe5SD6kVq5wbUx3SB3O1oqcJtgTw+hJykX1HPzIjXmQQmN8Wt+UdtxzD9gJ1YvHA==}
     peerDependencies:
-      '@subsquid/typeorm-store': ^0.1.5
+      '@subsquid/typeorm-store': ^0.2.0
     peerDependenciesMeta:
       '@subsquid/typeorm-store':
         optional: true
@@ -1122,8 +1126,8 @@ packages:
       - typeorm
     dev: false
 
-  /@subsquid/substrate-typegen/1.5.1:
-    resolution: {integrity: sha512-n+sjtLdxaOloZ7tDirSYh4ruZixnscaCrn/duc7agfqTR/0rAbHrAPpeshQsmJELIrFYBBKsVMrTeeJS3ZlgPQ==}
+  /@subsquid/substrate-typegen/2.1.0:
+    resolution: {integrity: sha512-NSwvQy7kUC8Sb6DZMFBEm+bqZb+e4neyayrCQ6AzCyofQIdiN4m4kC+/uoewZVIjm0Hds+JBzsXnltFw6BzX3w==}
     hasBin: true
     dependencies:
       '@subsquid/logger': 0.3.0
@@ -1132,10 +1136,10 @@ packages:
       '@subsquid/substrate-metadata-explorer': 1.0.9
       '@subsquid/util-internal': 1.0.0
       '@subsquid/util-internal-code-printer': 0.1.0
+      '@subsquid/util-internal-config': 1.0.0
       '@subsquid/util-internal-gql-request': 0.1.1
       '@subsquid/util-internal-read-lines': 0.0.1
       '@subsquid/util-naming': 0.0.1
-      ajv: 8.12.0
       commander: 9.5.0
     transitivePeerDependencies:
       - encoding
@@ -1159,6 +1163,13 @@ packages:
 
   /@subsquid/util-internal-code-printer/0.1.0:
     resolution: {integrity: sha512-qVlW3cvEo64gbjxLCBRu95eDORKDZmSxGpILbtNWq34Gg8fChSsnvdyL2rN9vIU/sMZtcPhL52RdDJI0lVWv9Q==}
+    dev: false
+
+  /@subsquid/util-internal-config/1.0.0:
+    resolution: {integrity: sha512-VfqyTl3ZOdl/4JJufdTAwq1IqF4E/VNB60ZT9bL2+1tlz/UMyvY/9yPMmYq75uDmvI37iZxf3AZnqHC2Uug7kQ==}
+    dependencies:
+      '@exodus/schemasafe': 1.0.0-rc.9
+      jsonc-parser: 3.2.0
     dev: false
 
   /@subsquid/util-internal-counters/0.0.1:
@@ -1807,6 +1818,10 @@ packages:
     resolution: {integrity: sha512-NM8/P9n3XjXhIZn1lLhkFaACTOURQXjWhV4BA/RnOv8xvgqtqpAX9IO4mRQxSx1Rlo4tqzeqb0sOlruaOy3dug==}
     dev: false
 
+  /jsonc-parser/3.2.0:
+    resolution: {integrity: sha512-gfFQZrcTc8CnKXp6Y4/CBT3fTc0OVuDofpre4aEeEpSBPV5X5v4+Vmx+8snU7RLPrNHPKSgLxGo9YuQzz20o+w==}
+    dev: false
+
   /locate-path/6.0.0:
     resolution: {integrity: sha512-iPZK6eYjbxRu3uB4/WZ3EsEIMJFMqAoopl3R+zuq0UjcAm/MO6KCweDgPfP3elTztoKP3KtnVHxTn2NHBSDVUw==}
     engines: {node: '>=10'}
@@ -2432,15 +2447,15 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-x9P2prM+DuaWRfgQH/dZTkN5enE8Ncmr9yk2/1A6VsZbVvL7I9NzPgDiKL7H3R20TB8ivOI58UqcmhCdzOYpHQ==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-lwMNSU4iHOSoQELS7gjQpu7p0SSOyNFdlwcZOWkLlpWwRBv8wbylpQjDfHXJLPcUi9Kw5yHpUtr4NHGS5r7mkQ==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:
-      '@subsquid/archive-registry': 1.0.16
+      '@subsquid/archive-registry': 2.0.1
       '@subsquid/ss58': 0.1.2
       '@subsquid/substrate-metadata-explorer': 1.0.9
-      '@subsquid/substrate-processor': 2.0.2
-      '@subsquid/substrate-typegen': 1.5.1
+      '@subsquid/substrate-processor': 2.2.0
+      '@subsquid/substrate-typegen': 2.1.0
       '@types/node': 16.11.56
       dotenv: 10.0.0
       typescript: 4.8.2
