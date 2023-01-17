@@ -51,15 +51,15 @@ class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBu
     private _size = 0
 
     constructor(private columns: Column<ParquetColumnData>[], private options: Required<TableOptions>) {
-        let writePropertiesBuilder = new WriterPropertiesBuilder()
+        let builer = new WriterPropertiesBuilder()
         for (let column of columns) {
             this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
-            writePropertiesBuilder.setColumnDictionaryEnabled(column.name, column.data.options.dictionary)
-            writePropertiesBuilder.setColumnCompression(column.name, column.data.options.compression)
+            builer = builer.setColumnDictionaryEnabled(column.name, column.data.options.dictionary)
+            builer = builer.setColumnCompression(column.name, column.data.options.compression)
         }
-        writePropertiesBuilder.setCompression(options.compression)
-        writePropertiesBuilder.setDictionaryEnabled(options.dictionary)
-        this.writeProperties = writePropertiesBuilder.build()
+        builer = builer.setCompression(options.compression)
+        builer = builer.setDictionaryEnabled(options.dictionary)
+        this.writeProperties = builer.build()
     }
 
     get size() {
@@ -75,10 +75,7 @@ class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBu
         }
         let arrowTable = new ArrowTable(columnsData)
 
-        return writeParquet(
-            tableToIPC(arrowTable),
-            this.writeProperties
-        )
+        return writeParquet(tableToIPC(arrowTable), this.writeProperties)
     }
 
     append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {

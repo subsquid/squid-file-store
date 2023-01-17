@@ -468,6 +468,12 @@
         "projectFolder": "bigdata-parquet",
         "shouldPublish": true,
         "versionPolicyName": "npm"
+      },
+      {
+        "packageName": "@subsquid/bigdata-s3",
+        "projectFolder": "bigdata-s3",
+        "shouldPublish": true,
+        "versionPolicyName": "npm"
       }
     ]
   }

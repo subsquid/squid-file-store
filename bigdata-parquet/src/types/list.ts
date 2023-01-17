@@ -16,7 +16,7 @@ export let ListType = <T, Options extends ListOptions>(
     },
     validate(value) {
         assert(Array.isArray(value))
-        if (options?.nullable) {
+        if (!options?.nullable) {
             for (let i of value) {
                 assert(i != null)
             }

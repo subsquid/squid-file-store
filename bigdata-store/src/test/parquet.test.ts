@@ -53,14 +53,14 @@ export let table = new Table('test', {
 type Record = TableRecord<typeof table>
 
 export let record1: Record = {
-    string: 'string',
+    string: 'hello',
     int: 3,
     bigint: 4n,
     float: 0.1,
     boolean: true,
     timestamp: new Date(),
     date: new Date(),
-    nullableString: null,
+    nullableString: 'hello',
     list: [1, 2, 3, 4],
     nullableList: [null, 3, 4],
 }

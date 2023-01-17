@@ -4,9 +4,11 @@ specifiers:
   '@aws-sdk/client-s3': ^3.245.0
   '@rush-temp/bigdata-csv': file:./projects/bigdata-csv.tgz
   '@rush-temp/bigdata-parquet': file:./projects/bigdata-parquet.tgz
+  '@rush-temp/bigdata-s3': file:./projects/bigdata-s3.tgz
   '@rush-temp/bigdata-store': file:./projects/bigdata-store.tgz
   '@rush-temp/bigdata-table': file:./projects/bigdata-table.tgz
   '@subsquid/util-internal': ^1.0.0
+  '@subsquid/util-internal-json': ~0.2.0
   '@subsquid/util-naming': ^0.0.0
   '@types/mocha': ^10.0.1
   '@types/node': 16.11.56
@@ -14,6 +16,7 @@ specifiers:
   dotenv: ^16.0.3
   mocha: ^10.2.0
   parquet-wasm: ^0.4.0-beta.5
+  parquetjs: ~0.11.2
   typescript: 4.8.2
   upath: ^2.0.1
 
@@ -21,9 +24,11 @@ dependencies:
   '@aws-sdk/client-s3': 3.245.0
   '@rush-temp/bigdata-csv': file:projects/bigdata-csv.tgz
   '@rush-temp/bigdata-parquet': file:projects/bigdata-parquet.tgz
+  '@rush-temp/bigdata-s3': file:projects/bigdata-s3.tgz
   '@rush-temp/bigdata-store': file:projects/bigdata-store.tgz
   '@rush-temp/bigdata-table': file:projects/bigdata-table.tgz
   '@subsquid/util-internal': 1.0.0
+  '@subsquid/util-internal-json': 0.2.0
   '@subsquid/util-naming': 0.0.0
   '@types/mocha': 10.0.1
   '@types/node': 16.11.56
@@ -31,6 +36,7 @@ dependencies:
   dotenv: 16.0.3
   mocha: 10.2.0
   parquet-wasm: 0.4.0-beta.5
+  parquetjs: 0.11.2
   typescript: 4.8.2
   upath: 2.0.1
 
@@ -1880,7 +1886,7 @@ packages:
     dev: false
 
   file:projects/bigdata-csv.tgz:
-    resolution: {integrity: sha512-CQQRwAARIKpx/kcLcR6bOKs9ByjV8omA5/7n4uFmUo9Zcr0bnfFmCFOrz/7wfSFzbhMZxy5yP6BnpOcQIg1Ilw==, tarball: file:projects/bigdata-csv.tgz}
+    resolution: {integrity: sha512-jg8HnHilcEywchgRA6bdmQs9jaKXYloRRudozvtxwGJ/50/f+Y9kfmQJBwHnr671+I/thQD5ew4Rq5oBl/RRbQ==, tarball: file:projects/bigdata-csv.tgz}
     name: '@rush-temp/bigdata-csv'
     version: 0.0.0
     dependencies:
@@ -1906,8 +1912,23 @@ packages:
       - utf-8-validate
     dev: false
 
+  file:projects/bigdata-s3.tgz:
+    resolution: {integrity: sha512-WmnQ+0UTL1ivQM38F2dB3i3pwQKfJmLfHVG2w1g8+JjLMVGP3EBUFkqCjULJDCJyklUhrnizF4Z43rN5eMPuMw==, tarball: file:projects/bigdata-s3.tgz}
+    name: '@rush-temp/bigdata-s3'
+    version: 0.0.0
+    dependencies:
+      '@aws-sdk/client-s3': 3.245.0
+      '@subsquid/util-internal': 1.0.0
+      '@types/node': 16.11.56
+      typescript: 4.8.2
+      upath: 2.0.1
+    transitivePeerDependencies:
+      - '@aws-sdk/signature-v4-crt'
+      - aws-crt
+    dev: false
+
   file:projects/bigdata-store.tgz:
-    resolution: {integrity: sha512-jzwKXj8RNmVc6K2r9qtIRj5DhKMeLzyGA19VSWJGPLoenGS/myqpeVd7je0foBXI60RXlv5ixlbkOVhfGDt0jw==, tarball: file:projects/bigdata-store.tgz}
+    resolution: {integrity: sha512-zTyqogYSdlSl/gLzawEdAAcNGnd/NwWzKXCOuQIFlfwvvVK6fYqAyikZqG8M+LP3VXEfexucNZRptczMyCMKNA==, tarball: file:projects/bigdata-store.tgz}
     name: '@rush-temp/bigdata-store'
     version: 0.0.0
     dependencies:
@@ -1925,9 +1946,6 @@ packages:
       parquet-wasm: 0.4.0-beta.5
       typescript: 4.8.2
       upath: 2.0.1
-    transitivePeerDependencies:
-      - '@aws-sdk/signature-v4-crt'
-      - aws-crt
     dev: false
 
   file:projects/bigdata-table.tgz:
