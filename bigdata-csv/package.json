@@ -31,6 +31,7 @@
     "@subsquid/util-internal-json": "~0.2.0"
   },
   "devDependencies": {
+    "expect": "^27.5.1",
     "@types/node": "16.11.56",
     "typescript": "4.8.2"
   }

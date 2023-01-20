@@ -39,7 +39,11 @@ export class LocalFS implements FS {
     }
 
     async readdir(dir: string): Promise<string[]> {
-        return fs.readdir(this.path(dir))
+        if (await this.exists(dir)) {
+            return fs.readdir(this.path(dir))
+        } else {
+            return []
+        }
     }
 
     async mkdir(dir: string): Promise<void> {

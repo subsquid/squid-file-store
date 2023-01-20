@@ -9,7 +9,7 @@ import {
     TableSchema,
 } from '@subsquid/bigdata-table'
 import {toSnakeCase} from '@subsquid/util-naming'
-import {Dialect, dialects} from './dialect'
+import {Dialect, dialects, Quote} from './dialect'
 import {CsvType} from './types'
 
 export interface TableOptions {
@@ -46,9 +46,7 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
             for (let i = 0; i < this.columns.length; i++) {
                 let column = this.columns[i]
                 let normalizedName = toSnakeCase(column.name)
-                header[i] = this.hasSpecialChar(normalizedName, this.options.dialect)
-                    ? `'${normalizedName}'`
-                    : normalizedName
+                header[i] = this.escape(normalizedName, false)
             }
             this.records.push(header.join(this.options.dialect.delimiter) + '\n')
         }
@@ -76,11 +74,7 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
                     assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
                 }
                 let serializedValue = value == null ? `` : column.data.type.serialize(value)
-                serializedValues.push(
-                    this.hasSpecialChar(serializedValue, this.options.dialect)
-                        ? `'${serializedValue}'`
-                        : serializedValue
-                )
+                serializedValues.push(this.escape(serializedValue, column.data.type.isNumeric))
             }
             let serializedRecord = serializedValues.join(this.options.dialect.delimiter) + '\n'
             this.records.push(serializedRecord)
@@ -90,8 +84,54 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
         return this
     }
 
-    private hasSpecialChar(str: string, dialect: Dialect) {
-        return str.includes(dialect.delimiter) || str.includes('\n') || str.includes(dialect.quoteChar)
+    private escape(str: string, isNumeric: boolean) {
+        switch (this.options.dialect.quoting) {
+            case Quote.NONE:
+                return this.escapeAll(str)
+            case Quote.MINIMAL:
+                if (this.hasSpecialChar(str)) {
+                    return this.quote(this.escapeQuote(str))
+                } else {
+                    return str
+                }
+            case Quote.NONNUMERIC:
+                if (isNumeric) {
+                    return this.escapeAll(str)
+                } else {
+                    return this.quote(this.escapeQuote(str))
+                }
+            case Quote.ALL: {
+                return this.quote(this.escapeQuote(str))
+            }
+        }
+    }
+
+    private escapeQuote(str: string) {
+        return this.escapeChars(str, [this.options.dialect.quoteChar])
+    }
+
+    private escapeAll(str: string) {
+        let dialect = this.options.dialect
+        return this.escapeChars(str, [dialect.delimiter, dialect.escapeChar || '', dialect.quoteChar, '\n'])
+    }
+
+    private escapeChars(str: string, chars: string[]) {
+        let quoteChar = this.options.dialect.quoteChar
+        let escapeChar = this.options.dialect.escapeChar || quoteChar
+        return str.replace(new RegExp(`[${chars.map((c) => `\(${c}\)`).join('')}]`, 'g'), (s) => `${escapeChar}${s}`)
+    }
+
+    private quote(str: string) {
+        let quoteChar = this.options.dialect.quoteChar
+        return quoteChar + str + quoteChar
+    }
+
+    private hasSpecialChar(str: string) {
+        return (
+            str.includes(this.options.dialect.delimiter) ||
+            str.includes('\n') ||
+            str.includes(this.options.dialect.quoteChar)
+        )
     }
 }
 

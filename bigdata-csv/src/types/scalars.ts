@@ -10,6 +10,7 @@ export function StringType(): CsvType<string> {
             assert(typeof value === 'string')
             return value
         },
+        isNumeric: false,
     }
 }
 
@@ -22,6 +23,7 @@ export function IntegerType(): CsvType<number | bigint> {
             assert((typeof value === 'number' && Number.isInteger(value)) || typeof value === 'bigint')
             return value
         },
+        isNumeric: true,
     }
 }
 
@@ -34,6 +36,7 @@ export function DecimalType(): CsvType<number> {
             assert(typeof value === 'number')
             return value
         },
+        isNumeric: true,
     }
 }
 export function BooleanType(): CsvType<boolean> {
@@ -46,6 +49,7 @@ export function BooleanType(): CsvType<boolean> {
             assert(typeof value === 'boolean')
             return value
         },
+        isNumeric: false,
     }
 }
 
@@ -58,5 +62,6 @@ export function DateTimeType(): CsvType<Date> {
             assert(value instanceof Date)
             return value
         },
+        isNumeric: false,
     }
 }
