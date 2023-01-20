@@ -1,7 +1,7 @@
 import path from 'upath'
 import fs from 'fs/promises'
 import {existsSync} from 'fs'
-import type {S3Options} from '@subsquid/bigdata-s3'
+import {S3FsConstructor, S3Options} from '@subsquid/bigdata-s3'
 
 export interface FS {
     readFile(file: string): Promise<string>
@@ -10,32 +10,36 @@ export interface FS {
     mkdir(path: string): Promise<void> // always recursive
     readdir(path: string): Promise<string[]>
     rm(path: string): Promise<void> // always recursive and force
-    abs(...paths: string[]): string
+    path(...paths: string[]): string
 }
 
 export class LocalFS implements FS {
-    constructor(protected dir: string) {}
+    protected dir: string
+
+    constructor(dir: string) {
+        this.dir = path.normalize(dir)
+    }
 
     async exists(name: string) {
-        return existsSync(path.join(this.dir, name))
+        return existsSync(this.path(name))
     }
 
     async readFile(name: string): Promise<string> {
-        return fs.readFile(this.abs(name), 'utf-8')
+        return fs.readFile(this.path(name), 'utf-8')
     }
 
     async writeFile(name: string, data: string | Uint8Array): Promise<void> {
-        let absPath = this.abs(name)
-        await this.mkdir(path.dirname(absPath))
-        return fs.writeFile(absPath, data, 'utf-8')
+        let destPath = this.path(name)
+        await this.mkdir(path.dirname(destPath))
+        return fs.writeFile(destPath, data, 'utf-8')
     }
 
     async rm(name: string): Promise<void> {
-        return fs.rm(this.abs(name), {recursive: true, force: true})
+        return fs.rm(this.path(name), {recursive: true, force: true})
     }
 
     async readdir(dir: string): Promise<string[]> {
-        return fs.readdir(this.abs(dir))
+        return fs.readdir(this.path(dir))
     }
 
     async mkdir(dir: string): Promise<void> {
@@ -43,19 +47,19 @@ export class LocalFS implements FS {
     }
 
     async rename(oldPath: string, newPath: string): Promise<void> {
-        return fs.rename(this.abs(oldPath), this.abs(newPath))
+        return fs.rename(this.path(oldPath), this.path(newPath))
     }
 
-    abs(...paths: string[]) {
+    path(...paths: string[]) {
         return path.join(this.dir, ...paths)
     }
 }
 
 export async function fsTransact(fs: FS, dir: string, cb: (fs: FS) => Promise<void>) {
     if (fs instanceof LocalFS) {
-        let absPath = fs.abs(dir)
-        let tempDir = `${path.basename(absPath)}-temp-${Date.now()}`
-        let tempPath = path.join(path.dirname(absPath), tempDir)
+        let destPath = fs.path(dir)
+        let tempDir = `${path.basename(destPath)}-temp-${Date.now()}`
+        let tempPath = path.join(path.dirname(destPath), tempDir)
         let txFs = new LocalFS(tempPath)
         try {
             await cb(txFs)
@@ -70,14 +74,14 @@ export async function fsTransact(fs: FS, dir: string, cb: (fs: FS) => Promise<vo
     }
 }
 
-export function createFS(dest: string, s3Options?: S3Options) {
+export function createFS(dest: string, s3Options?: S3Options): FS {
     let url = parseUrl(dest)
     if (!url) {
         return new LocalFS(dest)
     } else if (url.protocol === 's3:') {
         try {
-            let s3 = require('@subsquid/bigdata-s3')
-            return new s3.S3Fs(url.pathname.slice(1), url.hostname, s3Options)
+            let S3Fs = require('@subsquid/bigdata-s3').S3Fs as S3FsConstructor
+            return new S3Fs(url.pathname.slice(1), url.hostname, s3Options)
         } catch (e) {
             throw new Error('Package `@subsquid/bigdata-s3` is not installed')
         }

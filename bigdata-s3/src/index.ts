@@ -11,10 +11,14 @@ import {assertNotNull} from '@subsquid/util-internal'
 import assert from 'assert'
 import path from 'upath'
 
+export interface S3FsConstructor {
+    new (dir: string, bucket: string, options?: S3Options): S3Fs
+}
+
 export class S3Fs {
     private client: S3Client
 
-    constructor(private dir: string, private bucket: string, options: S3Options) {
+    constructor(private dir: string, private bucket: string, options?: S3Options) {
         this.client = new S3Client(
             options || {
                 region: process.env.S3_REGION,
@@ -28,7 +32,7 @@ export class S3Fs {
     }
 
     async exists(name: string) {
-        if (name.endsWith('/')) {
+        if (this.isDir(name)) {
             return this.existsDir(name)
         } else {
             let isFileExist = await this.existsFile(name)
@@ -45,7 +49,7 @@ export class S3Fs {
             await this.client.send(
                 new HeadObjectCommand({
                     Bucket: this.bucket,
-                    Key: this.abs(name),
+                    Key: this.path(name),
                 })
             )
         } catch (e) {
@@ -59,11 +63,11 @@ export class S3Fs {
     }
 
     private async existsDir(dir: string) {
-        dir = dir.endsWith('/') ? dir : dir + '/'
+        dir = this.toDir(dir)
         let ls = await this.client.send(
             new ListObjectsV2Command({
                 Bucket: this.bucket,
-                Prefix: this.abs(dir),
+                Prefix: this.path(dir),
                 MaxKeys: 1,
             })
         )
@@ -79,7 +83,7 @@ export class S3Fs {
         let res = await this.client.send(
             new GetObjectCommand({
                 Bucket: this.bucket,
-                Key: this.abs(name),
+                Key: this.path(name),
             })
         )
         assert(res.Body != null)
@@ -90,24 +94,24 @@ export class S3Fs {
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: this.abs(name),
+                Key: this.path(name),
                 Body: ArrayBuffer.isView(data) ? data : Buffer.from(data, 'utf-8'),
             })
         )
     }
 
     async mkdir(dir: string): Promise<void> {
-        dir = dir.endsWith('/') ? dir : dir + '/'
+        dir = this.toDir(dir)
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: this.abs(dir),
+                Key: this.path(dir),
             })
         )
     }
 
     async readdir(dir: string): Promise<string[]> {
-        dir = dir.endsWith('/') ? dir : dir + '/'
+        dir = this.toDir(dir)
 
         let names = new Set<string>()
 
@@ -116,7 +120,7 @@ export class S3Fs {
             let ls = await this.client.send(
                 new ListObjectsV2Command({
                     Bucket: this.bucket,
-                    Prefix: this.abs(dir),
+                    Prefix: this.path(dir),
                     Delimiter: '/',
                     ContinuationToken: ContinuationToken ? ContinuationToken : undefined,
                 })
@@ -155,7 +159,7 @@ export class S3Fs {
     }
 
     async rm(name: string): Promise<void> {
-        if (name.endsWith('/')) {
+        if (this.isDir(name)) {
             return this.rmDir(name)
         }
 
@@ -164,7 +168,7 @@ export class S3Fs {
                 new DeleteObjectsCommand({
                     Bucket: this.bucket,
                     Delete: {
-                        Objects: [{Key: this.abs(name)}],
+                        Objects: [{Key: this.path(name)}],
                         Quiet: true,
                     },
                 })
@@ -175,14 +179,14 @@ export class S3Fs {
     }
 
     private async rmDir(dir: string): Promise<void> {
-        dir = dir.endsWith('/') ? dir : dir + '/'
+        dir = this.toDir(dir)
 
         let ContinuationToken: string | undefined
         while (true) {
             let ls = await this.client.send(
                 new ListObjectsV2Command({
                     Bucket: this.bucket,
-                    Prefix: this.abs(dir),
+                    Prefix: this.path(dir),
                     ContinuationToken: ContinuationToken ? ContinuationToken : undefined,
                 })
             )
@@ -207,8 +211,16 @@ export class S3Fs {
         }
     }
 
-    abs(...paths: string[]) {
+    path(...paths: string[]) {
         return path.join(this.dir, ...paths)
+    }
+
+    private toDir(str: string) {
+        return this.isDir(str) ? str : str + '/'
+    }
+
+    private isDir(str: string) {
+        return str.endsWith('/')
     }
 }
 
