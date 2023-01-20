@@ -1,14 +1,14 @@
-import {toSnakeCase} from '@subsquid/util-naming'
 import assert from 'assert'
 import {
-    TableSchema,
     Table as BaseTable,
-    TableRecord,
-    ITableBuilder,
     Column,
     ColumnData,
     ColumnOptions,
+    ITableBuilder,
+    TableRecord,
+    TableSchema,
 } from '@subsquid/bigdata-table'
+import {toSnakeCase} from '@subsquid/util-naming'
 import {Dialect, dialects} from './dialect'
 import {CsvType} from './types'
 
@@ -106,17 +106,3 @@ export function Column<T extends CsvType<any>>(type: T, options?: ColumnOptions)
         options: {nullable: false, ...options},
     }
 }
-
-// let type: CsvType<string> = {
-//     validate: (v) => v as string,
-//     serialize: () => 'a',
-// }
-
-// let a = new Table('aaa', {
-//     a: Column(type),
-//     b: Column(type, {nullable: true}),
-// })
-
-// // type B = typeof a extends Table<infer R> ? R : never
-
-// type A = TableRecord<typeof a>

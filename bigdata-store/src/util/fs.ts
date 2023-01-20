@@ -1,6 +1,6 @@
-import path from 'upath'
-import fs from 'fs/promises'
 import {existsSync} from 'fs'
+import fs from 'fs/promises'
+import path from 'upath'
 import {S3FsConstructor, S3Options} from '@subsquid/bigdata-s3'
 
 export interface FS {

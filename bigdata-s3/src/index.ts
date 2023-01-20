@@ -1,15 +1,15 @@
+import assert from 'assert'
+import path from 'upath'
 import {
-    S3Client,
     DeleteObjectsCommand,
     GetObjectCommand,
-    PutObjectCommand,
     HeadObjectCommand,
     ListObjectsV2Command,
     NotFound,
+    PutObjectCommand,
+    S3Client,
 } from '@aws-sdk/client-s3'
 import {assertNotNull} from '@subsquid/util-internal'
-import assert from 'assert'
-import path from 'upath'
 
 export interface S3FsConstructor {
     new (dir: string, bucket: string, options?: S3Options): S3Fs

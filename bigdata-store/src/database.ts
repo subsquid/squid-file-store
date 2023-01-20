@@ -1,7 +1,7 @@
 import assert from 'assert'
-import {createFS, FS, fsTransact, S3Options} from './util/fs'
+import {Table, TableRecord, TableSchema} from '@subsquid/bigdata-table'
 import {Chunk} from './chunk'
-import {Table, TableSchema, TableRecord} from '@subsquid/bigdata-table'
+import {FS, S3Options, createFS, fsTransact} from './util/fs'
 
 interface DatabaseHooks {
     onConnect(fs: FS): Promise<number>

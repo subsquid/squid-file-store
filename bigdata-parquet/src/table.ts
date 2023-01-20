@@ -1,16 +1,16 @@
 import assert from 'assert'
+import {Table as ArrowTable, Builder, makeBuilder, tableToIPC} from 'apache-arrow'
+import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
 import {
-    TableSchema,
     Table as BaseTable,
-    TableRecord,
-    ITableBuilder,
     Column,
     ColumnData,
     ColumnOptions,
+    ITableBuilder,
+    TableRecord,
+    TableSchema,
 } from '@subsquid/bigdata-table'
 import {ParquetType} from './types'
-import {Builder, makeBuilder, Table as ArrowTable, tableToIPC} from 'apache-arrow'
-import {writeParquet, WriterProperties, WriterPropertiesBuilder, Compression} from 'parquet-wasm/node/arrow1'
 
 export {Compression} from 'parquet-wasm/node/arrow1'
 
@@ -110,17 +110,3 @@ export function Column<T extends ParquetType<any>>(type: T, options?: ParquetCol
         options: {compression: Compression.UNCOMPRESSED, dictionary: false, ...options},
     }
 }
-
-// let type: ParquetType<string> = {
-//     validate: (v) => v as string,
-//     serialize: () => 'a',
-// }
-
-// let a = new ParquetTable('aaa', {
-//     a: Column(type),
-//     b: Column(type, {nullable: true}),
-// })
-
-// // type B = typeof a extends Table<infer R> ? R : never
-
-// type A = TableRecord<typeof a>
