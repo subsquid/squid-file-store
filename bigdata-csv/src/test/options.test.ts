@@ -1,8 +1,7 @@
-import {readFileSync} from 'fs'
-import {Column, Table} from '../table'
-import {StringType, IntegerType, DecimalType, BooleanType, DateTimeType} from '../types'
 import expect from 'expect'
-import {dialects, Quote} from '../dialect'
+import {Quote, dialects} from '../dialect'
+import {Column, Table} from '../table'
+import {IntegerType, StringType} from '../types'
 
 describe('Options', function () {
     describe('header', async function () {
@@ -85,7 +84,7 @@ describe('Options', function () {
                         quoteChar: "'",
                         escapeChar: '^',
                         quoting: Quote.MINIMAL,
-                        lineterminator: ';'
+                        lineterminator: ';',
                     },
                     header: false,
                 }

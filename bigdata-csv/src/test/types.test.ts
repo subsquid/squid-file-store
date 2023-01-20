@@ -51,5 +51,5 @@ let record2: Record = {
     decimal: 0.1111111111111,
     boolean: true,
     timestamp: new Date(1575583206000),
-    nullableString: null,
+    nullableString: 'not null',
 }
