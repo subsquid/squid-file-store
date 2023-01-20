@@ -10,12 +10,14 @@ export interface Dialect {
     escapeChar?: string
     quoteChar: string
     quoting: Quote
+    lineterminator: string
 }
 
 let excel: Dialect = {
     delimiter: ',',
     quoteChar: '"',
     quoting: Quote.MINIMAL,
+    lineterminator: '\r\n'
 }
 
 let excelTab: Dialect = {

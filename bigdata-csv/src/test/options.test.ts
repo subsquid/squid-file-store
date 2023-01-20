@@ -16,7 +16,7 @@ describe('Options', function () {
             builder.append({column1: 'value1', column2: 'value2'})
             let result = builder.flush()
 
-            expect(result).toEqual('column1,column2\n' + 'value1,value2\n')
+            expect(result).toEqual('column1,column2\r\n' + 'value1,value2\r\n')
         })
 
         it('without header', () => {
@@ -29,7 +29,7 @@ describe('Options', function () {
             builder.append({column1: 'value1', column2: 'value2'})
             let result = builder.flush()
 
-            expect(result).toEqual('value1,value2\n')
+            expect(result).toEqual('value1,value2\r\n')
         })
     })
 
@@ -46,10 +46,10 @@ describe('Options', function () {
                 {dialect: dialects.excel, header: false}
             )
             let builder = table.createTableBuilder()
-            builder.append({column1: 'aaa', column2: 'bb,b', column3: 'c"c"c', column4: 'dd\nd'})
+            builder.append({column1: 'aaa', column2: 'bb,b', column3: 'c"c"c', column4: 'dd\r\nd'})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,"bb,b","c""c""c","dd\nd"\n')
+            expect(result).toEqual('aaa,"bb,b","c""c""c","dd\r\nd"\r\n')
         })
 
         it('excel-tab', () => {
@@ -67,7 +67,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb\tb', column3: 'c"c"c', column4: 'dd,d'})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa\t"bb\tb"\t"c""c""c"\tdd,d\n')
+            expect(result).toEqual('aaa\t"bb\tb"\t"c""c""c"\tdd,d\r\n')
         })
 
         it('custom', () => {
@@ -85,6 +85,7 @@ describe('Options', function () {
                         quoteChar: "'",
                         escapeChar: '^',
                         quoting: Quote.MINIMAL,
+                        lineterminator: ';'
                     },
                     header: false,
                 }
@@ -93,7 +94,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb-b', column3: "c'c'c", column4: 'dd,d'})
             let result = builder.flush()
 
-            expect(result).toEqual("aaa-'bb-b'-'c^'c^'c'-dd,d\n")
+            expect(result).toEqual("aaa-'bb-b'-'c^'c^'c'-dd,d;")
         })
 
         it('Quote.NONE', () => {
@@ -110,7 +111,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,bb",b,1000\n')
+            expect(result).toEqual('aaa,bb",b,1000\r\n')
         })
 
         it('Quote.MINIMAL', () => {
@@ -127,7 +128,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,"bb,b",1000\n')
+            expect(result).toEqual('aaa,"bb,b",1000\r\n')
         })
 
         it('Quote.NONNUMERIC', () => {
@@ -144,7 +145,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('"aaa","bb,b",1000\n')
+            expect(result).toEqual('"aaa","bb,b",1000\r\n')
         })
 
         it('Quote.ALL', () => {
@@ -161,7 +162,7 @@ describe('Options', function () {
             builder.append({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('"aaa","bb,b","1000"\n')
+            expect(result).toEqual('"aaa","bb,b","1000"\r\n')
         })
     })
 })

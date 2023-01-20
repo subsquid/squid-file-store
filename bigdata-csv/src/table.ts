@@ -48,7 +48,7 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
                 let normalizedName = toSnakeCase(column.name)
                 header[i] = this.escape(normalizedName, false)
             }
-            this.records.push(header.join(this.options.dialect.delimiter) + '\n')
+            this.records.push(header.join(this.options.dialect.delimiter) + this.options.dialect.lineterminator)
         }
     }
 
@@ -76,7 +76,8 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
                 let serializedValue = value == null ? `` : column.data.type.serialize(value)
                 serializedValues.push(this.escape(serializedValue, column.data.type.isNumeric))
             }
-            let serializedRecord = serializedValues.join(this.options.dialect.delimiter) + '\n'
+            let serializedRecord =
+                serializedValues.join(this.options.dialect.delimiter) + this.options.dialect.lineterminator
             this.records.push(serializedRecord)
             this._size += Buffer.byteLength(serializedRecord)
         }
@@ -112,7 +113,12 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
 
     private escapeAll(str: string) {
         let dialect = this.options.dialect
-        return this.escapeChars(str, [dialect.delimiter, dialect.escapeChar || '', dialect.quoteChar, '\n'])
+        return this.escapeChars(str, [
+            dialect.delimiter,
+            dialect.escapeChar || '',
+            dialect.quoteChar,
+            dialect.lineterminator,
+        ])
     }
 
     private escapeChars(str: string, chars: string[]) {
@@ -129,7 +135,7 @@ class TableBuilder<T extends TableSchema<CsvColumnData>> implements ITableBuilde
     private hasSpecialChar(str: string) {
         return (
             str.includes(this.options.dialect.delimiter) ||
-            str.includes('\n') ||
+            str.includes(this.options.dialect.lineterminator) ||
             str.includes(this.options.dialect.quoteChar)
         )
     }
