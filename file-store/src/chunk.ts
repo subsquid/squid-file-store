@@ -1,21 +1,18 @@
-import {ITableBuilder, Table, TableSchema} from '@subsquid/file-table'
-import {assertNotNull} from '@subsquid/util-internal'
+import {TableWriter, Table} from './table'
 
 export class Chunk {
-    private tableBuilders: Map<string, ITableBuilder<any>>
+    readonly writers: Record<string, TableWriter<any>> = {}
 
-    constructor(public from: number, public to: number, tables: Table<any>[]) {
-        this.tableBuilders = new Map(tables.map((t) => [t.name, t.createTableBuilder()]))
-    }
-
-    getTableBuilder<T extends TableSchema<any>>(name: string): ITableBuilder<T> {
-        return assertNotNull(this.tableBuilders.get(name), `Table "${name}" does not exist`)
+    constructor(public from: number, public to: number, tables: Record<string, Table<any>>) {
+        for (let name in tables) {
+            this.writers[name] = tables[name].createWriter()
+        }
     }
 
     get size() {
         let total = 0
-        for (let table of this.tableBuilders.values()) {
-            total += table.size
+        for (let name in this.writers) {
+            total += this.writers[name].size
         }
         return total
     }

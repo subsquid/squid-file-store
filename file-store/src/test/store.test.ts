@@ -1,8 +1,6 @@
-import {TableRecord} from '@subsquid/file-table'
 import {rmSync} from 'fs'
 import {Database} from '../database'
-import {CsvTable} from './csv.table'
-import {ParquetTable} from './parquet.table'
+import {Table} from '../table'
 
 describe('Store', function () {
     it('output', async function () {
@@ -10,21 +8,13 @@ describe('Store', function () {
 
         await db.connect()
         await db.transact(0, 0, async (store) => {
-            store.write(CsvTable, {
-                blockNumber: 5089937,
-                timestamp: new Date(`2020-11-27T06:47:12.000Z`),
-                extrinsicHash: `0x77709e82369fc279c64aeb44c7ec7b05362a3599f0e27b62f6c5a19e3159b6d1`,
-                from: `EEsp9Duot6U3F1fgA2MXBHeArtkySqpXWYkcBj7wfjC6rLY`,
-                to: `Cb2QccEAM38pjwmcHHTTuTukUobTHwhakKH4kBo4k8Vur8o`,
-                amount: 997433334294n,
+            store.tables.foo.write({
+                a: 'hello',
+                b: 10,
             })
-            store.write(ParquetTable, {
-                blockNumber: 5089937,
-                timestamp: new Date(`2020-11-27T06:47:12.000Z`),
-                extrinsicHash: `0x77709e82369fc279c64aeb44c7ec7b05362a3599f0e27b62f6c5a19e3159b6d1`,
-                from: `EEsp9Duot6U3F1fgA2MXBHeArtkySqpXWYkcBj7wfjC6rLY`,
-                to: `Cb2QccEAM38pjwmcHHTTuTukUobTHwhakKH4kBo4k8Vur8o`,
-                amount: 997433334294n,
+            store.tables.bar.write({
+                a: 10,
+                b: 'hello',
             })
         })
         await db.advance(1, true)
@@ -36,7 +26,10 @@ export function initDatabase() {
     rmSync('./src/test/data', {force: true, recursive: true})
 
     return new Database({
-        tables: [CsvTable, ParquetTable],
+        tables: {
+            foo: {} as Table<{a: string; b: number}>,
+            bar: {} as Table<{a: number; b: string}>,
+        },
         dest: './src/test/data',
         syncIntervalBlocks: 1,
     })

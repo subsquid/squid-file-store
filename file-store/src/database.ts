@@ -1,5 +1,5 @@
 import assert from 'assert'
-import {Table, TableRecord, TableSchema} from '@subsquid/file-table'
+import {Table, TableRecord, TableWriter} from './table'
 import {Chunk} from './chunk'
 import {FS, S3Options, createFS, fsTransact} from './util/fs'
 
@@ -8,8 +8,8 @@ interface DatabaseHooks {
     onFlush(fs: FS, height: number, isHead: boolean): Promise<void>
 }
 
-export interface DatabaseOptions {
-    tables: Table<any>[]
+export interface DatabaseOptions<T extends Record<string, Table<any>>> {
+    tables: T
     /**
      * Local or s3 destination. For s3 use 's3://bucket/path'
      * @Default ./data
@@ -33,8 +33,8 @@ export interface DatabaseOptions {
     hooks?: DatabaseHooks
 }
 
-export class Database {
-    protected tables: Table<any>[]
+export class Database<T extends Record<string, Table<any>>> {
+    protected tables: T
 
     protected dest: string
     protected chunkSize: number
@@ -47,7 +47,7 @@ export class Database {
 
     protected hooks: DatabaseHooks
 
-    constructor(options: DatabaseOptions) {
+    constructor(options: DatabaseOptions<T>) {
         this.tables = options.tables
         this.dest = options?.dest || './data'
         this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
@@ -80,7 +80,7 @@ export class Database {
         this.lastBlock = undefined
     }
 
-    async transact(from: number, to: number, cb: (store: Store) => Promise<void>): Promise<void> {
+    async transact(from: number, to: number, cb: (store: Store<T>) => Promise<void>): Promise<void> {
         let open = true
 
         if (this.chunk == null) {
@@ -91,11 +91,11 @@ export class Database {
 
         let store = new Store(() => {
             assert(open, `Transaction was already closed`)
-            return this.chunk as Chunk
+            return this.chunk!.writers
         })
 
         try {
-            await cb(store)
+            await cb(store as any)
         } catch (e: any) {
             open = false
             throw e
@@ -119,33 +119,28 @@ export class Database {
         ) {
             let folderName =
                 this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
-            await this.outputChunk(folderName, this.chunk)
+            await fsTransact(this.fs, folderName, async (txFs) => {
+                for (let name in this.tables) {
+                    await txFs.writeFile(`${this.tables[name].name}`, this.chunk!.writers[name].flush())
+                }
+            })
             this.lastBlock = height
             this.chunk = undefined
 
             await this.hooks.onFlush(this.fs, height, isHead ?? false)
         }
     }
-
-    private async outputChunk(path: string, chunk: Chunk) {
-        await fsTransact(this.fs, path, async (txFs) => {
-            for (let table of this.tables) {
-                let tablebuilder = chunk.getTableBuilder(table.name)
-                await txFs.writeFile(
-                    `${table.name}.${table.getFileExtension()}`,
-                    tablebuilder.flush()
-                )
-            }
-        })
-    }
 }
 
-export class Store {
-    constructor(private chunk: () => Chunk) {}
+export class Store<T extends Record<string, Table<any>>> {
+    constructor(
+        private writers: () => {
+            readonly [k in keyof T]: Pick<TableWriter<T[k] extends Table<infer R> ? R : never>, 'write' | 'writeMany'>
+        }
+    ) {}
 
-    write<T extends TableSchema<any>>(table: Table<T>, records: TableRecord<T> | TableRecord<T>[]): void {
-        let builder = this.chunk().getTableBuilder(table.name)
-        builder.append(records)
+    get tables() {
+        return this.writers()
     }
 }
 

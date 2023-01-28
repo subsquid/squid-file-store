@@ -452,12 +452,6 @@
         "versionPolicyName": "npm"
       },
       {
-        "packageName": "@subsquid/file-table",
-        "projectFolder": "file-table",
-        "shouldPublish": true,
-        "versionPolicyName": "npm"
-      },
-      {
         "packageName": "@subsquid/file-csv",
         "projectFolder": "file-csv",
         "shouldPublish": true,
