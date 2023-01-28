@@ -1,6 +1,5 @@
 import assert from 'assert'
-import {Table, TableRecord, TableWriter} from './table'
-import {Chunk} from './chunk'
+import {Table, TableWriter} from './table'
 import {FS, S3Options, createFS, fsTransact} from './util/fs'
 
 interface DatabaseHooks {
@@ -8,7 +7,9 @@ interface DatabaseHooks {
     onFlush(fs: FS, height: number, isHead: boolean): Promise<void>
 }
 
-export interface DatabaseOptions<T extends Record<string, Table<any>>> {
+type Tables = Record<string, Table<any>>
+
+export interface DatabaseOptions<T extends Tables> {
     tables: T
     /**
      * Local or s3 destination. For s3 use 's3://bucket/path'
@@ -33,7 +34,21 @@ export interface DatabaseOptions<T extends Record<string, Table<any>>> {
     hooks?: DatabaseHooks
 }
 
-export class Database<T extends Record<string, Table<any>>> {
+type Chunk<T extends Tables> = {
+    [k in keyof T]: TableWriter<T[k] extends Table<infer R> ? R : never>
+}
+
+type ToStoreWriter<W extends TableWriter<any>> = Pick<W, 'write' | 'writeMany'>
+
+export type Store<T extends Tables> = Readonly<{
+    [k in keyof T]: ToStoreWriter<Chunk<T>[k]>
+}>
+
+interface StoreConstructor<T extends Tables> {
+    new (chunk: () => Chunk<T>): Store<T>
+}
+
+export class Database<T extends Tables> {
     protected tables: T
 
     protected dest: string
@@ -42,10 +57,12 @@ export class Database<T extends Record<string, Table<any>>> {
     protected s3Options?: S3Options
 
     protected fs: FS
-    protected chunk?: Chunk
-    protected lastBlock?: number
+    protected chunk?: Chunk<T>
+    protected lastCommited?: number
 
     protected hooks: DatabaseHooks
+
+    protected StoreConstructor: StoreConstructor<T>
 
     constructor(options: DatabaseOptions<T>) {
         this.tables = options.tables
@@ -57,97 +74,109 @@ export class Database<T extends Record<string, Table<any>>> {
         this.hooks = options.hooks || defaultHooks
 
         this.fs = createFS(this.dest, this.s3Options)
+
+        class Store {
+            constructor(protected chunk: () => Chunk<T>) {}
+        }
+        for (let name in this.tables) {
+            Object.defineProperty(Store.prototype, name, {
+                get(this: Store) {
+                    return this.chunk()[name]
+                },
+            })
+        }
+        this.StoreConstructor = Store as any
     }
 
     async connect(): Promise<number> {
-        this.lastBlock = await this.hooks.onConnect(this.fs)
+        this.lastCommited = await this.hooks.onConnect(this.fs)
 
         let names = await this.fs.readdir('./')
         for (let name of names) {
             if (!/^(\d+)-(\d+)$/.test(name)) continue
 
             let chunkStart = Number(name.split('-')[0])
-            if (chunkStart > this.lastBlock) {
+            if (chunkStart > this.lastCommited) {
                 await this.fs.rm(name)
             }
         }
 
-        return this.lastBlock
+        return this.lastCommited
     }
 
     async close(): Promise<void> {
         this.chunk = undefined
-        this.lastBlock = undefined
+        this.lastCommited = undefined
     }
 
     async transact(from: number, to: number, cb: (store: Store<T>) => Promise<void>): Promise<void> {
         let open = true
 
-        if (this.chunk == null) {
-            this.chunk = new Chunk(from, to, this.tables)
-        } else {
-            this.chunk.to = to
-        }
+        let chunk = this.chunk || this.createChunk()
 
-        let store = new Store(() => {
+        let store = new this.StoreConstructor(() => {
             assert(open, `Transaction was already closed`)
-            return this.chunk!.writers
+            return chunk
         })
 
         try {
-            await cb(store as any)
+            await cb(store)
         } catch (e: any) {
             open = false
             throw e
         }
 
+        this.chunk = chunk
+
         open = false
     }
 
     async advance(height: number, isHead?: boolean): Promise<void> {
-        assert(this.lastBlock != null, `Not connected to database`)
+        assert(this.lastCommited != null, `Not connected to database`)
 
         if (this.chunk == null) return
+        let chunk = this.chunk
 
-        if (this.chunk.to < height) {
-            this.chunk.to = height
+        let chunkSize = 0
+        for (let name in chunk) {
+            chunkSize += chunk[name].size
         }
 
+        let from = this.lastCommited + 1
+        let to = height
+
         if (
-            this.chunk.size >= this.chunkSize * 1024 * 1024 ||
-            (isHead && height - this.chunk.from >= this.updateInterval && this.chunk.size > 0)
+            chunkSize >= this.chunkSize * 1024 * 1024 ||
+            (isHead && height - this.lastCommited >= this.updateInterval && chunkSize > 0)
         ) {
-            let folderName =
-                this.chunk.from.toString().padStart(10, '0') + '-' + this.chunk.to.toString().padStart(10, '0')
+            let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
             await fsTransact(this.fs, folderName, async (txFs) => {
                 for (let name in this.tables) {
-                    await txFs.writeFile(`${this.tables[name].name}`, this.chunk!.writers[name].flush())
+                    await txFs.writeFile(`${this.tables[name].name}`, chunk[name].flush())
                 }
             })
-            this.lastBlock = height
+            this.lastCommited = height
             this.chunk = undefined
 
             await this.hooks.onFlush(this.fs, height, isHead ?? false)
         }
     }
-}
 
-export class Store<T extends Record<string, Table<any>>> {
-    constructor(
-        private writers: () => {
-            readonly [k in keyof T]: Pick<TableWriter<T[k] extends Table<infer R> ? R : never>, 'write' | 'writeMany'>
+    private createChunk(): Chunk<T> {
+        let chunk: Chunk<T> = {} as any
+        for (let name in this.tables) {
+            chunk[name] = this.tables[name].createWriter()
         }
-    ) {}
-
-    get tables() {
-        return this.writers()
+        return chunk
     }
 }
 
+let DEFAULT_STATUS_FILE = `status.txt`
+
 const defaultHooks: DatabaseHooks = {
     async onConnect(fs) {
-        if (await fs.exists(`status.txt`)) {
-            let height = await fs.readFile(`status.json`).then(Number)
+        if (await fs.exists(DEFAULT_STATUS_FILE)) {
+            let height = await fs.readFile(DEFAULT_STATUS_FILE).then(Number)
             assert(Number.isSafeInteger(height))
             return height
         } else {
@@ -155,6 +184,6 @@ const defaultHooks: DatabaseHooks = {
         }
     },
     async onFlush(fs, height) {
-        await fs.writeFile(`status.txt`, height.toString())
+        await fs.writeFile(DEFAULT_STATUS_FILE, height.toString())
     },
 }

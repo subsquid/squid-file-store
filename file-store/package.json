@@ -35,21 +35,5 @@
     "dotenv": "^16.0.3",
     "mocha": "^10.2.0",
     "typescript": "4.8.2"
-  },
-  "peerDependencies": {
-    "@subsquid/file-csv": "^0.0.0",
-    "@subsquid/file-parquet": "^0.0.0",
-    "@subsquid/file-s3": "^0.0.0"
-  },
-  "peerDependenciesMeta": {
-    "@subsquid/file-csv": {
-      "optional": true
-    },
-    "@subsquid/file-parquet": {
-      "optional": true
-    },
-    "@subsquid/file-s3": {
-      "optional": true
-    }
   }
 }

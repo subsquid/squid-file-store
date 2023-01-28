@@ -8,11 +8,11 @@ describe('Store', function () {
 
         await db.connect()
         await db.transact(0, 0, async (store) => {
-            store.tables.foo.write({
+            store.foo.write({
                 a: 'hello',
                 b: 10,
             })
-            store.tables.bar.write({
+            store.bar.write({
                 a: 10,
                 b: 'hello',
             })
@@ -27,8 +27,8 @@ export function initDatabase() {
 
     return new Database({
         tables: {
-            foo: {} as Table<{a: string; b: number}>,
-            bar: {} as Table<{a: number; b: string}>,
+            foo: {createWriter() {}} as Table<{a: string; b: number}>,
+            bar: {createWriter() {}} as Table<{a: number; b: string}>,
         },
         dest: './src/test/data',
         syncIntervalBlocks: 1,

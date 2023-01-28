@@ -1,7 +1,7 @@
 import {existsSync} from 'fs'
 import fs from 'fs/promises'
 import path from 'upath'
-import {S3FsConstructor, S3Options} from '@subsquid/file-s3'
+// import {S3FsConstructor, S3Options} from '@subsquid/file-s3'
 
 export interface FS {
     readFile(file: string): Promise<string>
@@ -78,17 +78,12 @@ export async function fsTransact(fs: FS, dir: string, cb: (fs: FS) => Promise<vo
     }
 }
 
-export function createFS(dest: string, s3Options?: S3Options): FS {
+export function createFS(dest: string, s3Options?: any): FS {
     let url = parseUrl(dest)
     if (!url) {
         return new LocalFS(dest)
     } else if (url.protocol === 's3:') {
-        try {
-            let S3Fs = require('@subsquid/file-s3').S3Fs as S3FsConstructor
-            return new S3Fs(url.pathname.slice(1), url.hostname, s3Options)
-        } catch (e) {
-            throw new Error('Package `@subsquid/file-s3` is not installed')
-        }
+        throw new Error('Package `@subsquid/file-s3` is not installed')
     } else {
         throw new Error(`Unexpected destination: "${dest}"`)
     }

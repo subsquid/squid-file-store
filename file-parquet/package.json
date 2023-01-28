@@ -26,10 +26,11 @@
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
-    "@subsquid/file-table": "^0.0.0",
     "apache-arrow": "^10.0.1",
-    "parquet-wasm": "^0.4.0-beta.5",
-    "parquetjs": "~0.11.2"
+    "parquet-wasm": "^0.4.0-beta.5"
+  },
+  "peerDependencies": {
+    "@subsquid/file-store": "^0.1.1"
   },
   "devDependencies": {
     "@types/node": "16.11.56",

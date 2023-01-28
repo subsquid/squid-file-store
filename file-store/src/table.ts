@@ -11,3 +11,4 @@ export interface Table<T> {
 }
 
 export type TableRecord<T extends Table<any>> = T extends Table<infer R> ? R : never
+
