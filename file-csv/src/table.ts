@@ -7,7 +7,7 @@ import {
     ITableBuilder,
     TableRecord,
     TableSchema,
-} from '@subsquid/bigdata-table'
+} from '@subsquid/file-table'
 import {toSnakeCase} from '@subsquid/util-naming'
 import {Dialect, dialects, Quote} from './dialect'
 import {CsvType} from './types'

@@ -2,11 +2,11 @@ lockfileVersion: 5.3
 
 specifiers:
   '@aws-sdk/client-s3': ^3.245.0
-  '@rush-temp/bigdata-csv': file:./projects/bigdata-csv.tgz
-  '@rush-temp/bigdata-parquet': file:./projects/bigdata-parquet.tgz
-  '@rush-temp/bigdata-s3': file:./projects/bigdata-s3.tgz
-  '@rush-temp/bigdata-store': file:./projects/bigdata-store.tgz
-  '@rush-temp/bigdata-table': file:./projects/bigdata-table.tgz
+  '@rush-temp/file-csv': file:./projects/file-csv.tgz
+  '@rush-temp/file-parquet': file:./projects/file-parquet.tgz
+  '@rush-temp/file-s3': file:./projects/file-s3.tgz
+  '@rush-temp/file-store': file:./projects/file-store.tgz
+  '@rush-temp/file-table': file:./projects/file-table.tgz
   '@rush-temp/test': file:./projects/test.tgz
   '@subsquid/archive-registry': ^2.0.1
   '@subsquid/ss58': ^0.1.2
@@ -28,11 +28,11 @@ specifiers:
 
 dependencies:
   '@aws-sdk/client-s3': 3.245.0
-  '@rush-temp/bigdata-csv': file:projects/bigdata-csv.tgz
-  '@rush-temp/bigdata-parquet': file:projects/bigdata-parquet.tgz
-  '@rush-temp/bigdata-s3': file:projects/bigdata-s3.tgz
-  '@rush-temp/bigdata-store': file:projects/bigdata-store.tgz
-  '@rush-temp/bigdata-table': file:projects/bigdata-table.tgz
+  '@rush-temp/file-csv': file:projects/file-csv.tgz
+  '@rush-temp/file-parquet': file:projects/file-parquet.tgz
+  '@rush-temp/file-s3': file:projects/file-s3.tgz
+  '@rush-temp/file-store': file:projects/file-store.tgz
+  '@rush-temp/file-table': file:projects/file-table.tgz
   '@rush-temp/test': file:projects/test.tgz
   '@subsquid/archive-registry': 2.0.1
   '@subsquid/ss58': 0.1.2
@@ -2540,9 +2540,9 @@ packages:
     engines: {node: '>=10'}
     dev: false
 
-  file:projects/bigdata-csv.tgz:
-    resolution: {integrity: sha512-p//yO5JT4ih4lHXTERHRv8HEbJvGPZ3xz2pM56sLn93pbynQncbyKMCNTPl2Jq0cQJNlr9o6qgIdOhdDPJYEhw==, tarball: file:projects/bigdata-csv.tgz}
-    name: '@rush-temp/bigdata-csv'
+  file:projects/file-csv.tgz:
+    resolution: {integrity: sha512-p//yO5JT4ih4lHXTERHRv8HEbJvGPZ3xz2pM56sLn93pbynQncbyKMCNTPl2Jq0cQJNlr9o6qgIdOhdDPJYEhw==, tarball: file:projects/file-csv.tgz}
+    name: '@rush-temp/file-csv'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal': 1.0.0
@@ -2553,9 +2553,9 @@ packages:
       typescript: 4.8.2
     dev: false
 
-  file:projects/bigdata-parquet.tgz:
-    resolution: {integrity: sha512-zAjEuvruuDy5v5VD5Qhzbvz0l22LTqbfHEDP5g2kzQ9SE8RfqhFKzGkDZerUD2Qs4XlGyDCWrR4JxE+4zy18iA==, tarball: file:projects/bigdata-parquet.tgz}
-    name: '@rush-temp/bigdata-parquet'
+  file:projects/file-parquet.tgz:
+    resolution: {integrity: sha512-zAjEuvruuDy5v5VD5Qhzbvz0l22LTqbfHEDP5g2kzQ9SE8RfqhFKzGkDZerUD2Qs4XlGyDCWrR4JxE+4zy18iA==, tarball: file:projects/file-parquet.tgz}
+    name: '@rush-temp/file-parquet'
     version: 0.0.0
     dependencies:
       '@types/node': 16.11.56
@@ -2568,9 +2568,9 @@ packages:
       - utf-8-validate
     dev: false
 
-  file:projects/bigdata-s3.tgz:
-    resolution: {integrity: sha512-WmnQ+0UTL1ivQM38F2dB3i3pwQKfJmLfHVG2w1g8+JjLMVGP3EBUFkqCjULJDCJyklUhrnizF4Z43rN5eMPuMw==, tarball: file:projects/bigdata-s3.tgz}
-    name: '@rush-temp/bigdata-s3'
+  file:projects/file-s3.tgz:
+    resolution: {integrity: sha512-WmnQ+0UTL1ivQM38F2dB3i3pwQKfJmLfHVG2w1g8+JjLMVGP3EBUFkqCjULJDCJyklUhrnizF4Z43rN5eMPuMw==, tarball: file:projects/file-s3.tgz}
+    name: '@rush-temp/file-s3'
     version: 0.0.0
     dependencies:
       '@aws-sdk/client-s3': 3.245.0
@@ -2583,9 +2583,9 @@ packages:
       - aws-crt
     dev: false
 
-  file:projects/bigdata-store.tgz:
-    resolution: {integrity: sha512-kvyN54a/pRWM9wLHp+rEdfL8yHomwcMO+bR5V8pkAAqJQ9aG5JYBMZTcVUjzKtmPTFVcWeiyENeF1lEG+IJ2NA==, tarball: file:projects/bigdata-store.tgz}
-    name: '@rush-temp/bigdata-store'
+  file:projects/file-store.tgz:
+    resolution: {integrity: sha512-kvyN54a/pRWM9wLHp+rEdfL8yHomwcMO+bR5V8pkAAqJQ9aG5JYBMZTcVUjzKtmPTFVcWeiyENeF1lEG+IJ2NA==, tarball: file:projects/file-store.tgz}
+    name: '@rush-temp/file-store'
     version: 0.0.0
     dependencies:
       '@aws-sdk/client-s3': 3.245.0
@@ -2604,9 +2604,9 @@ packages:
       upath: 2.0.1
     dev: false
 
-  file:projects/bigdata-table.tgz:
-    resolution: {integrity: sha512-R4zS3JYYAwa35A2nmM4+DU+s0DRvLqOoj68oiI+1vRaX6xxS5EeGrNXV5cETcPe8WCadBgcZo+J8xz1nA2Vp4A==, tarball: file:projects/bigdata-table.tgz}
-    name: '@rush-temp/bigdata-table'
+  file:projects/file-table.tgz:
+    resolution: {integrity: sha512-R4zS3JYYAwa35A2nmM4+DU+s0DRvLqOoj68oiI+1vRaX6xxS5EeGrNXV5cETcPe8WCadBgcZo+J8xz1nA2Vp4A==, tarball: file:projects/file-table.tgz}
+    name: '@rush-temp/file-table'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal': 1.0.0

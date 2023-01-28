@@ -1,7 +1,7 @@
 import * as ss58 from '@subsquid/ss58'
 import {lookupArchive} from '@subsquid/archive-registry'
 import {decodeHex, SubstrateBatchProcessor} from '@subsquid/substrate-processor'
-import {Database} from '@subsquid/bigdata-store'
+import {Database} from '@subsquid/file-store'
 import {BalancesTransferEvent} from './types/events'
 import {Extrinsics, Transfers} from './tables'
 

@@ -1,5 +1,5 @@
 {
-  "name": "@subsquid/bigdata-parquet",
+  "name": "@subsquid/file-csv",
   "version": "0.0.0",
   "description": "",
   "publishConfig": {
@@ -26,12 +26,12 @@
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
-    "@subsquid/bigdata-table": "^0.0.0",
-    "apache-arrow": "^10.0.1",
-    "parquet-wasm": "^0.4.0-beta.5",
-    "parquetjs": "~0.11.2"
+    "@subsquid/util-naming": "^0.0.0",
+    "@subsquid/file-table": "~0.0.0",
+    "@subsquid/util-internal-json": "~0.2.0"
   },
   "devDependencies": {
+    "expect": "^27.5.1",
     "@types/node": "16.11.56",
     "typescript": "4.8.2"
   }

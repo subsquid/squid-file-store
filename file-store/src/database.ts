@@ -1,5 +1,5 @@
 import assert from 'assert'
-import {Table, TableRecord, TableSchema} from '@subsquid/bigdata-table'
+import {Table, TableRecord, TableSchema} from '@subsquid/file-table'
 import {Chunk} from './chunk'
 import {FS, S3Options, createFS, fsTransact} from './util/fs'
 

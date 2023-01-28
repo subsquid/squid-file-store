@@ -1,4 +1,4 @@
-import {TableRecord} from '@subsquid/bigdata-table'
+import {TableRecord} from '@subsquid/file-table'
 import {rmSync} from 'fs'
 import {Database} from '../database'
 import {CsvTable} from './csv.table'

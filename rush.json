@@ -446,32 +446,32 @@
       //   // "versionPolicyName": ""
       // },
       {
-        "packageName": "@subsquid/bigdata-store",
-        "projectFolder": "bigdata-store",
+        "packageName": "@subsquid/file-store",
+        "projectFolder": "file-store",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
-        "packageName": "@subsquid/bigdata-table",
-        "projectFolder": "bigdata-table",
+        "packageName": "@subsquid/file-table",
+        "projectFolder": "file-table",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
-        "packageName": "@subsquid/bigdata-csv",
-        "projectFolder": "bigdata-csv",
+        "packageName": "@subsquid/file-csv",
+        "projectFolder": "file-csv",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
-        "packageName": "@subsquid/bigdata-parquet",
-        "projectFolder": "bigdata-parquet",
+        "packageName": "@subsquid/file-parquet",
+        "projectFolder": "file-parquet",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },
       {
-        "packageName": "@subsquid/bigdata-s3",
-        "projectFolder": "bigdata-s3",
+        "packageName": "@subsquid/file-s3",
+        "projectFolder": "file-s3",
         "shouldPublish": true,
         "versionPolicyName": "npm"
       },

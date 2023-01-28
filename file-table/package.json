@@ -1,5 +1,5 @@
 {
-  "name": "@subsquid/bigdata-s3",
+  "name": "@subsquid/file-table",
   "version": "0.0.0",
   "description": "",
   "publishConfig": {
@@ -25,11 +25,6 @@
     "url": "https://github.com/subsquid/squid-csv-store/issues"
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
-  "dependencies": {
-    "@aws-sdk/client-s3": "^3.245.0",
-    "@subsquid/util-internal": "^1.0.0",
-    "upath": "^2.0.1"
-  },
   "devDependencies": {
     "@types/node": "16.11.56",
     "typescript": "4.8.2"

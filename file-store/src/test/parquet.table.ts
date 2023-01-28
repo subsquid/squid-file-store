@@ -1,4 +1,4 @@
-import {Column, StringType, Table, TimestampType, Uint16Type, Uint64Type} from '@subsquid/bigdata-parquet'
+import {Column, StringType, Table, TimestampType, Uint16Type, Uint64Type} from '@subsquid/file-parquet'
 
 export const ParquetTable = new Table('transfers', {
     blockNumber: Column(Uint16Type()),

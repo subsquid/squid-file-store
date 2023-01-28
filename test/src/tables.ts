@@ -1,4 +1,4 @@
-import {Table, StringType, Column, DateTimeType, IntegerType} from '@subsquid/bigdata-csv'
+import {Table, StringType, Column, DateTimeType, IntegerType} from '@subsquid/file-csv'
 
 export const Transfers = new Table('transfers', {
     blockNumber: Column(IntegerType()),

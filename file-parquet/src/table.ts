@@ -9,7 +9,7 @@ import {
     ITableBuilder,
     TableRecord,
     TableSchema,
-} from '@subsquid/bigdata-table'
+} from '@subsquid/file-table'
 import {ParquetType} from './types'
 
 export {Compression} from 'parquet-wasm/node/arrow1'

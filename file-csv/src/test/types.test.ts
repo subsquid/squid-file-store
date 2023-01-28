@@ -1,5 +1,5 @@
 import expect from 'expect'
-import {TableRecord} from '@subsquid/bigdata-table'
+import {TableRecord} from '@subsquid/file-table'
 import {Column, Table} from '../table'
 import {BooleanType, DateTimeType, DecimalType, IntegerType, StringType} from '../types'
 import {readFileSync} from 'fs'
