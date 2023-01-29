@@ -1,21 +1,18 @@
 import assert from 'assert'
 import {Table, TableWriter} from './table'
-import {FS, S3Options, createFS, fsTransact} from './util/fs'
+import {Dest, LocalDest} from './dest'
 
-interface DatabaseHooks {
-    onConnect(fs: FS): Promise<number>
-    onFlush(fs: FS, height: number, isHead: boolean): Promise<void>
+interface DatabaseHooks<D extends Dest = Dest> {
+    onConnect(dest: D): Promise<number>
+    onFlush(dest: D, height: number, isHead: boolean): Promise<void>
 }
 
 type Tables = Record<string, Table<any>>
 
-export interface DatabaseOptions<T extends Tables> {
+export interface DatabaseOptions<T extends Tables, D extends Dest> {
     tables: T
-    /**
-     * Local or s3 destination. For s3 use 's3://bucket/path'
-     * @Default ./data
-     */
-    dest?: string
+
+    dest: D
     /**
      * Approximate folder size (MB).
      * @Default 20
@@ -26,12 +23,8 @@ export interface DatabaseOptions<T extends Tables> {
      * @Default Infinity
      */
     syncIntervalBlocks?: number
-    /**
-     * S3 connection options.
-     */
-    s3Options?: S3Options
 
-    hooks?: DatabaseHooks
+    hooks?: DatabaseHooks<D>
 }
 
 type Chunk<T extends Tables> = {
@@ -48,32 +41,27 @@ interface StoreConstructor<T extends Tables> {
     new (chunk: () => Chunk<T>): Store<T>
 }
 
-export class Database<T extends Tables> {
+export class Database<T extends Tables, D extends Dest> {
     protected tables: T
+    protected dest: D
 
-    protected dest: string
     protected chunkSize: number
     protected updateInterval: number
-    protected s3Options?: S3Options
 
-    protected fs: FS
     protected chunk?: Chunk<T>
     protected lastCommited?: number
 
-    protected hooks: DatabaseHooks
+    protected hooks: DatabaseHooks<D>
 
     protected StoreConstructor: StoreConstructor<T>
 
-    constructor(options: DatabaseOptions<T>) {
+    constructor(options: DatabaseOptions<T, D>) {
         this.tables = options.tables
-        this.dest = options?.dest || './data'
+        this.dest = options.dest
         this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
         this.updateInterval =
             options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
-        this.s3Options = options?.s3Options
         this.hooks = options.hooks || defaultHooks
-
-        this.fs = createFS(this.dest, this.s3Options)
 
         class Store {
             constructor(protected chunk: () => Chunk<T>) {}
@@ -89,15 +77,15 @@ export class Database<T extends Tables> {
     }
 
     async connect(): Promise<number> {
-        this.lastCommited = await this.hooks.onConnect(this.fs)
+        this.lastCommited = await this.hooks.onConnect(this.dest)
 
-        let names = await this.fs.readdir('./')
+        let names = await this.dest.readdir('./')
         for (let name of names) {
             if (!/^(\d+)-(\d+)$/.test(name)) continue
 
             let chunkStart = Number(name.split('-')[0])
             if (chunkStart > this.lastCommited) {
-                await this.fs.rm(name)
+                await this.dest.rm(name)
             }
         }
 
@@ -150,15 +138,15 @@ export class Database<T extends Tables> {
             (isHead && height - this.lastCommited >= this.updateInterval && chunkSize > 0)
         ) {
             let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
-            await fsTransact(this.fs, folderName, async (txFs) => {
+            await this.dest.transact(folderName, async (txDest) => {
                 for (let name in this.tables) {
-                    await txFs.writeFile(`${this.tables[name].name}`, chunk[name].flush())
+                    await txDest.writeFile(`${this.tables[name].name}`, chunk[name].flush())
                 }
             })
+            await this.hooks.onFlush(this.dest, height, isHead ?? false)
+
             this.lastCommited = height
             this.chunk = undefined
-
-            await this.hooks.onFlush(this.fs, height, isHead ?? false)
         }
     }
 
@@ -174,16 +162,16 @@ export class Database<T extends Tables> {
 let DEFAULT_STATUS_FILE = `status.txt`
 
 const defaultHooks: DatabaseHooks = {
-    async onConnect(fs) {
-        if (await fs.exists(DEFAULT_STATUS_FILE)) {
-            let height = await fs.readFile(DEFAULT_STATUS_FILE).then(Number)
+    async onConnect(dest) {
+        if (await dest.exists(DEFAULT_STATUS_FILE)) {
+            let height = await dest.readFile(DEFAULT_STATUS_FILE).then(Number)
             assert(Number.isSafeInteger(height))
             return height
         } else {
             return -1
         }
     },
-    async onFlush(fs, height) {
-        await fs.writeFile(DEFAULT_STATUS_FILE, height.toString())
+    async onFlush(dest, height) {
+        await dest.writeFile(DEFAULT_STATUS_FILE, height.toString())
     },
 }

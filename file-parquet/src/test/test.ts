@@ -1,5 +1,3 @@
-import {TableRecord} from '@subsquid/file-table'
-import {writeFileSync} from 'fs'
 import {Column, Table} from '../table'
 import {Int32Type, StringType, Uint64Type} from '../types'
 

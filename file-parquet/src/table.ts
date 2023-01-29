@@ -119,7 +119,7 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
 }
 
 export function Column<T extends Type<any>>(type: T): ColumnData<T>
-export function Column<T extends Type<any>, O extends ColumnData>(
+export function Column<T extends Type<any>, O extends ColumnOptions>(
     type: T,
     options?: O
 ): ColumnData<T, O & Required<ColumnOptions>>

@@ -1,7 +1,7 @@
 import * as ss58 from '@subsquid/ss58'
 import {lookupArchive} from '@subsquid/archive-registry'
 import {decodeHex, SubstrateBatchProcessor} from '@subsquid/substrate-processor'
-import {Database} from '@subsquid/file-store'
+import {Database, LocalDest} from '@subsquid/file-store'
 import {BalancesTransferEvent} from './types/events'
 import {Extrinsics, Transfers} from './tables'
 
@@ -24,8 +24,11 @@ const processor = new SubstrateBatchProcessor()
     } as const)
 
 let db = new Database({
-    tables: [Transfers, Extrinsics],
-    dest: `./data`,
+    tables: {
+        Transfers,
+        Extrinsics,
+    },
+    dest: new LocalDest(`./data`),
     chunkSizeMb: 10,
     syncIntervalBlocks: 1_000,
     hooks: {
@@ -62,7 +65,7 @@ processor.run(db, async (ctx) => {
                     throw new Error('Unsupported spec')
                 }
 
-                ctx.store.write(Transfers, {
+                ctx.store.Transfers.write({
                     blockNumber: block.header.height,
                     timestamp: new Date(block.header.timestamp),
                     extrinsicHash: item.event.extrinsic?.hash,
@@ -75,7 +78,7 @@ processor.run(db, async (ctx) => {
                     let signer = getOriginAccountId(item.event.extrinsic.call.origin)
 
                     if (signer) {
-                        ctx.store.write(Extrinsics, {
+                        ctx.store.Extrinsics.write({
                             blockNumber: block.header.height,
                             timestamp: new Date(block.header.timestamp),
                             hash: item.event.extrinsic.hash,

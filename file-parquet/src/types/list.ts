@@ -12,16 +12,7 @@ export let ListType = <T, Options extends ListOptions>(
 ): Type<(Options['nullable'] extends true ? T | null | undefined : T)[]> => ({
     arrowDataType: new List(Field.new('element', itemType.arrowDataType, options?.nullable)),
     prepare(value) {
-        return this.validate(value).map((i) => (i == null ? null : itemType.prepare(i)))
-    },
-    validate(value) {
-        assert(Array.isArray(value))
-        if (!options?.nullable) {
-            for (let i of value) {
-                assert(i != null)
-            }
-        }
-        return value
+        return value.map((i) => (i == null ? null : itemType.prepare(i)))
     },
 })
 

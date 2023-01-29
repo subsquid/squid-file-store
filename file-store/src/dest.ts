@@ -1,19 +1,19 @@
 import {existsSync} from 'fs'
 import fs from 'fs/promises'
 import path from 'upath'
-// import {S3FsConstructor, S3Options} from '@subsquid/file-s3'
 
-export interface FS {
+export interface Dest {
     readFile(file: string): Promise<string>
     writeFile(file: string, data: string | Uint8Array): Promise<void>
     exists(path: string): Promise<boolean>
     mkdir(path: string): Promise<void> // always recursive
     readdir(path: string): Promise<string[]>
     rm(path: string): Promise<void> // always recursive and force
+    transact(path: string, cb: (txDest: Dest) => Promise<void>): Promise<void>
     path(...paths: string[]): string
 }
 
-export class LocalFS implements FS {
+export class LocalDest implements Dest {
     protected dir: string
 
     constructor(dir: string) {
@@ -54,34 +54,30 @@ export class LocalFS implements FS {
         return fs.rename(this.path(oldPath), this.path(newPath))
     }
 
+    async transact(dir: string, cb: (txDest: LocalDest) => Promise<void>) {
+        let destPath = this.path(dir)
+        let tempDir = `${path.basename(destPath)}-temp-${Date.now()}`
+        let tempPath = path.join(path.dirname(destPath), tempDir)
+        let txFs = new LocalDest(tempPath)
+        try {
+            await cb(txFs)
+            await this.rm(dir)
+            await this.rename(tempDir, dir)
+        } catch (e) {
+            await this.rm(tempDir)
+            throw e
+        }
+    }
+
     path(...paths: string[]) {
         return path.join(this.dir, ...paths)
     }
 }
 
-export async function fsTransact(fs: FS, dir: string, cb: (fs: FS) => Promise<void>) {
-    if (fs instanceof LocalFS) {
-        let destPath = fs.path(dir)
-        let tempDir = `${path.basename(destPath)}-temp-${Date.now()}`
-        let tempPath = path.join(path.dirname(destPath), tempDir)
-        let txFs = new LocalFS(tempPath)
-        try {
-            await cb(txFs)
-            await fs.rm(dir)
-            await fs.rename(tempDir, dir)
-        } catch (e) {
-            await fs.rm(tempDir)
-            throw e
-        }
-    } else {
-        await cb(fs)
-    }
-}
-
-export function createFS(dest: string, s3Options?: any): FS {
+export function createDest(dest: string, s3Options?: any): Dest {
     let url = parseUrl(dest)
     if (!url) {
-        return new LocalFS(dest)
+        return new LocalDest(dest)
     } else if (url.protocol === 's3:') {
         throw new Error('Package `@subsquid/file-s3` is not installed')
     } else {
@@ -96,5 +92,3 @@ function parseUrl(url: string) {
         return undefined
     }
 }
-
-export type {S3Options} from '@subsquid/file-s3'

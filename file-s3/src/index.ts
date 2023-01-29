@@ -9,26 +9,29 @@ import {
     PutObjectCommand,
     S3Client,
 } from '@aws-sdk/client-s3'
+import {Dest} from '@subsquid/file-store'
 import {assertNotNull} from '@subsquid/util-internal'
 
-export interface S3FsConstructor {
-    new (dir: string, bucket: string, options?: S3Options): S3Fs
-}
-
-export class S3Fs {
+export class S3Dest implements Dest {
     private client: S3Client
 
-    constructor(private dir: string, private bucket: string, options?: S3Options) {
-        this.client = new S3Client(
-            options || {
-                region: process.env.S3_REGION,
-                endpoint: process.env.S3_ENDPOINT,
-                credentials: {
-                    secretAccessKey: assertNotNull(process.env.S3_SECRET_ACCESS_KEY),
-                    accessKeyId: assertNotNull(process.env.S3_ACCESS_KEY_ID),
-                },
-            }
-        )
+    constructor(dir: string, bucket: string, options?: S3Options)
+    constructor(dir: string, bucket: string, client: S3Client)
+    constructor(private dir: string, private bucket: string, optionsOrClient?: S3Options | S3Client) {
+        if (optionsOrClient instanceof S3Client) {
+            this.client = optionsOrClient
+        } else {
+            this.client = new S3Client(
+                optionsOrClient || {
+                    region: process.env.S3_REGION,
+                    endpoint: process.env.S3_ENDPOINT,
+                    credentials: {
+                        secretAccessKey: assertNotNull(process.env.S3_SECRET_ACCESS_KEY),
+                        accessKeyId: assertNotNull(process.env.S3_ACCESS_KEY_ID),
+                    },
+                }
+            )
+        }
     }
 
     async exists(name: string) {
@@ -209,6 +212,11 @@ export class S3Fs {
                 break
             }
         }
+    }
+
+    async transact(dir: string, cb: (dest: S3Dest) => Promise<void>): Promise<void> {
+        let txDest = new S3Dest(this.path(dir), this.bucket, this.client)
+        await cb(txDest)
     }
 
     path(...paths: string[]) {
