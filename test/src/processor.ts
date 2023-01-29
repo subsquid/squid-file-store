@@ -1,6 +1,6 @@
 import * as ss58 from '@subsquid/ss58'
 import {lookupArchive} from '@subsquid/archive-registry'
-import {decodeHex, SubstrateBatchProcessor} from '@subsquid/substrate-processor'
+import {decodeHex, SubstrateBatchProcessor, SubstrateBlock} from '@subsquid/substrate-processor'
 import {Database, LocalDest} from '@subsquid/file-store'
 import {BalancesTransferEvent} from './types/events'
 import {Extrinsics, Transfers} from './tables'
@@ -23,6 +23,8 @@ const processor = new SubstrateBatchProcessor()
         },
     } as const)
 
+let lastBlock: SubstrateBlock
+
 let db = new Database({
     tables: {
         Transfers,
@@ -41,7 +43,7 @@ let db = new Database({
             }
         },
         async onFlush(fs, height) {
-            await fs.writeFile('./status.json', JSON.stringify({height, timestamp: new Date()}))
+            await fs.writeFile('./status.json', JSON.stringify({height, timestamp: new Date(lastBlock.timestamp)}))
         },
     },
 })
@@ -88,6 +90,7 @@ processor.run(db, async (ctx) => {
                 }
             }
         }
+        lastBlock = block.header
     }
 })
 
