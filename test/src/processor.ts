@@ -31,7 +31,7 @@ let db = new Database({
         Extrinsics,
     },
     dest: new LocalDest(`./data`),
-    chunkSizeMb: 10,
+    chunkSizeMb: 100,
     syncIntervalBlocks: 1_000,
     hooks: {
         async onConnect(fs) {
@@ -42,8 +42,14 @@ let db = new Database({
                 return -1
             }
         },
-        async onFlush(fs, height) {
-            await fs.writeFile('./status.json', JSON.stringify({height, timestamp: new Date(lastBlock.timestamp)}))
+        async onFlush(fs, range) {
+            await fs.writeFile(
+                './status.json',
+                JSON.stringify({
+                    height: range.to,
+                    timestamp: new Date(lastBlock.timestamp),
+                })
+            )
         },
     },
 })

@@ -2,9 +2,11 @@ import assert from 'assert'
 import {Table, TableWriter} from './table'
 import {Dest, LocalDest} from './dest'
 
+type Range = {from: number; to: number}
+
 interface DatabaseHooks<D extends Dest = Dest> {
     onConnect(dest: D): Promise<number>
-    onFlush(dest: D, height: number, isHead: boolean): Promise<void>
+    onFlush(dest: D, range: Range, isHead: boolean): Promise<void>
 }
 
 type Tables = Record<string, Table<any>>
@@ -139,11 +141,11 @@ export class Database<T extends Tables, D extends Dest> {
         ) {
             let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
             await this.dest.transact(folderName, async (txDest) => {
-                for (let name in this.tables) {
-                    await txDest.writeFile(`${this.tables[name].name}`, chunk[name].flush())
+                for (let tableAlias in this.tables) {
+                    await txDest.writeFile(`${this.tables[tableAlias].name}`, chunk[tableAlias].flush())
                 }
             })
-            await this.hooks.onFlush(this.dest, height, isHead ?? false)
+            await this.hooks.onFlush(this.dest, {from, to}, isHead ?? false)
 
             this.lastCommited = height
             this.chunk = undefined
@@ -171,7 +173,7 @@ const defaultHooks: DatabaseHooks = {
             return -1
         }
     },
-    async onFlush(dest, height) {
-        await dest.writeFile(DEFAULT_STATUS_FILE, height.toString())
+    async onFlush(dest, range) {
+        await dest.writeFile(DEFAULT_STATUS_FILE, range.to.toString())
     },
 }
