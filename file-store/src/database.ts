@@ -102,11 +102,10 @@ export class Database<T extends Tables, D extends Dest> {
     async transact(from: number, to: number, cb: (store: Store<T>) => Promise<void>): Promise<void> {
         let open = true
 
-        let chunk = this.chunk || this.createChunk()
-
         let store = new this.StoreConstructor(() => {
             assert(open, `Transaction was already closed`)
-            return chunk
+            this.chunk = this.chunk || this.createChunk()
+            return this.chunk
         })
 
         try {
@@ -116,8 +115,6 @@ export class Database<T extends Tables, D extends Dest> {
             throw e
         }
 
-        this.chunk = chunk
-
         open = false
     }
 
@@ -125,11 +122,10 @@ export class Database<T extends Tables, D extends Dest> {
         assert(this.lastCommited != null, `Not connected to database`)
 
         if (this.chunk == null) return
-        let chunk = this.chunk
 
         let chunkSize = 0
-        for (let name in chunk) {
-            chunkSize += chunk[name].size
+        for (let name in this.chunk) {
+            chunkSize += this.chunk[name].size
         }
 
         let from = this.lastCommited + 1
@@ -140,6 +136,7 @@ export class Database<T extends Tables, D extends Dest> {
             (isHead && height - this.lastCommited >= this.updateInterval && chunkSize > 0)
         ) {
             let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
+            let chunk = this.chunk
             await this.dest.transact(folderName, async (txDest) => {
                 for (let tableAlias in this.tables) {
                     await txDest.writeFile(`${this.tables[tableAlias].name}`, chunk[tableAlias].flush())
