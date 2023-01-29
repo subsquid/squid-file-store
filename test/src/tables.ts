@@ -1,6 +1,6 @@
 import {Table, StringType, Column, DateTimeType, IntegerType} from '@subsquid/file-csv'
 
-export const Transfers = new Table('transfers', {
+export const Transfers = new Table('transfers.csv', {
     blockNumber: Column(IntegerType()),
     timestamp: Column(DateTimeType()),
     extrinsicHash: Column(StringType(), {nullable: true}),
@@ -9,7 +9,7 @@ export const Transfers = new Table('transfers', {
     amount: Column(IntegerType()),
 })
 
-export const Extrinsics = new Table('extrinsics', {
+export const Extrinsics = new Table('extrinsics.csv', {
     blockNumber: Column(IntegerType()),
     timestamp: Column(DateTimeType()),
     hash: Column(StringType()),
