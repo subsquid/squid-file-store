@@ -1,16 +1,8 @@
 import assert from 'assert'
 import {Table as ArrowTable, Builder, makeBuilder, tableToIPC} from 'apache-arrow'
 import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
-import {
-    Table as BaseTable,
-    Column,
-    ColumnData,
-    ColumnOptions,
-    ITableBuilder,
-    TableRecord,
-    TableSchema,
-} from '@subsquid/file-table'
-import {ParquetType} from './types'
+import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
+import {Type} from './types'
 
 export {Compression} from 'parquet-wasm/node/arrow1'
 
@@ -19,38 +11,63 @@ export interface TableOptions {
     dictionary?: boolean
 }
 
-export interface ParquetColumnOptions extends ColumnOptions {
+export interface ColumnOptions {
+    nullable?: boolean
     compression?: Compression
     dictionary?: boolean
 }
 
-type ParquetColumnData<
-    T extends ParquetType<any> = ParquetType<any>,
-    O extends ParquetColumnOptions = ParquetColumnOptions
-> = ColumnData<T, O>
+export interface ColumnData<
+    T extends Type<any> = Type<any>,
+    O extends Required<ColumnOptions> = Required<ColumnOptions>
+> {
+    type: T
+    options: O
+}
 
-export class Table<T extends TableSchema<ParquetColumnData>> extends BaseTable<T> {
+export interface Column {
+    name: string
+    data: ColumnData
+}
+
+export interface TableSchema {
+    [column: string]: ColumnData
+}
+
+type NullableColumns<T extends Record<string, ColumnData>> = {
+    [F in keyof T]: T[F] extends ColumnData<any, infer R> ? (R extends {nullable: true} ? F : never) : never
+}[keyof T]
+
+type ColumnsToTypes<T extends Record<string, ColumnData>> = {
+    [F in Exclude<keyof T, NullableColumns<T>>]: T[F] extends ColumnData<Type<infer R>> ? R : never
+} & {
+    [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
+}
+
+export class Table<T extends TableSchema> implements ITable<ColumnsToTypes<T>> {
+    private columns: Column[] = []
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
-        super(name, schema)
+        for (let column in schema) {
+            this.columns.push({
+                name: column,
+                data: schema[column],
+            })
+        }
         this.options = {compression: Compression.UNCOMPRESSED, dictionary: false, ...options}
     }
 
-    createTableBuilder(): TableBuilder<T> {
-        return new TableBuilder(this.columns, this.options)
-    }
-
-    getFileExtension() {
-        return 'parquet'
+    createWriter(): TableWriter<ColumnsToTypes<T>> {
+        return new TableWriter(this.columns, this.options)
     }
 }
 
-class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBuilder<T> {
+class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     private columnBuilders: Record<string, Builder> = {}
     private writeProperties: WriterProperties
     private _size = 0
 
-    constructor(private columns: Column<ParquetColumnData>[], private options: Required<TableOptions>) {
+    constructor(private columns: Column[], options: Required<TableOptions>) {
         let builer = new WriterPropertiesBuilder()
         for (let column of columns) {
             this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
@@ -78,9 +95,11 @@ class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBu
         return writeParquet(tableToIPC(arrowTable), this.writeProperties)
     }
 
-    append(records: TableRecord<T> | TableRecord<T>[]): TableBuilder<T> {
-        records = Array.isArray(records) ? records : [records]
+    write(record: T): this {
+        return this.writeMany([record])
+    }
 
+    writeMany(records: T[]): this {
         let newSize = 0
         for (let column of this.columns) {
             let columnBuilder = this.columnBuilders[column.name]
@@ -99,12 +118,12 @@ class TableBuilder<T extends TableSchema<ParquetColumnData>> implements ITableBu
     }
 }
 
-export function Column<T extends ParquetType<any>>(type: T): ParquetColumnData<T>
-export function Column<T extends ParquetType<any>, O extends ParquetColumnOptions>(
+export function Column<T extends Type<any>>(type: T): ColumnData<T>
+export function Column<T extends Type<any>, O extends ColumnData>(
     type: T,
     options?: O
-): ParquetColumnData<T, O & ParquetColumnOptions>
-export function Column<T extends ParquetType<any>>(type: T, options?: ParquetColumnOptions) {
+): ColumnData<T, O & Required<ColumnOptions>>
+export function Column<T extends Type<any>>(type: T, options?: ColumnOptions) {
     return {
         type,
         options: {compression: Compression.UNCOMPRESSED, dictionary: false, ...options},

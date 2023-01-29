@@ -1,15 +1,15 @@
 import {Field, List} from 'apache-arrow'
 import assert from 'assert'
-import {ParquetType} from './type'
+import {Type} from './type'
 
 interface ListOptions {
     nullable?: boolean
 }
 
 export let ListType = <T, Options extends ListOptions>(
-    itemType: ParquetType<T>,
+    itemType: Type<T>,
     options?: Options
-): ParquetType<(Options['nullable'] extends true ? T | null | undefined : T)[]> => ({
+): Type<(Options['nullable'] extends true ? T | null | undefined : T)[]> => ({
     arrowDataType: new List(Field.new('element', itemType.arrowDataType, options?.nullable)),
     prepare(value) {
         return this.validate(value).map((i) => (i == null ? null : itemType.prepare(i)))
@@ -25,7 +25,7 @@ export let ListType = <T, Options extends ListOptions>(
     },
 })
 
-// export let MapType = <T>(itemType: ParquetType<T>): ParquetType<Map<string, T>> => ({
+// export let MapType = <T>(itemType: Type<T>): Type<Map<string, T>> => ({
 //     arrowDataType: new Map_(
 //         Field.new(
 //             'key_value',

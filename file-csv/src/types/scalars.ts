@@ -1,10 +1,10 @@
 import assert from 'assert'
-import {CsvType} from './type'
+import {Type} from './type'
 
-export function StringType(): CsvType<string> {
+export function StringType(): Type<string> {
     return {
         serialize(value) {
-            return this.validate(value)
+            return value
         },
         validate(value) {
             assert(typeof value === 'string')
@@ -14,7 +14,7 @@ export function StringType(): CsvType<string> {
     }
 }
 
-export function IntegerType(): CsvType<number | bigint> {
+export function IntegerType(): Type<number | bigint> {
     return {
         serialize(value: number) {
             return this.validate(value).toString()
@@ -27,7 +27,7 @@ export function IntegerType(): CsvType<number | bigint> {
     }
 }
 
-export function DecimalType(): CsvType<number> {
+export function DecimalType(): Type<number> {
     return {
         serialize(value: number) {
             return this.validate(value).toString()
@@ -39,7 +39,7 @@ export function DecimalType(): CsvType<number> {
         isNumeric: true,
     }
 }
-export function BooleanType(): CsvType<boolean> {
+export function BooleanType(): Type<boolean> {
     return {
         serialize(value: boolean) {
             assert(typeof value === 'boolean', 'Invalid boolean')
@@ -53,7 +53,7 @@ export function BooleanType(): CsvType<boolean> {
     }
 }
 
-export function DateTimeType(): CsvType<Date> {
+export function DateTimeType(): Type<Date> {
     return {
         serialize(value: Date) {
             return this.validate(value).toISOString()

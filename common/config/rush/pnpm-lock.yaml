@@ -19,7 +19,6 @@ specifiers:
   '@types/node': 16.11.56
   apache-arrow: ^10.0.1
   expect: ^27.5.1
-  mocha: ^10.2.0
   parquet-wasm: ^0.4.0-beta.5
   typescript: 4.8.2
   upath: ^2.0.1
@@ -43,7 +42,6 @@ dependencies:
   '@types/node': 16.11.56
   apache-arrow: 10.0.1
   expect: 27.5.1
-  mocha: 10.2.0
   parquet-wasm: 0.4.0-beta.5
   typescript: 4.8.2
   upath: 2.0.1
@@ -2537,15 +2535,17 @@ packages:
     dev: false
 
   file:projects/file-csv.tgz:
-    resolution: {integrity: sha512-Bzmf/BnPMWxnr1bhNGR34Y0q3CEZrN02M2wkmRj3V//LtI2SE9F2gAz1rmfU2JDDnVT+S+KY452M2ZU/SsUY5w==, tarball: file:projects/file-csv.tgz}
+    resolution: {integrity: sha512-6QQdFuhVv1uwcwyvHAvbBXnJh8v2ZTg4iuSL+Ql/z0tn5B82xfyQmoFQnagFvQNYenb4xVRKdRj1WbGzeSlSrw==, tarball: file:projects/file-csv.tgz}
     name: '@rush-temp/file-csv'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal': 1.0.0
       '@subsquid/util-internal-json': 0.2.0
       '@subsquid/util-naming': 0.0.0
+      '@types/mocha': 10.0.1
       '@types/node': 16.11.56
       expect: 27.5.1
+      mocha: 10.2.0
       typescript: 4.8.2
     dev: false
 
