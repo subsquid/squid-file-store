@@ -1,5 +1,5 @@
 {
-  "name": "@subsquid/file-s3",
+  "name": "@subsquid/file-store-s3",
   "version": "0.0.0",
   "description": "",
   "publishConfig": {
@@ -31,7 +31,7 @@
     "upath": "^2.0.1"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^0.1.1"
+    "@subsquid/file-store": "^0.0.0"
   },
   "devDependencies": {
     "@types/node": "16.11.56",

@@ -1,5 +1,5 @@
 {
-  "name": "@subsquid/file-parquet",
+  "name": "@subsquid/file-store-parquet",
   "version": "0.0.0",
   "description": "",
   "publishConfig": {
@@ -30,7 +30,7 @@
     "parquet-wasm": "^0.4.0-beta.5"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^0.1.1"
+    "@subsquid/file-store": "^0.0.0"
   },
   "devDependencies": {
     "@types/node": "16.11.56",
