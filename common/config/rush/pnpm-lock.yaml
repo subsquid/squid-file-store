@@ -7,7 +7,6 @@ specifiers:
   '@rush-temp/file-store-parquet': file:./projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:./projects/file-store-s3.tgz
   '@rush-temp/test': file:./projects/test.tgz
-  '@subsquid/archive-registry': ^2.0.1
   '@subsquid/ss58': ^0.1.2
   '@subsquid/substrate-metadata-explorer': ^1.0.9
   '@subsquid/substrate-processor': ^2.2.0
@@ -15,9 +14,12 @@ specifiers:
   '@subsquid/util-internal': ^1.0.0
   '@subsquid/util-internal-json': ^0.2.0
   '@subsquid/util-naming': ^0.0.0
+  '@types/mocha': ^10.0.1
   '@types/node': 16.11.56
   apache-arrow: ^10.0.1
+  dotenv: ^16.0.3
   expect: ^27.5.1
+  mocha: ^10.2.0
   parquet-wasm: ^0.4.0-beta.5
   typescript: 4.8.2
   upath: ^2.0.1
@@ -29,7 +31,6 @@ dependencies:
   '@rush-temp/file-store-parquet': file:projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:projects/file-store-s3.tgz
   '@rush-temp/test': file:projects/test.tgz
-  '@subsquid/archive-registry': 2.1.2
   '@subsquid/ss58': 0.1.3
   '@subsquid/substrate-metadata-explorer': 1.0.9
   '@subsquid/substrate-processor': 2.2.0
@@ -37,9 +38,12 @@ dependencies:
   '@subsquid/util-internal': 1.0.0
   '@subsquid/util-internal-json': 0.2.0
   '@subsquid/util-naming': 0.0.0
+  '@types/mocha': 10.0.1
   '@types/node': 16.11.56
   apache-arrow: 10.0.1
+  dotenv: 16.0.3
   expect: 27.5.1
+  mocha: 10.2.0
   parquet-wasm: 0.4.0-beta.5
   typescript: 4.8.2
   upath: 2.0.1
@@ -1046,18 +1050,6 @@ packages:
       chalk: 4.1.2
     dev: false
 
-  /@subsquid/archive-registry/2.1.2:
-    resolution: {integrity: sha512-xbzLoLvDgTpPoPkZ9S3brq1WtWgb5mrlZGUi2AdHUhzArrNE5uirYZD92yGfZFbomI0rsg66ZxWQR3eBfDX+Xw==}
-    hasBin: true
-    dependencies:
-      '@subsquid/util-internal': 1.0.0
-      commander: 10.0.0
-      node-abort-controller: 2.0.0
-      node-fetch: 2.6.8
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
   /@subsquid/logger/0.3.0:
     resolution: {integrity: sha512-uflVPTey/6p/KCIpdzP2/Q1RRd3Ec4iLPjqdSFSmFPtai3IDEOQv5dXzUeiDRwa/63Q9tmzsLeKgdW8TDw5c7Q==}
     dependencies:
@@ -1558,11 +1550,6 @@ packages:
       typical: 5.2.0
     dev: false
 
-  /commander/10.0.0:
-    resolution: {integrity: sha512-zS5PnTI22FIRM6ylNW8G4Ap0IEOyk62fhLSD0+uHRT9McRCLGpkVNvao4bjimpK/GShynyQkFFxHhwMcETmduA==}
-    engines: {node: '>=14'}
-    dev: false
-
   /commander/9.5.0:
     resolution: {integrity: sha512-KRs7WVDKg86PWiuAqhDrAQnTXZKraVcCc6vFdL14qrZ/DcWwuRo7VoiYXalXO7S5GKpqYiVEwCbgFDfxNHKJBQ==}
     engines: {node: ^12.20.0 || >=14}
@@ -1625,11 +1612,6 @@ packages:
   /diff/5.0.0:
     resolution: {integrity: sha512-/VTCrvm5Z0JGty/BWHljh+BAiw3IK+2j87NGMu8Nwc/f48WoDAC395uomO9ZD117ZOBaHmkX1oyLvkVM/aIT3w==}
     engines: {node: '>=0.3.1'}
-    dev: false
-
-  /dotenv/10.0.0:
-    resolution: {integrity: sha512-rlBi9d8jpv9Sf1klPjNfFAuWDjKLwTIJJ/VxtoTwIR6hnZxcEOQCZg2oIL3MWBYw5GpUDKOEnND7LXTbIpQ03Q==}
-    engines: {node: '>=10'}
     dev: false
 
   /dotenv/16.0.3:
@@ -2012,10 +1994,6 @@ packages:
 
   /next-tick/1.1.0:
     resolution: {integrity: sha512-CXdUiJembsNjuToQvxayPZF9Vqht7hewsvy2sOWafLvi2awflj9mOC6bHIg50orX8IJvWKY9wYQ/zB2kogPslQ==}
-    dev: false
-
-  /node-abort-controller/2.0.0:
-    resolution: {integrity: sha512-L8RfEgjBTHAISTuagw51PprVAqNZoG6KSB6LQ6H1bskMVkFs5E71IyjauLBv3XbuomJlguWF/VnRHdJ1gqiAqA==}
     dev: false
 
   /node-fetch/2.6.8:
@@ -2410,7 +2388,7 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-cTBDr2AijcIH5Xep4N0Pu78oz31v27Q5aUeCPAGAtvyNbLMxQKO37BlKZl+O7rsejj81SNrKcG7AZx+xlSMq3w==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-2BCxJ9v7bNwosnOjlyhvtF//m2gufX0OK5qO67mkOd1HFnkHL/WXX/cfAEcVG+SejmYZzdBGhWYxH4sxoKvHJA==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
@@ -2464,17 +2442,16 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-8a6rpX6S/aYyiRgBOZxokaHNRMVGH9wn1rC6Sdi+0h0iQuVL8OU181OzbXRLl3wb6xH3R/rB05VOtEnnGLjtgg==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-oraXHJdz9N/asuR3pYOOPoNplcgzSkjwU7IfZuCNs8rP9sBlJmU20huaFHQrElBnDk1jANun6rSbe8ocBe9QeQ==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:
-      '@subsquid/archive-registry': 2.1.2
       '@subsquid/ss58': 0.1.3
       '@subsquid/substrate-metadata-explorer': 1.0.9
       '@subsquid/substrate-processor': 2.2.0
       '@subsquid/substrate-typegen': 2.1.0
       '@types/node': 16.11.56
-      dotenv: 10.0.0
+      dotenv: 16.0.3
       typescript: 4.8.2
     transitivePeerDependencies:
       - '@subsquid/typeorm-store'
