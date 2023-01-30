@@ -443,8 +443,7 @@
 		{
 			"packageName": "test",
 			"projectFolder": "test",
-			"shouldPublish": false,
-			"versionPolicyName": "npm"
+			"shouldPublish": false
 		}
 	]
 }
