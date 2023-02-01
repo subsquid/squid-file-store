@@ -1,0 +1,17 @@
+{
+  "name": "@subsquid/file-store-csv",
+  "entries": [
+    {
+      "version": "0.1.0",
+      "tag": "@subsquid/file-store-csv_v0.1.0",
+      "date": "Wed, 01 Feb 2023 20:37:01 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "change types naming and wrap them"
+          }
+        ]
+      }
+    }
+  ]
+}
