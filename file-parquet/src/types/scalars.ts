@@ -15,7 +15,6 @@ import {
     Float32,
     Bool,
 } from 'apache-arrow'
-import assert from 'assert'
 import {Type} from './type'
 
 export let StringType = (): Type<string> => ({
@@ -67,7 +66,7 @@ export let Uint16Type = (): Type<number> => ({
     },
 })
 
-export let Uint32Type = (): Type<bigint> => ({
+export let Uint32Type = (): Type<number> => ({
     arrowDataType: new Uint32(),
     prepare(value) {
         return value

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "change `Uint32` typescript type to `number`",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}
