@@ -10,5 +10,5 @@ export interface Table<T> {
     createWriter(): TableWriter<T>
 }
 
-export type TableRecord<T extends Table<any>> = T extends Table<infer R> ? R : never
+export type TableRecord<T> = T extends Table<infer R> ? R : never
 

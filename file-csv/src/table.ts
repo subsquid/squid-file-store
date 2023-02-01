@@ -2,7 +2,12 @@ import assert from 'assert'
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
 import {toSnakeCase} from '@subsquid/util-naming'
 import {Dialect, Quote, dialects} from './dialect'
-import {Type} from './types'
+
+export interface Type<T> {
+    serialize(value: T): string
+    validate(value: unknown): T
+    isNumeric: boolean
+}
 
 export interface TableOptions {
     extension?: string

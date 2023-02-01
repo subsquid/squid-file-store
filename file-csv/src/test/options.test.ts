@@ -1,14 +1,14 @@
 import expect from 'expect'
 import {Quote, dialects} from '../dialect'
 import {Column, Table} from '../table'
-import {IntegerType, StringType} from '../types'
+import * as Types from '../types'
 
 describe('Options', function () {
     describe('header', async function () {
         it('with header', () => {
             let table = new Table(
                 'test',
-                {column1: Column(StringType()), column2: Column(StringType())},
+                {column1: Column(Types.String()), column2: Column(Types.String())},
                 {header: true}
             )
             let builder = table.createWriter()
@@ -21,7 +21,7 @@ describe('Options', function () {
         it('without header', () => {
             let table = new Table(
                 'test',
-                {column1: Column(StringType()), column2: Column(StringType())},
+                {column1: Column(Types.String()), column2: Column(Types.String())},
                 {header: false}
             )
             let builder = table.createWriter()
@@ -37,10 +37,10 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(StringType()),
-                    column4: Column(StringType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.String()),
+                    column4: Column(Types.String()),
                 },
                 {dialect: dialects.excel, header: false}
             )
@@ -55,10 +55,10 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(StringType()),
-                    column4: Column(StringType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.String()),
+                    column4: Column(Types.String()),
                 },
                 {dialect: dialects.excelTab, header: false}
             )
@@ -73,10 +73,10 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(StringType()),
-                    column4: Column(StringType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.String()),
+                    column4: Column(Types.String()),
                 },
                 {
                     dialect: {
@@ -100,9 +100,9 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(IntegerType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.Integer()),
                 },
                 {dialect: {...dialects.excel, quoting: Quote.NONE}, header: false}
             )
@@ -117,9 +117,9 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(IntegerType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.Integer()),
                 },
                 {dialect: {...dialects.excel, quoting: Quote.MINIMAL}, header: false}
             )
@@ -134,9 +134,9 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(IntegerType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.Integer()),
                 },
                 {dialect: {...dialects.excel, quoting: Quote.NONNUMERIC}, header: false}
             )
@@ -151,9 +151,9 @@ describe('Options', function () {
             let table = new Table(
                 'test',
                 {
-                    column1: Column(StringType()),
-                    column2: Column(StringType()),
-                    column3: Column(IntegerType()),
+                    column1: Column(Types.String()),
+                    column2: Column(Types.String()),
+                    column3: Column(Types.Integer()),
                 },
                 {dialect: {...dialects.excel, quoting: Quote.ALL}, header: false}
             )

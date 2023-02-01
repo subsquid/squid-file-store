@@ -1,108 +1,92 @@
-import {
-    Int16,
-    Int32,
-    Int64,
-    Int8,
-    Uint16,
-    Uint32,
-    Uint64,
-    Uint8,
-    Utf8,
-    Date_,
-    Timestamp,
-    DateUnit,
-    TimeUnit,
-    Float32,
-    Bool,
-} from 'apache-arrow'
-import {Type} from './type'
+import * as Arrow from 'apache-arrow'
+import {Type} from '../table'
 
-export let StringType = (): Type<string> => ({
-    arrowDataType: new Utf8(),
+export let String = (): Type<string> => ({
+    arrowDataType: new Arrow.Utf8(),
     prepare(value) {
         return value
     },
 })
 
-export let Int8Type = (): Type<number> => ({
-    arrowDataType: new Int8(),
+export let Int8 = (): Type<number> => ({
+    arrowDataType: new Arrow.Int8(),
     prepare(value) {
         return value
     },
 })
 
-export let Int16Type = (): Type<number> => ({
-    arrowDataType: new Int16(),
+export let Int16 = (): Type<number> => ({
+    arrowDataType: new Arrow.Int16(),
     prepare(value) {
         return value
     },
 })
 
-export let Int32Type = (): Type<number> => ({
-    arrowDataType: new Int32(),
+export let Int32 = (): Type<number> => ({
+    arrowDataType: new Arrow.Int32(),
     prepare(value) {
         return value
     },
 })
 
-export let Int64Type = (): Type<bigint> => ({
-    arrowDataType: new Int64(),
+export let Int64 = (): Type<bigint> => ({
+    arrowDataType: new Arrow.Int64(),
     prepare(value) {
         return value
     },
 })
 
-export let Uint8Type = (): Type<number> => ({
-    arrowDataType: new Uint8(),
+export let Uint8 = (): Type<number> => ({
+    arrowDataType: new Arrow.Uint8(),
     prepare(value) {
         return value
     },
 })
 
-export let Uint16Type = (): Type<number> => ({
-    arrowDataType: new Uint16(),
+export let Uint16 = (): Type<number> => ({
+    arrowDataType: new Arrow.Uint16(),
     prepare(value) {
         return value
     },
 })
 
-export let Uint32Type = (): Type<number> => ({
-    arrowDataType: new Uint32(),
+export let Uint32 = (): Type<number> => ({
+    arrowDataType: new Arrow.Uint32(),
     prepare(value) {
         return value
     },
 })
 
-export let Uint64Type = (): Type<bigint> => ({
-    arrowDataType: new Uint64(),
+export let Uint64 = (): Type<bigint> => ({
+    arrowDataType: new Arrow.Uint64(),
     prepare(value) {
         return value
     },
 })
 
-export let FloatType = (): Type<number> => ({
-    arrowDataType: new Float32(),
+export let Float = (): Type<number> => ({
+    arrowDataType: new Arrow.Float32(),
     prepare(value) {
         return value
     },
 })
 
-export let BooleanType = (): Type<boolean> => ({
-    arrowDataType: new Bool(),
+export let Boolean = (): Type<boolean> => ({
+    arrowDataType: new Arrow.Bool(),
     prepare(value) {
         return value
     },
 })
 
-export let TimestampType = (): Type<Date> => ({
-    arrowDataType: new Timestamp(TimeUnit.MILLISECOND),
+export let Timestamp = (): Type<Date> => ({
+    arrowDataType: new Arrow.Timestamp(Arrow.TimeUnit.MILLISECOND),
     prepare(value) {
         return value.valueOf()
     },
 })
 
-export let DateType = (): Type<Date> => ({
-    arrowDataType: new Date_(DateUnit.DAY),
+export let Date = (): Type<Date> => ({
+    arrowDataType: new Arrow.Date_(Arrow.DateUnit.DAY),
     prepare(value) {
         return value
     },

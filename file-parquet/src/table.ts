@@ -1,10 +1,14 @@
 import assert from 'assert'
-import {Table as ArrowTable, Builder, makeBuilder, tableToIPC} from 'apache-arrow'
+import {Table as ArrowTable, Builder, DataType, makeBuilder, tableToIPC} from 'apache-arrow'
 import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
-import {Type} from './types'
 
-export {Compression} from 'parquet-wasm/node/arrow1'
+export interface Type<T> {
+    arrowDataType: DataType
+    prepare(value: T): any
+}
+
+export {Compression}
 
 export interface TableOptions {
     compression?: Compression
@@ -17,17 +21,9 @@ export interface ColumnOptions {
     dictionary?: boolean
 }
 
-export interface ColumnData<
-    T extends Type<any> = Type<any>,
-    O extends Required<ColumnOptions> = Required<ColumnOptions>
-> {
+export interface ColumnData<T extends Type<any> = Type<any>, O extends ColumnOptions = ColumnOptions> {
     type: T
-    options: O
-}
-
-export interface Column {
-    name: string
-    data: ColumnData
+    options: Required<O>
 }
 
 export interface TableSchema {
@@ -35,16 +31,21 @@ export interface TableSchema {
 }
 
 type NullableColumns<T extends Record<string, ColumnData>> = {
-    [F in keyof T]: T[F] extends ColumnData<any, infer R> ? (R extends {nullable: true} ? F : never) : never
+    [F in keyof T]: T[F]['options'] extends {nullable: true} ? F : never
 }[keyof T]
 
-type ColumnsToTypes<T extends Record<string, ColumnData>> = {
+type Convert<T extends Record<string, ColumnData>> = {
     [F in Exclude<keyof T, NullableColumns<T>>]: T[F] extends ColumnData<Type<infer R>> ? R : never
 } & {
     [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
 }
 
-export class Table<T extends TableSchema> implements ITable<ColumnsToTypes<T>> {
+export interface Column {
+    name: string
+    data: ColumnData
+}
+
+export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     private columns: Column[] = []
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
@@ -57,7 +58,7 @@ export class Table<T extends TableSchema> implements ITable<ColumnsToTypes<T>> {
         this.options = {compression: Compression.UNCOMPRESSED, dictionary: false, ...options}
     }
 
-    createWriter(): TableWriter<ColumnsToTypes<T>> {
+    createWriter(): TableWriter<Convert<T>> {
         return new TableWriter(this.columns, this.options)
     }
 }
@@ -122,10 +123,10 @@ export function Column<T extends Type<any>>(type: T): ColumnData<T>
 export function Column<T extends Type<any>, O extends ColumnOptions>(
     type: T,
     options?: O
-): ColumnData<T, O & Required<ColumnOptions>>
-export function Column<T extends Type<any>>(type: T, options?: ColumnOptions) {
+): ColumnData<T, O & ColumnOptions>
+export function Column(type: Type<any>, options?: ColumnOptions): ColumnData {
     return {
         type,
-        options: {compression: Compression.UNCOMPRESSED, dictionary: false, ...options},
+        options: {compression: Compression.UNCOMPRESSED, dictionary: false, nullable: false, ...options},
     }
 }

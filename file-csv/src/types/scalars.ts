@@ -1,7 +1,7 @@
 import assert from 'assert'
-import {Type} from './type'
+import {Type} from '../table'
 
-export function StringType(): Type<string> {
+export function String(): Type<string> {
     return {
         serialize(value) {
             return value
@@ -14,7 +14,7 @@ export function StringType(): Type<string> {
     }
 }
 
-export function IntegerType(): Type<number | bigint> {
+export function Integer(): Type<number | bigint> {
     return {
         serialize(value: number) {
             return this.validate(value).toString()
@@ -27,7 +27,7 @@ export function IntegerType(): Type<number | bigint> {
     }
 }
 
-export function DecimalType(): Type<number> {
+export function Decimal(): Type<number> {
     return {
         serialize(value: number) {
             return this.validate(value).toString()
@@ -39,7 +39,7 @@ export function DecimalType(): Type<number> {
         isNumeric: true,
     }
 }
-export function BooleanType(): Type<boolean> {
+export function Boolean(): Type<boolean> {
     return {
         serialize(value: boolean) {
             assert(typeof value === 'boolean', 'Invalid boolean')
@@ -53,7 +53,7 @@ export function BooleanType(): Type<boolean> {
     }
 }
 
-export function DateTimeType(): Type<Date> {
+export function DateTime(): Type<Date> {
     return {
         serialize(value: Date) {
             return this.validate(value).toISOString()

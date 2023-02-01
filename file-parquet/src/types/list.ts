@@ -1,16 +1,15 @@
-import {Field, List} from 'apache-arrow'
-import assert from 'assert'
-import {Type} from './type'
+import * as Arrow from 'apache-arrow'
+import {Type} from '../table'
 
 interface ListOptions {
     nullable?: boolean
 }
 
-export let ListType = <T, Options extends ListOptions>(
+export let List = <T, Options extends ListOptions>(
     itemType: Type<T>,
     options?: Options
 ): Type<(Options['nullable'] extends true ? T | null | undefined : T)[]> => ({
-    arrowDataType: new List(Field.new('element', itemType.arrowDataType, options?.nullable)),
+    arrowDataType: new Arrow.List(Arrow.Field.new('element', itemType.arrowDataType, options?.nullable)),
     prepare(value) {
         return value.map((i) => (i == null ? null : itemType.prepare(i)))
     },

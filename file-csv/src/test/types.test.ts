@@ -1,6 +1,6 @@
 import expect from 'expect'
 import {Column, Table} from '../table'
-import {BooleanType, DateTimeType, DecimalType, IntegerType, StringType} from '../types'
+import * as Types from '../types'
 import {readFileSync} from 'fs'
 import {TableRecord} from '@subsquid/file-store'
 
@@ -9,13 +9,13 @@ describe('Types', function () {
         let table = new Table(
             'test',
             {
-                string: Column(StringType()),
-                int: Column(IntegerType()),
-                bigint: Column(IntegerType()),
-                decimal: Column(DecimalType()),
-                boolean: Column(BooleanType()),
-                timestamp: Column(DateTimeType()),
-                nullableString: Column(StringType(), {nullable: true}),
+                string: Column(Types.String()),
+                int: Column(Types.Integer()),
+                bigint: Column(Types.Integer()),
+                decimal: Column(Types.Decimal()),
+                boolean: Column(Types.Boolean()),
+                timestamp: Column(Types.DateTime()),
+                nullableString: Column(Types.String(), {nullable: true}),
             },
             {
                 header: false,
