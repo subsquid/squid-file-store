@@ -1,0 +1,17 @@
+{
+  "name": "@subsquid/file-store-parquet",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@subsquid/file-store-parquet_v0.0.1",
+      "date": "Wed, 01 Feb 2023 11:09:12 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "change `Uint32` typescript type to `number`"
+          }
+        ]
+      }
+    }
+  ]
+}
