@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
