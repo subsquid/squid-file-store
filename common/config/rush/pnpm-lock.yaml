@@ -16,7 +16,7 @@ specifiers:
   '@subsquid/util-naming': ^0.0.0
   '@types/mocha': ^10.0.1
   '@types/node': 16.11.56
-  apache-arrow: ^10.0.1
+  apache-arrow: ^11.0.0
   dotenv: ^16.0.3
   expect: ^27.5.1
   mocha: ^10.2.0
@@ -40,7 +40,7 @@ dependencies:
   '@subsquid/util-naming': 0.0.0
   '@types/mocha': 10.0.1
   '@types/node': 16.11.56
-  apache-arrow: 10.0.1
+  apache-arrow: 11.0.0
   dotenv: 16.0.3
   expect: 27.5.1
   mocha: 10.2.0
@@ -1360,8 +1360,8 @@ packages:
       picomatch: 2.3.1
     dev: false
 
-  /apache-arrow/10.0.1:
-    resolution: {integrity: sha512-6QrfmyNsmNjZQszYzVLHSXIejZiRa3jFqeD3nTCjU3WqvoUxaC/0etjcErwnlLR3++3uc+faWw0OlM6IgY6xIQ==}
+  /apache-arrow/11.0.0:
+    resolution: {integrity: sha512-M8J4y+DimIyS44w2KOmVfzNHbTroR1oDpBKK6BYnlu8xVB41lxTz0yLmapo8/WJVAt5XcinAxMm14M771dm/rA==}
     hasBin: true
     dependencies:
       '@types/command-line-args': 5.2.0
@@ -2402,12 +2402,12 @@ packages:
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-Uur10se8V4oH+I13dkOY+Zgj/7FV34eaHJKHrh4miTHOJmr03htD591ONbmQEP7+G4bh+de5IV0XTQ0jfVtyTg==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-4GddvPM+8TJ+a8+miAPfChEToWQqnDTR3pe8xZ1XVWx/faZWxjjjK3Txu7aCmTYxiHhlGyH1nQtzNnj7iYUqnw==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
       '@types/node': 16.11.56
-      apache-arrow: 10.0.1
+      apache-arrow: 11.0.0
       parquet-wasm: 0.4.0-beta.5
       typescript: 4.8.2
     dev: false
@@ -2442,7 +2442,7 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-oraXHJdz9N/asuR3pYOOPoNplcgzSkjwU7IfZuCNs8rP9sBlJmU20huaFHQrElBnDk1jANun6rSbe8ocBe9QeQ==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-cB1dz01+KZU+kyIRwEieVMQtBaxtuEHTbXK7RaZ8MWO8X+G5dM7+cj6ABZj6qzIYJOs4igMTlqNyywzq+8fj+w==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:

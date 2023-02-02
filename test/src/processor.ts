@@ -2,7 +2,7 @@ import * as ss58 from '@subsquid/ss58'
 import {decodeHex, SubstrateBatchProcessor, SubstrateBlock} from '@subsquid/substrate-processor'
 import {Database, LocalDest} from '@subsquid/file-store'
 import {BalancesTransferEvent} from './types/events'
-import {Extrinsics, Transfers} from './tables'
+import {Extrinsics, Transfers} from './parquet'
 
 const processor = new SubstrateBatchProcessor()
     .setDataSource({
@@ -30,7 +30,7 @@ let db = new Database({
         Extrinsics,
     },
     dest: new LocalDest(`./data`),
-    chunkSizeMb: 100,
+    chunkSizeMb: 10,
     syncIntervalBlocks: 1_000,
     hooks: {
         async onConnect(fs) {

@@ -68,15 +68,16 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     private records: string[] = []
     private _size = 0
 
+    private header: string | undefined
+
     constructor(private columns: Column[], private options: Required<TableOptions>) {
         if (this.options.header) {
-            let header = new Array<string>(this.columns.length)
-            for (let i = 0; i < this.columns.length; i++) {
-                let column = this.columns[i]
+            let columnNames: string[] = []
+            for (let column of this.columns) {
                 let normalizedName = toSnakeCase(column.name)
-                header[i] = this.escape(normalizedName, false)
+                columnNames.push(this.escape(normalizedName, false))
             }
-            this.records.push(header.join(this.options.dialect.delimiter) + this.options.dialect.lineterminator)
+            this.header = columnNames.join(this.options.dialect.delimiter) + this.options.dialect.lineterminator
         }
     }
 
@@ -85,10 +86,20 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     }
 
     flush(): Uint8Array {
-        let records = this.records
+        let table: string[] = []
+        if (this.header) {
+            table.push(this.header)
+        }
+        table.push(...this.records)
+
+        this.reset()
+
+        return Buffer.from(table.join(''), 'utf-8')
+    }
+
+    reset() {
         this.records = []
         this._size = 0
-        return Buffer.from(records.join(''), 'utf-8')
     }
 
     write(record: T): this {

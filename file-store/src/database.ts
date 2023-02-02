@@ -145,7 +145,6 @@ export class Database<T extends Tables, D extends Dest> {
             await this.hooks.onFlush(this.dest, {from, to}, isHead ?? false)
 
             this.lastCommited = height
-            this.chunk = undefined
         }
     }
 

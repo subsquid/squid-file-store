@@ -1,5 +1,5 @@
 import assert from 'assert'
-import {Table as ArrowTable, Builder, DataType, makeBuilder, tableToIPC} from 'apache-arrow'
+import {Table as ArrowTable, Builder, DataType, makeBuilder, tableToIPC, RecordBatchWriter} from 'apache-arrow'
 import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
 
@@ -89,6 +89,7 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
 
         let columnsData: Record<string, any> = {}
         for (let column of this.columns) {
+            this.columnBuilders[column.name].finish()
             columnsData[column.name] = this.columnBuilders[column.name].flush()
         }
         let arrowTable = new ArrowTable(columnsData)
