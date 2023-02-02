@@ -1,0 +1,17 @@
+{
+  "name": "@subsquid/file-store-s3",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@subsquid/file-store-s3_v0.0.1",
+      "date": "Thu, 02 Feb 2023 11:28:23 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "check if dir exists in readdir method"
+          }
+        ]
+      }
+    }
+  ]
+}
