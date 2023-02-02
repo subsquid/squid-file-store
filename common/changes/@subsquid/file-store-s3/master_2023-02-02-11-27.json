@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-s3",
+      "comment": "check if dir exists in readdir method",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-s3"
+}

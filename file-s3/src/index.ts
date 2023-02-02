@@ -116,6 +116,8 @@ export class S3Dest implements Dest {
     async readdir(dir: string): Promise<string[]> {
         dir = this.toDir(dir)
 
+        if (!(await this.exists(dir))) return []
+
         let names = new Set<string>()
 
         let ContinuationToken: string | undefined
