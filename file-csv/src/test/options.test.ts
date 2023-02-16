@@ -15,7 +15,7 @@ describe('Options', function () {
             builder.write({column1: 'value1', column2: 'value2'})
             let result = builder.flush()
 
-            expect(result).toEqual('column1,column2\r\n' + 'value1,value2\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('column1,column2\r\n' + 'value1,value2\r\n')
         })
 
         it('without header', () => {
@@ -28,7 +28,7 @@ describe('Options', function () {
             builder.write({column1: 'value1', column2: 'value2'})
             let result = builder.flush()
 
-            expect(result).toEqual('value1,value2\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('value1,value2\r\n')
         })
     })
 
@@ -48,7 +48,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb,b', column3: 'c"c"c', column4: 'dd\r\nd'})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,"bb,b","c""c""c","dd\r\nd"\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('aaa,"bb,b","c""c""c","dd\r\nd"\r\n')
         })
 
         it('excel-tab', () => {
@@ -66,7 +66,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb\tb', column3: 'c"c"c', column4: 'dd,d'})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa\t"bb\tb"\t"c""c""c"\tdd,d\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('aaa\t"bb\tb"\t"c""c""c"\tdd,d\r\n')
         })
 
         it('custom', () => {
@@ -93,7 +93,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb-b', column3: "c'c'c", column4: 'dd,d'})
             let result = builder.flush()
 
-            expect(result).toEqual("aaa-'bb-b'-'c^'c^'c'-dd,d;")
+            expect(Buffer.from(result).toString('utf8')).toEqual("aaa-'bb-b'-'c^'c^'c'-dd,d;")
         })
 
         it('Quote.NONE', () => {
@@ -110,7 +110,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,bb",b,1000\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('aaa,bb",b,1000\r\n')
         })
 
         it('Quote.MINIMAL', () => {
@@ -127,7 +127,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('aaa,"bb,b",1000\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('aaa,"bb,b",1000\r\n')
         })
 
         it('Quote.NONNUMERIC', () => {
@@ -144,7 +144,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('"aaa","bb,b",1000\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('"aaa","bb,b",1000\r\n')
         })
 
         it('Quote.ALL', () => {
@@ -161,7 +161,7 @@ describe('Options', function () {
             builder.write({column1: 'aaa', column2: 'bb,b', column3: 1000})
             let result = builder.flush()
 
-            expect(result).toEqual('"aaa","bb,b","1000"\r\n')
+            expect(Buffer.from(result).toString('utf8')).toEqual('"aaa","bb,b","1000"\r\n')
         })
     })
 })
