@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "keep chunk after flush",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
