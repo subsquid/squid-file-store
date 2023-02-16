@@ -53,7 +53,7 @@ export function Boolean(): Type<boolean> {
     }
 }
 
-export function DateTime(): Type<Date> {
+export function Timestamp(): Type<Date> {
     return {
         serialize(value: Date) {
             return this.validate(value).toISOString()
@@ -65,3 +65,8 @@ export function DateTime(): Type<Date> {
         isNumeric: false,
     }
 }
+
+/**
+ * @deprecated use Timestamp
+ */
+export const DateTime = Timestamp
