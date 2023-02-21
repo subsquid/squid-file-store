@@ -79,13 +79,13 @@ export type ParquetField = CommonParquetField | NestedParquetField
 
 export type CommonParquetField = {
     name: string
-    path: string[]
+    path: string
     key: string
     primitiveType?: PrimitiveType
     originalType?: OriginalType
     repetitionType: RepetitionType
     typeLength?: number
-    encoding?: ParquetCodec
+    encoding: ParquetCodec
     compression?: ParquetCompression
 
     /**
@@ -124,6 +124,7 @@ export type CommonParquetField = {
      */
     dLevelMax: number
     fieldCount?: number
+    isNested?: boolean
 }
 
 type NestedParquetField = CommonParquetField & {

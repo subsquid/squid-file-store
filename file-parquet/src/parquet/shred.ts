@@ -21,8 +21,8 @@ export class TooManyValuesShredError extends Error {
 }
 
 export interface ParquetWriteColumnData {
-    dLevels: number[]
-    rLevels: number[]
+    dlevels: number[]
+    rlevels: number[]
     values: ParquetValueArray
     count: number
 }
@@ -43,8 +43,8 @@ const shredColumnBuffers = (schema: ParquetSchema): Record<string, ParquetWriteC
             .map((field) => [
                 field.key,
                 {
-                    dLevels: [],
-                    rLevels: [],
+                    dlevels: [],
+                    rlevels: [],
                     values: [],
                     count: 0,
                 },

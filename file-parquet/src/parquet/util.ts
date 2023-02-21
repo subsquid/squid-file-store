@@ -1,6 +1,5 @@
 import fs = require('fs')
 import {TBufferedTransport, TCompactProtocol, TFramedTransport} from 'thrift'
-import {FileMetaData, PageHeader, RowGroup} from './thrift/org/apache/parquet/format'
 import {Writable} from 'stream'
 
 export interface WriteStreamOptions {
@@ -46,32 +45,6 @@ export function decodeThrift(obj: any, buf: Buffer, offset?: number) {
     return transport.readPos - offset
 }
 
-export function decodeFileMetadata(buf: Buffer, offset?: number) {
-    if (!offset) {
-        // tslint:disable-next-line:no-parameter-reassignment
-        offset = 0
-    }
-
-    const transport = new UFramedTransport(buf)
-    transport.readPos = offset
-    const protocol = new TCompactProtocol(transport)
-    const metadata = FileMetaData.read(protocol)
-    return {length: transport.readPos - offset, metadata}
-}
-
-export function decodePageHeader(buf: Buffer, offset?: number) {
-    if (!offset) {
-        // tslint:disable-next-line:no-parameter-reassignment
-        offset = 0
-    }
-
-    const transport = new UFramedTransport(buf)
-    transport.readPos = offset
-    const protocol = new TCompactProtocol(transport)
-    const pageHeader = PageHeader.read(protocol)
-    return {length: transport.readPos - offset, pageHeader}
-}
-
 /**
  * Get the number of bits required to store a given value
  */
@@ -82,18 +55,6 @@ export function getBitWidth(val: number): number {
     } else {
         return Math.ceil(Math.log2(val + 1))
     }
-}
-
-/**
- * FIXME not ideal that this is linear
- */
-export function getThriftEnum(klass: any, value: number | string): string {
-    for (const k in klass) {
-        if (klass[k] === value) {
-            return k
-        }
-    }
-    throw new Error('Invalid ENUM value')
 }
 
 // Supports MQTT path wildcards
@@ -112,23 +73,4 @@ export function fieldIndexOf(arr: string[][], elem: string[]): number {
         if (m) return j
     }
     return -1
-}
-
-/**
- * Compare two arrays of strings.  Used to compare field paths.
- */
-export function stringArraysEqual(a: string[], b: string[]): boolean {
-    return a.length === b.length && a.every((aa, idx) => aa === b[idx])
-}
-
-/**
- * Find a column chunk in a row group matching the given field path
- * @param name
- */
-export function findColumnChunk(rowGroup: RowGroup, name: string[]) {
-    return rowGroup.columns.find((cc) => stringArraysEqual(cc.meta_data!.path_in_schema, name))
-}
-
-export function load(name: string): any {
-    return (module || (global as any))['require'](name)
 }
