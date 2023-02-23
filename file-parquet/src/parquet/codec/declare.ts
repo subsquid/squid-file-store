@@ -14,5 +14,4 @@ export interface ParquetCodecOptions {
 
 export interface ParquetCodecKit {
     encodeValues(type: PrimitiveType, values: ParquetValueArray, opts?: ParquetCodecOptions): Buffer
-    decodeValues(type: PrimitiveType, cursor: CursorBuffer, count: number, opts: ParquetCodecOptions): ParquetValueArray
 }

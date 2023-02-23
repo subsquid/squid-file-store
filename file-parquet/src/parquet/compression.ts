@@ -56,13 +56,11 @@ function deflate_snappy(value: Buffer): Buffer {
 }
 
 function deflate_lzo(value: Buffer): Buffer {
-    lzo = lzo || Util.load('lzo')
-    return lzo.compress(value)
+    return require('lzo').compress(value)
 }
 
 function deflate_brotli(value: Buffer): Buffer {
-    brotli = brotli || Util.load('brotli')
-    const result = brotli.compress(value, {
+    const result = require('brotli').compress(value, {
         mode: 0,
         quality: 8,
         lgwin: 22,
@@ -71,14 +69,8 @@ function deflate_brotli(value: Buffer): Buffer {
 }
 
 function deflate_lz4(value: Buffer): Buffer {
-    lz4js = lz4js || Util.load('lz4js')
     try {
-        // let result = Buffer.alloc(lz4js.encodeBound(value.length));
-        // const compressedSize = lz4.encodeBlock(value, result);
-        // // remove unnecessary bytes
-        // result = result.slice(0, compressedSize);
-        // return result;
-        return Buffer.from(lz4js.compress(value))
+        return Buffer.from(require('lz4js').compress(value))
     } catch (err) {
         throw err
     }

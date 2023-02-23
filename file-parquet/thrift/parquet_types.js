@@ -3,12 +3,16 @@
 //
 // DO NOT EDIT UNLESS YOU ARE SURE THAT YOU KNOW WHAT YOU ARE DOING
 //
-if (typeof Int64 === 'undefined' && typeof require === 'function') {
-  var Int64 = require('node-int64');
-}
+"use strict";
+
+var thrift = require('thrift');
+var Thrift = thrift.Thrift;
+var Q = thrift.Q;
+var Int64 = require('node-int64');
 
 
-Type = {
+var ttypes = module.exports = {};
+ttypes.Type = {
   '0' : 'BOOLEAN',
   'BOOLEAN' : 0,
   '1' : 'INT32',
@@ -26,7 +30,7 @@ Type = {
   '7' : 'FIXED_LEN_BYTE_ARRAY',
   'FIXED_LEN_BYTE_ARRAY' : 7
 };
-ConvertedType = {
+ttypes.ConvertedType = {
   '0' : 'UTF8',
   'UTF8' : 0,
   '1' : 'MAP',
@@ -72,7 +76,7 @@ ConvertedType = {
   '21' : 'INTERVAL',
   'INTERVAL' : 21
 };
-FieldRepetitionType = {
+ttypes.FieldRepetitionType = {
   '0' : 'REQUIRED',
   'REQUIRED' : 0,
   '1' : 'OPTIONAL',
@@ -80,7 +84,7 @@ FieldRepetitionType = {
   '2' : 'REPEATED',
   'REPEATED' : 2
 };
-Encoding = {
+ttypes.Encoding = {
   '0' : 'PLAIN',
   'PLAIN' : 0,
   '2' : 'PLAIN_DICTIONARY',
@@ -100,7 +104,7 @@ Encoding = {
   '9' : 'BYTE_STREAM_SPLIT',
   'BYTE_STREAM_SPLIT' : 9
 };
-CompressionCodec = {
+ttypes.CompressionCodec = {
   '0' : 'UNCOMPRESSED',
   'UNCOMPRESSED' : 0,
   '1' : 'SNAPPY',
@@ -118,7 +122,7 @@ CompressionCodec = {
   '7' : 'LZ4_RAW',
   'LZ4_RAW' : 7
 };
-PageType = {
+ttypes.PageType = {
   '0' : 'DATA_PAGE',
   'DATA_PAGE' : 0,
   '1' : 'INDEX_PAGE',
@@ -128,7 +132,7 @@ PageType = {
   '3' : 'DATA_PAGE_V2',
   'DATA_PAGE_V2' : 3
 };
-BoundaryOrder = {
+ttypes.BoundaryOrder = {
   '0' : 'UNORDERED',
   'UNORDERED' : 0,
   '1' : 'ASCENDING',
@@ -136,7 +140,7 @@ BoundaryOrder = {
   '2' : 'DESCENDING',
   'DESCENDING' : 2
 };
-Statistics = function(args) {
+var Statistics = module.exports.Statistics = function(args) {
   this.max = null;
   this.min = null;
   this.null_count = null;
@@ -177,42 +181,42 @@ Statistics.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.max = input.readBinary().value;
+        this.max = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.min = input.readBinary().value;
+        this.min = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I64) {
-        this.null_count = input.readI64().value;
+        this.null_count = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I64) {
-        this.distinct_count = input.readI64().value;
+        this.distinct_count = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.STRING) {
-        this.max_value = input.readBinary().value;
+        this.max_value = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.STRING) {
-        this.min_value = input.readBinary().value;
+        this.min_value = input.readBinary();
       } else {
         input.skip(ftype);
       }
@@ -263,7 +267,7 @@ Statistics.prototype.write = function(output) {
   return;
 };
 
-StringType = function(args) {
+var StringType = module.exports.StringType = function(args) {
 };
 StringType.prototype = {};
 StringType.prototype.read = function(input) {
@@ -288,7 +292,7 @@ StringType.prototype.write = function(output) {
   return;
 };
 
-UUIDType = function(args) {
+var UUIDType = module.exports.UUIDType = function(args) {
 };
 UUIDType.prototype = {};
 UUIDType.prototype.read = function(input) {
@@ -313,7 +317,7 @@ UUIDType.prototype.write = function(output) {
   return;
 };
 
-MapType = function(args) {
+var MapType = module.exports.MapType = function(args) {
 };
 MapType.prototype = {};
 MapType.prototype.read = function(input) {
@@ -338,7 +342,7 @@ MapType.prototype.write = function(output) {
   return;
 };
 
-ListType = function(args) {
+var ListType = module.exports.ListType = function(args) {
 };
 ListType.prototype = {};
 ListType.prototype.read = function(input) {
@@ -363,7 +367,7 @@ ListType.prototype.write = function(output) {
   return;
 };
 
-EnumType = function(args) {
+var EnumType = module.exports.EnumType = function(args) {
 };
 EnumType.prototype = {};
 EnumType.prototype.read = function(input) {
@@ -388,7 +392,7 @@ EnumType.prototype.write = function(output) {
   return;
 };
 
-DateType = function(args) {
+var DateType = module.exports.DateType = function(args) {
 };
 DateType.prototype = {};
 DateType.prototype.read = function(input) {
@@ -413,7 +417,7 @@ DateType.prototype.write = function(output) {
   return;
 };
 
-NullType = function(args) {
+var NullType = module.exports.NullType = function(args) {
 };
 NullType.prototype = {};
 NullType.prototype.read = function(input) {
@@ -438,7 +442,7 @@ NullType.prototype.write = function(output) {
   return;
 };
 
-DecimalType = function(args) {
+var DecimalType = module.exports.DecimalType = function(args) {
   this.scale = null;
   this.precision = null;
   if (args) {
@@ -467,14 +471,14 @@ DecimalType.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.scale = input.readI32().value;
+        this.scale = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.precision = input.readI32().value;
+        this.precision = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -505,7 +509,7 @@ DecimalType.prototype.write = function(output) {
   return;
 };
 
-MilliSeconds = function(args) {
+var MilliSeconds = module.exports.MilliSeconds = function(args) {
 };
 MilliSeconds.prototype = {};
 MilliSeconds.prototype.read = function(input) {
@@ -530,7 +534,7 @@ MilliSeconds.prototype.write = function(output) {
   return;
 };
 
-MicroSeconds = function(args) {
+var MicroSeconds = module.exports.MicroSeconds = function(args) {
 };
 MicroSeconds.prototype = {};
 MicroSeconds.prototype.read = function(input) {
@@ -555,7 +559,7 @@ MicroSeconds.prototype.write = function(output) {
   return;
 };
 
-NanoSeconds = function(args) {
+var NanoSeconds = module.exports.NanoSeconds = function(args) {
 };
 NanoSeconds.prototype = {};
 NanoSeconds.prototype.read = function(input) {
@@ -580,19 +584,19 @@ NanoSeconds.prototype.write = function(output) {
   return;
 };
 
-TimeUnit = function(args) {
+var TimeUnit = module.exports.TimeUnit = function(args) {
   this.MILLIS = null;
   this.MICROS = null;
   this.NANOS = null;
   if (args) {
     if (args.MILLIS !== undefined && args.MILLIS !== null) {
-      this.MILLIS = new MilliSeconds(args.MILLIS);
+      this.MILLIS = new ttypes.MilliSeconds(args.MILLIS);
     }
     if (args.MICROS !== undefined && args.MICROS !== null) {
-      this.MICROS = new MicroSeconds(args.MICROS);
+      this.MICROS = new ttypes.MicroSeconds(args.MICROS);
     }
     if (args.NANOS !== undefined && args.NANOS !== null) {
-      this.NANOS = new NanoSeconds(args.NANOS);
+      this.NANOS = new ttypes.NanoSeconds(args.NANOS);
     }
   }
 };
@@ -609,7 +613,7 @@ TimeUnit.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.MILLIS = new MilliSeconds();
+        this.MILLIS = new ttypes.MilliSeconds();
         this.MILLIS.read(input);
       } else {
         input.skip(ftype);
@@ -617,7 +621,7 @@ TimeUnit.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.MICROS = new MicroSeconds();
+        this.MICROS = new ttypes.MicroSeconds();
         this.MICROS.read(input);
       } else {
         input.skip(ftype);
@@ -625,7 +629,7 @@ TimeUnit.prototype.read = function(input) {
       break;
       case 3:
       if (ftype == Thrift.Type.STRUCT) {
-        this.NANOS = new NanoSeconds();
+        this.NANOS = new ttypes.NanoSeconds();
         this.NANOS.read(input);
       } else {
         input.skip(ftype);
@@ -662,7 +666,7 @@ TimeUnit.prototype.write = function(output) {
   return;
 };
 
-TimestampType = function(args) {
+var TimestampType = module.exports.TimestampType = function(args) {
   this.isAdjustedToUTC = null;
   this.unit = null;
   if (args) {
@@ -672,7 +676,7 @@ TimestampType = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field isAdjustedToUTC is unset!');
     }
     if (args.unit !== undefined && args.unit !== null) {
-      this.unit = new TimeUnit(args.unit);
+      this.unit = new ttypes.TimeUnit(args.unit);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field unit is unset!');
     }
@@ -691,14 +695,14 @@ TimestampType.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.BOOL) {
-        this.isAdjustedToUTC = input.readBool().value;
+        this.isAdjustedToUTC = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.unit = new TimeUnit();
+        this.unit = new ttypes.TimeUnit();
         this.unit.read(input);
       } else {
         input.skip(ftype);
@@ -730,7 +734,7 @@ TimestampType.prototype.write = function(output) {
   return;
 };
 
-TimeType = function(args) {
+var TimeType = module.exports.TimeType = function(args) {
   this.isAdjustedToUTC = null;
   this.unit = null;
   if (args) {
@@ -740,7 +744,7 @@ TimeType = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field isAdjustedToUTC is unset!');
     }
     if (args.unit !== undefined && args.unit !== null) {
-      this.unit = new TimeUnit(args.unit);
+      this.unit = new ttypes.TimeUnit(args.unit);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field unit is unset!');
     }
@@ -759,14 +763,14 @@ TimeType.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.BOOL) {
-        this.isAdjustedToUTC = input.readBool().value;
+        this.isAdjustedToUTC = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.unit = new TimeUnit();
+        this.unit = new ttypes.TimeUnit();
         this.unit.read(input);
       } else {
         input.skip(ftype);
@@ -798,7 +802,7 @@ TimeType.prototype.write = function(output) {
   return;
 };
 
-IntType = function(args) {
+var IntType = module.exports.IntType = function(args) {
   this.bitWidth = null;
   this.isSigned = null;
   if (args) {
@@ -827,14 +831,14 @@ IntType.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.BYTE) {
-        this.bitWidth = input.readByte().value;
+        this.bitWidth = input.readByte();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.BOOL) {
-        this.isSigned = input.readBool().value;
+        this.isSigned = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -865,7 +869,7 @@ IntType.prototype.write = function(output) {
   return;
 };
 
-JsonType = function(args) {
+var JsonType = module.exports.JsonType = function(args) {
 };
 JsonType.prototype = {};
 JsonType.prototype.read = function(input) {
@@ -890,7 +894,7 @@ JsonType.prototype.write = function(output) {
   return;
 };
 
-BsonType = function(args) {
+var BsonType = module.exports.BsonType = function(args) {
 };
 BsonType.prototype = {};
 BsonType.prototype.read = function(input) {
@@ -915,7 +919,7 @@ BsonType.prototype.write = function(output) {
   return;
 };
 
-LogicalType = function(args) {
+var LogicalType = module.exports.LogicalType = function(args) {
   this.STRING = null;
   this.MAP = null;
   this.LIST = null;
@@ -931,43 +935,43 @@ LogicalType = function(args) {
   this.UUID = null;
   if (args) {
     if (args.STRING !== undefined && args.STRING !== null) {
-      this.STRING = new StringType(args.STRING);
+      this.STRING = new ttypes.StringType(args.STRING);
     }
     if (args.MAP !== undefined && args.MAP !== null) {
-      this.MAP = new MapType(args.MAP);
+      this.MAP = new ttypes.MapType(args.MAP);
     }
     if (args.LIST !== undefined && args.LIST !== null) {
-      this.LIST = new ListType(args.LIST);
+      this.LIST = new ttypes.ListType(args.LIST);
     }
     if (args.ENUM !== undefined && args.ENUM !== null) {
-      this.ENUM = new EnumType(args.ENUM);
+      this.ENUM = new ttypes.EnumType(args.ENUM);
     }
     if (args.DECIMAL !== undefined && args.DECIMAL !== null) {
-      this.DECIMAL = new DecimalType(args.DECIMAL);
+      this.DECIMAL = new ttypes.DecimalType(args.DECIMAL);
     }
     if (args.DATE !== undefined && args.DATE !== null) {
-      this.DATE = new DateType(args.DATE);
+      this.DATE = new ttypes.DateType(args.DATE);
     }
     if (args.TIME !== undefined && args.TIME !== null) {
-      this.TIME = new TimeType(args.TIME);
+      this.TIME = new ttypes.TimeType(args.TIME);
     }
     if (args.TIMESTAMP !== undefined && args.TIMESTAMP !== null) {
-      this.TIMESTAMP = new TimestampType(args.TIMESTAMP);
+      this.TIMESTAMP = new ttypes.TimestampType(args.TIMESTAMP);
     }
     if (args.INTEGER !== undefined && args.INTEGER !== null) {
-      this.INTEGER = new IntType(args.INTEGER);
+      this.INTEGER = new ttypes.IntType(args.INTEGER);
     }
     if (args.UNKNOWN !== undefined && args.UNKNOWN !== null) {
-      this.UNKNOWN = new NullType(args.UNKNOWN);
+      this.UNKNOWN = new ttypes.NullType(args.UNKNOWN);
     }
     if (args.JSON !== undefined && args.JSON !== null) {
-      this.JSON = new JsonType(args.JSON);
+      this.JSON = new ttypes.JsonType(args.JSON);
     }
     if (args.BSON !== undefined && args.BSON !== null) {
-      this.BSON = new BsonType(args.BSON);
+      this.BSON = new ttypes.BsonType(args.BSON);
     }
     if (args.UUID !== undefined && args.UUID !== null) {
-      this.UUID = new UUIDType(args.UUID);
+      this.UUID = new ttypes.UUIDType(args.UUID);
     }
   }
 };
@@ -984,7 +988,7 @@ LogicalType.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.STRING = new StringType();
+        this.STRING = new ttypes.StringType();
         this.STRING.read(input);
       } else {
         input.skip(ftype);
@@ -992,7 +996,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.MAP = new MapType();
+        this.MAP = new ttypes.MapType();
         this.MAP.read(input);
       } else {
         input.skip(ftype);
@@ -1000,7 +1004,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 3:
       if (ftype == Thrift.Type.STRUCT) {
-        this.LIST = new ListType();
+        this.LIST = new ttypes.ListType();
         this.LIST.read(input);
       } else {
         input.skip(ftype);
@@ -1008,7 +1012,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.STRUCT) {
-        this.ENUM = new EnumType();
+        this.ENUM = new ttypes.EnumType();
         this.ENUM.read(input);
       } else {
         input.skip(ftype);
@@ -1016,7 +1020,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 5:
       if (ftype == Thrift.Type.STRUCT) {
-        this.DECIMAL = new DecimalType();
+        this.DECIMAL = new ttypes.DecimalType();
         this.DECIMAL.read(input);
       } else {
         input.skip(ftype);
@@ -1024,7 +1028,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 6:
       if (ftype == Thrift.Type.STRUCT) {
-        this.DATE = new DateType();
+        this.DATE = new ttypes.DateType();
         this.DATE.read(input);
       } else {
         input.skip(ftype);
@@ -1032,7 +1036,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 7:
       if (ftype == Thrift.Type.STRUCT) {
-        this.TIME = new TimeType();
+        this.TIME = new ttypes.TimeType();
         this.TIME.read(input);
       } else {
         input.skip(ftype);
@@ -1040,7 +1044,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 8:
       if (ftype == Thrift.Type.STRUCT) {
-        this.TIMESTAMP = new TimestampType();
+        this.TIMESTAMP = new ttypes.TimestampType();
         this.TIMESTAMP.read(input);
       } else {
         input.skip(ftype);
@@ -1048,7 +1052,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 10:
       if (ftype == Thrift.Type.STRUCT) {
-        this.INTEGER = new IntType();
+        this.INTEGER = new ttypes.IntType();
         this.INTEGER.read(input);
       } else {
         input.skip(ftype);
@@ -1056,7 +1060,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 11:
       if (ftype == Thrift.Type.STRUCT) {
-        this.UNKNOWN = new NullType();
+        this.UNKNOWN = new ttypes.NullType();
         this.UNKNOWN.read(input);
       } else {
         input.skip(ftype);
@@ -1064,7 +1068,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 12:
       if (ftype == Thrift.Type.STRUCT) {
-        this.JSON = new JsonType();
+        this.JSON = new ttypes.JsonType();
         this.JSON.read(input);
       } else {
         input.skip(ftype);
@@ -1072,7 +1076,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 13:
       if (ftype == Thrift.Type.STRUCT) {
-        this.BSON = new BsonType();
+        this.BSON = new ttypes.BsonType();
         this.BSON.read(input);
       } else {
         input.skip(ftype);
@@ -1080,7 +1084,7 @@ LogicalType.prototype.read = function(input) {
       break;
       case 14:
       if (ftype == Thrift.Type.STRUCT) {
-        this.UUID = new UUIDType();
+        this.UUID = new ttypes.UUIDType();
         this.UUID.read(input);
       } else {
         input.skip(ftype);
@@ -1167,7 +1171,7 @@ LogicalType.prototype.write = function(output) {
   return;
 };
 
-SchemaElement = function(args) {
+var SchemaElement = module.exports.SchemaElement = function(args) {
   this.type = null;
   this.type_length = null;
   this.repetition_type = null;
@@ -1209,7 +1213,7 @@ SchemaElement = function(args) {
       this.field_id = args.field_id;
     }
     if (args.logicalType !== undefined && args.logicalType !== null) {
-      this.logicalType = new LogicalType(args.logicalType);
+      this.logicalType = new ttypes.LogicalType(args.logicalType);
     }
   }
 };
@@ -1226,70 +1230,70 @@ SchemaElement.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.type = input.readI32().value;
+        this.type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.type_length = input.readI32().value;
+        this.type_length = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.repetition_type = input.readI32().value;
+        this.repetition_type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.STRING) {
-        this.name = input.readString().value;
+        this.name = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I32) {
-        this.num_children = input.readI32().value;
+        this.num_children = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I32) {
-        this.converted_type = input.readI32().value;
+        this.converted_type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I32) {
-        this.scale = input.readI32().value;
+        this.scale = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 8:
       if (ftype == Thrift.Type.I32) {
-        this.precision = input.readI32().value;
+        this.precision = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 9:
       if (ftype == Thrift.Type.I32) {
-        this.field_id = input.readI32().value;
+        this.field_id = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 10:
       if (ftype == Thrift.Type.STRUCT) {
-        this.logicalType = new LogicalType();
+        this.logicalType = new ttypes.LogicalType();
         this.logicalType.read(input);
       } else {
         input.skip(ftype);
@@ -1361,7 +1365,7 @@ SchemaElement.prototype.write = function(output) {
   return;
 };
 
-DataPageHeader = function(args) {
+var DataPageHeader = module.exports.DataPageHeader = function(args) {
   this.num_values = null;
   this.encoding = null;
   this.definition_level_encoding = null;
@@ -1389,7 +1393,7 @@ DataPageHeader = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field repetition_level_encoding is unset!');
     }
     if (args.statistics !== undefined && args.statistics !== null) {
-      this.statistics = new Statistics(args.statistics);
+      this.statistics = new ttypes.Statistics(args.statistics);
     }
   }
 };
@@ -1406,35 +1410,35 @@ DataPageHeader.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.num_values = input.readI32().value;
+        this.num_values = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.encoding = input.readI32().value;
+        this.encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.definition_level_encoding = input.readI32().value;
+        this.definition_level_encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.repetition_level_encoding = input.readI32().value;
+        this.repetition_level_encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.STRUCT) {
-        this.statistics = new Statistics();
+        this.statistics = new ttypes.Statistics();
         this.statistics.read(input);
       } else {
         input.skip(ftype);
@@ -1481,7 +1485,7 @@ DataPageHeader.prototype.write = function(output) {
   return;
 };
 
-IndexPageHeader = function(args) {
+var IndexPageHeader = module.exports.IndexPageHeader = function(args) {
 };
 IndexPageHeader.prototype = {};
 IndexPageHeader.prototype.read = function(input) {
@@ -1506,7 +1510,7 @@ IndexPageHeader.prototype.write = function(output) {
   return;
 };
 
-DictionaryPageHeader = function(args) {
+var DictionaryPageHeader = module.exports.DictionaryPageHeader = function(args) {
   this.num_values = null;
   this.encoding = null;
   this.is_sorted = null;
@@ -1539,21 +1543,21 @@ DictionaryPageHeader.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.num_values = input.readI32().value;
+        this.num_values = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.encoding = input.readI32().value;
+        this.encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.BOOL) {
-        this.is_sorted = input.readBool().value;
+        this.is_sorted = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -1589,7 +1593,7 @@ DictionaryPageHeader.prototype.write = function(output) {
   return;
 };
 
-DataPageHeaderV2 = function(args) {
+var DataPageHeaderV2 = module.exports.DataPageHeaderV2 = function(args) {
   this.num_values = null;
   this.num_nulls = null;
   this.num_rows = null;
@@ -1633,7 +1637,7 @@ DataPageHeaderV2 = function(args) {
       this.is_compressed = args.is_compressed;
     }
     if (args.statistics !== undefined && args.statistics !== null) {
-      this.statistics = new Statistics(args.statistics);
+      this.statistics = new ttypes.Statistics(args.statistics);
     }
   }
 };
@@ -1650,56 +1654,56 @@ DataPageHeaderV2.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.num_values = input.readI32().value;
+        this.num_values = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.num_nulls = input.readI32().value;
+        this.num_nulls = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.num_rows = input.readI32().value;
+        this.num_rows = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.encoding = input.readI32().value;
+        this.encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I32) {
-        this.definition_levels_byte_length = input.readI32().value;
+        this.definition_levels_byte_length = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I32) {
-        this.repetition_levels_byte_length = input.readI32().value;
+        this.repetition_levels_byte_length = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.BOOL) {
-        this.is_compressed = input.readBool().value;
+        this.is_compressed = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 8:
       if (ftype == Thrift.Type.STRUCT) {
-        this.statistics = new Statistics();
+        this.statistics = new ttypes.Statistics();
         this.statistics.read(input);
       } else {
         input.skip(ftype);
@@ -1761,7 +1765,7 @@ DataPageHeaderV2.prototype.write = function(output) {
   return;
 };
 
-SplitBlockAlgorithm = function(args) {
+var SplitBlockAlgorithm = module.exports.SplitBlockAlgorithm = function(args) {
 };
 SplitBlockAlgorithm.prototype = {};
 SplitBlockAlgorithm.prototype.read = function(input) {
@@ -1786,11 +1790,11 @@ SplitBlockAlgorithm.prototype.write = function(output) {
   return;
 };
 
-BloomFilterAlgorithm = function(args) {
+var BloomFilterAlgorithm = module.exports.BloomFilterAlgorithm = function(args) {
   this.BLOCK = null;
   if (args) {
     if (args.BLOCK !== undefined && args.BLOCK !== null) {
-      this.BLOCK = new SplitBlockAlgorithm(args.BLOCK);
+      this.BLOCK = new ttypes.SplitBlockAlgorithm(args.BLOCK);
     }
   }
 };
@@ -1807,7 +1811,7 @@ BloomFilterAlgorithm.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.BLOCK = new SplitBlockAlgorithm();
+        this.BLOCK = new ttypes.SplitBlockAlgorithm();
         this.BLOCK.read(input);
       } else {
         input.skip(ftype);
@@ -1837,7 +1841,7 @@ BloomFilterAlgorithm.prototype.write = function(output) {
   return;
 };
 
-XxHash = function(args) {
+var XxHash = module.exports.XxHash = function(args) {
 };
 XxHash.prototype = {};
 XxHash.prototype.read = function(input) {
@@ -1862,11 +1866,11 @@ XxHash.prototype.write = function(output) {
   return;
 };
 
-BloomFilterHash = function(args) {
+var BloomFilterHash = module.exports.BloomFilterHash = function(args) {
   this.XXHASH = null;
   if (args) {
     if (args.XXHASH !== undefined && args.XXHASH !== null) {
-      this.XXHASH = new XxHash(args.XXHASH);
+      this.XXHASH = new ttypes.XxHash(args.XXHASH);
     }
   }
 };
@@ -1883,7 +1887,7 @@ BloomFilterHash.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.XXHASH = new XxHash();
+        this.XXHASH = new ttypes.XxHash();
         this.XXHASH.read(input);
       } else {
         input.skip(ftype);
@@ -1913,7 +1917,7 @@ BloomFilterHash.prototype.write = function(output) {
   return;
 };
 
-Uncompressed = function(args) {
+var Uncompressed = module.exports.Uncompressed = function(args) {
 };
 Uncompressed.prototype = {};
 Uncompressed.prototype.read = function(input) {
@@ -1938,11 +1942,11 @@ Uncompressed.prototype.write = function(output) {
   return;
 };
 
-BloomFilterCompression = function(args) {
+var BloomFilterCompression = module.exports.BloomFilterCompression = function(args) {
   this.UNCOMPRESSED = null;
   if (args) {
     if (args.UNCOMPRESSED !== undefined && args.UNCOMPRESSED !== null) {
-      this.UNCOMPRESSED = new Uncompressed(args.UNCOMPRESSED);
+      this.UNCOMPRESSED = new ttypes.Uncompressed(args.UNCOMPRESSED);
     }
   }
 };
@@ -1959,7 +1963,7 @@ BloomFilterCompression.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.UNCOMPRESSED = new Uncompressed();
+        this.UNCOMPRESSED = new ttypes.Uncompressed();
         this.UNCOMPRESSED.read(input);
       } else {
         input.skip(ftype);
@@ -1989,7 +1993,7 @@ BloomFilterCompression.prototype.write = function(output) {
   return;
 };
 
-BloomFilterHeader = function(args) {
+var BloomFilterHeader = module.exports.BloomFilterHeader = function(args) {
   this.numBytes = null;
   this.algorithm = null;
   this.hash = null;
@@ -2001,17 +2005,17 @@ BloomFilterHeader = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field numBytes is unset!');
     }
     if (args.algorithm !== undefined && args.algorithm !== null) {
-      this.algorithm = new BloomFilterAlgorithm(args.algorithm);
+      this.algorithm = new ttypes.BloomFilterAlgorithm(args.algorithm);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field algorithm is unset!');
     }
     if (args.hash !== undefined && args.hash !== null) {
-      this.hash = new BloomFilterHash(args.hash);
+      this.hash = new ttypes.BloomFilterHash(args.hash);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field hash is unset!');
     }
     if (args.compression !== undefined && args.compression !== null) {
-      this.compression = new BloomFilterCompression(args.compression);
+      this.compression = new ttypes.BloomFilterCompression(args.compression);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field compression is unset!');
     }
@@ -2030,14 +2034,14 @@ BloomFilterHeader.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.numBytes = input.readI32().value;
+        this.numBytes = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.algorithm = new BloomFilterAlgorithm();
+        this.algorithm = new ttypes.BloomFilterAlgorithm();
         this.algorithm.read(input);
       } else {
         input.skip(ftype);
@@ -2045,7 +2049,7 @@ BloomFilterHeader.prototype.read = function(input) {
       break;
       case 3:
       if (ftype == Thrift.Type.STRUCT) {
-        this.hash = new BloomFilterHash();
+        this.hash = new ttypes.BloomFilterHash();
         this.hash.read(input);
       } else {
         input.skip(ftype);
@@ -2053,7 +2057,7 @@ BloomFilterHeader.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.STRUCT) {
-        this.compression = new BloomFilterCompression();
+        this.compression = new ttypes.BloomFilterCompression();
         this.compression.read(input);
       } else {
         input.skip(ftype);
@@ -2095,7 +2099,7 @@ BloomFilterHeader.prototype.write = function(output) {
   return;
 };
 
-PageHeader = function(args) {
+var PageHeader = module.exports.PageHeader = function(args) {
   this.type = null;
   this.uncompressed_page_size = null;
   this.compressed_page_size = null;
@@ -2124,16 +2128,16 @@ PageHeader = function(args) {
       this.crc = args.crc;
     }
     if (args.data_page_header !== undefined && args.data_page_header !== null) {
-      this.data_page_header = new DataPageHeader(args.data_page_header);
+      this.data_page_header = new ttypes.DataPageHeader(args.data_page_header);
     }
     if (args.index_page_header !== undefined && args.index_page_header !== null) {
-      this.index_page_header = new IndexPageHeader(args.index_page_header);
+      this.index_page_header = new ttypes.IndexPageHeader(args.index_page_header);
     }
     if (args.dictionary_page_header !== undefined && args.dictionary_page_header !== null) {
-      this.dictionary_page_header = new DictionaryPageHeader(args.dictionary_page_header);
+      this.dictionary_page_header = new ttypes.DictionaryPageHeader(args.dictionary_page_header);
     }
     if (args.data_page_header_v2 !== undefined && args.data_page_header_v2 !== null) {
-      this.data_page_header_v2 = new DataPageHeaderV2(args.data_page_header_v2);
+      this.data_page_header_v2 = new ttypes.DataPageHeaderV2(args.data_page_header_v2);
     }
   }
 };
@@ -2150,35 +2154,35 @@ PageHeader.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.type = input.readI32().value;
+        this.type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.uncompressed_page_size = input.readI32().value;
+        this.uncompressed_page_size = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.compressed_page_size = input.readI32().value;
+        this.compressed_page_size = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.crc = input.readI32().value;
+        this.crc = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.STRUCT) {
-        this.data_page_header = new DataPageHeader();
+        this.data_page_header = new ttypes.DataPageHeader();
         this.data_page_header.read(input);
       } else {
         input.skip(ftype);
@@ -2186,7 +2190,7 @@ PageHeader.prototype.read = function(input) {
       break;
       case 6:
       if (ftype == Thrift.Type.STRUCT) {
-        this.index_page_header = new IndexPageHeader();
+        this.index_page_header = new ttypes.IndexPageHeader();
         this.index_page_header.read(input);
       } else {
         input.skip(ftype);
@@ -2194,7 +2198,7 @@ PageHeader.prototype.read = function(input) {
       break;
       case 7:
       if (ftype == Thrift.Type.STRUCT) {
-        this.dictionary_page_header = new DictionaryPageHeader();
+        this.dictionary_page_header = new ttypes.DictionaryPageHeader();
         this.dictionary_page_header.read(input);
       } else {
         input.skip(ftype);
@@ -2202,7 +2206,7 @@ PageHeader.prototype.read = function(input) {
       break;
       case 8:
       if (ftype == Thrift.Type.STRUCT) {
-        this.data_page_header_v2 = new DataPageHeaderV2();
+        this.data_page_header_v2 = new ttypes.DataPageHeaderV2();
         this.data_page_header_v2.read(input);
       } else {
         input.skip(ftype);
@@ -2264,7 +2268,7 @@ PageHeader.prototype.write = function(output) {
   return;
 };
 
-KeyValue = function(args) {
+var KeyValue = module.exports.KeyValue = function(args) {
   this.key = null;
   this.value = null;
   if (args) {
@@ -2291,14 +2295,14 @@ KeyValue.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.key = input.readString().value;
+        this.key = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.value = input.readString().value;
+        this.value = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -2329,7 +2333,7 @@ KeyValue.prototype.write = function(output) {
   return;
 };
 
-SortingColumn = function(args) {
+var SortingColumn = module.exports.SortingColumn = function(args) {
   this.column_idx = null;
   this.descending = null;
   this.nulls_first = null;
@@ -2364,21 +2368,21 @@ SortingColumn.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.column_idx = input.readI32().value;
+        this.column_idx = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.BOOL) {
-        this.descending = input.readBool().value;
+        this.descending = input.readBool();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.BOOL) {
-        this.nulls_first = input.readBool().value;
+        this.nulls_first = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -2414,7 +2418,7 @@ SortingColumn.prototype.write = function(output) {
   return;
 };
 
-PageEncodingStats = function(args) {
+var PageEncodingStats = module.exports.PageEncodingStats = function(args) {
   this.page_type = null;
   this.encoding = null;
   this.count = null;
@@ -2449,21 +2453,21 @@ PageEncodingStats.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.page_type = input.readI32().value;
+        this.page_type = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.encoding = input.readI32().value;
+        this.encoding = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I32) {
-        this.count = input.readI32().value;
+        this.count = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -2499,7 +2503,7 @@ PageEncodingStats.prototype.write = function(output) {
   return;
 };
 
-ColumnMetaData = function(args) {
+var ColumnMetaData = module.exports.ColumnMetaData = function(args) {
   this.type = null;
   this.encodings = null;
   this.path_in_schema = null;
@@ -2551,7 +2555,7 @@ ColumnMetaData = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field total_compressed_size is unset!');
     }
     if (args.key_value_metadata !== undefined && args.key_value_metadata !== null) {
-      this.key_value_metadata = Thrift.copyList(args.key_value_metadata, [KeyValue]);
+      this.key_value_metadata = Thrift.copyList(args.key_value_metadata, [ttypes.KeyValue]);
     }
     if (args.data_page_offset !== undefined && args.data_page_offset !== null) {
       this.data_page_offset = args.data_page_offset;
@@ -2565,10 +2569,10 @@ ColumnMetaData = function(args) {
       this.dictionary_page_offset = args.dictionary_page_offset;
     }
     if (args.statistics !== undefined && args.statistics !== null) {
-      this.statistics = new Statistics(args.statistics);
+      this.statistics = new ttypes.Statistics(args.statistics);
     }
     if (args.encoding_stats !== undefined && args.encoding_stats !== null) {
-      this.encoding_stats = Thrift.copyList(args.encoding_stats, [PageEncodingStats]);
+      this.encoding_stats = Thrift.copyList(args.encoding_stats, [ttypes.PageEncodingStats]);
     }
     if (args.bloom_filter_offset !== undefined && args.bloom_filter_offset !== null) {
       this.bloom_filter_offset = args.bloom_filter_offset;
@@ -2588,7 +2592,7 @@ ColumnMetaData.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.type = input.readI32().value;
+        this.type = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -2600,7 +2604,7 @@ ColumnMetaData.prototype.read = function(input) {
         var _size0 = _rtmp31.size || 0;
         for (var _i2 = 0; _i2 < _size0; ++_i2) {
           var elem3 = null;
-          elem3 = input.readI32().value;
+          elem3 = input.readI32();
           this.encodings.push(elem3);
         }
         input.readListEnd();
@@ -2615,7 +2619,7 @@ ColumnMetaData.prototype.read = function(input) {
         var _size4 = _rtmp35.size || 0;
         for (var _i6 = 0; _i6 < _size4; ++_i6) {
           var elem7 = null;
-          elem7 = input.readString().value;
+          elem7 = input.readString();
           this.path_in_schema.push(elem7);
         }
         input.readListEnd();
@@ -2625,28 +2629,28 @@ ColumnMetaData.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.codec = input.readI32().value;
+        this.codec = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I64) {
-        this.num_values = input.readI64().value;
+        this.num_values = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I64) {
-        this.total_uncompressed_size = input.readI64().value;
+        this.total_uncompressed_size = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I64) {
-        this.total_compressed_size = input.readI64().value;
+        this.total_compressed_size = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -2658,7 +2662,7 @@ ColumnMetaData.prototype.read = function(input) {
         var _size8 = _rtmp39.size || 0;
         for (var _i10 = 0; _i10 < _size8; ++_i10) {
           var elem11 = null;
-          elem11 = new KeyValue();
+          elem11 = new ttypes.KeyValue();
           elem11.read(input);
           this.key_value_metadata.push(elem11);
         }
@@ -2669,28 +2673,28 @@ ColumnMetaData.prototype.read = function(input) {
       break;
       case 9:
       if (ftype == Thrift.Type.I64) {
-        this.data_page_offset = input.readI64().value;
+        this.data_page_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 10:
       if (ftype == Thrift.Type.I64) {
-        this.index_page_offset = input.readI64().value;
+        this.index_page_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 11:
       if (ftype == Thrift.Type.I64) {
-        this.dictionary_page_offset = input.readI64().value;
+        this.dictionary_page_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 12:
       if (ftype == Thrift.Type.STRUCT) {
-        this.statistics = new Statistics();
+        this.statistics = new ttypes.Statistics();
         this.statistics.read(input);
       } else {
         input.skip(ftype);
@@ -2703,7 +2707,7 @@ ColumnMetaData.prototype.read = function(input) {
         var _size12 = _rtmp313.size || 0;
         for (var _i14 = 0; _i14 < _size12; ++_i14) {
           var elem15 = null;
-          elem15 = new PageEncodingStats();
+          elem15 = new ttypes.PageEncodingStats();
           elem15.read(input);
           this.encoding_stats.push(elem15);
         }
@@ -2714,7 +2718,7 @@ ColumnMetaData.prototype.read = function(input) {
       break;
       case 14:
       if (ftype == Thrift.Type.I64) {
-        this.bloom_filter_offset = input.readI64().value;
+        this.bloom_filter_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -2833,7 +2837,7 @@ ColumnMetaData.prototype.write = function(output) {
   return;
 };
 
-EncryptionWithFooterKey = function(args) {
+var EncryptionWithFooterKey = module.exports.EncryptionWithFooterKey = function(args) {
 };
 EncryptionWithFooterKey.prototype = {};
 EncryptionWithFooterKey.prototype.read = function(input) {
@@ -2858,7 +2862,7 @@ EncryptionWithFooterKey.prototype.write = function(output) {
   return;
 };
 
-EncryptionWithColumnKey = function(args) {
+var EncryptionWithColumnKey = module.exports.EncryptionWithColumnKey = function(args) {
   this.path_in_schema = null;
   this.key_metadata = null;
   if (args) {
@@ -2890,7 +2894,7 @@ EncryptionWithColumnKey.prototype.read = function(input) {
         var _size20 = _rtmp321.size || 0;
         for (var _i22 = 0; _i22 < _size20; ++_i22) {
           var elem23 = null;
-          elem23 = input.readString().value;
+          elem23 = input.readString();
           this.path_in_schema.push(elem23);
         }
         input.readListEnd();
@@ -2900,7 +2904,7 @@ EncryptionWithColumnKey.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.key_metadata = input.readBinary().value;
+        this.key_metadata = input.readBinary();
       } else {
         input.skip(ftype);
       }
@@ -2938,15 +2942,15 @@ EncryptionWithColumnKey.prototype.write = function(output) {
   return;
 };
 
-ColumnCryptoMetaData = function(args) {
+var ColumnCryptoMetaData = module.exports.ColumnCryptoMetaData = function(args) {
   this.ENCRYPTION_WITH_FOOTER_KEY = null;
   this.ENCRYPTION_WITH_COLUMN_KEY = null;
   if (args) {
     if (args.ENCRYPTION_WITH_FOOTER_KEY !== undefined && args.ENCRYPTION_WITH_FOOTER_KEY !== null) {
-      this.ENCRYPTION_WITH_FOOTER_KEY = new EncryptionWithFooterKey(args.ENCRYPTION_WITH_FOOTER_KEY);
+      this.ENCRYPTION_WITH_FOOTER_KEY = new ttypes.EncryptionWithFooterKey(args.ENCRYPTION_WITH_FOOTER_KEY);
     }
     if (args.ENCRYPTION_WITH_COLUMN_KEY !== undefined && args.ENCRYPTION_WITH_COLUMN_KEY !== null) {
-      this.ENCRYPTION_WITH_COLUMN_KEY = new EncryptionWithColumnKey(args.ENCRYPTION_WITH_COLUMN_KEY);
+      this.ENCRYPTION_WITH_COLUMN_KEY = new ttypes.EncryptionWithColumnKey(args.ENCRYPTION_WITH_COLUMN_KEY);
     }
   }
 };
@@ -2963,7 +2967,7 @@ ColumnCryptoMetaData.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.ENCRYPTION_WITH_FOOTER_KEY = new EncryptionWithFooterKey();
+        this.ENCRYPTION_WITH_FOOTER_KEY = new ttypes.EncryptionWithFooterKey();
         this.ENCRYPTION_WITH_FOOTER_KEY.read(input);
       } else {
         input.skip(ftype);
@@ -2971,7 +2975,7 @@ ColumnCryptoMetaData.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.ENCRYPTION_WITH_COLUMN_KEY = new EncryptionWithColumnKey();
+        this.ENCRYPTION_WITH_COLUMN_KEY = new ttypes.EncryptionWithColumnKey();
         this.ENCRYPTION_WITH_COLUMN_KEY.read(input);
       } else {
         input.skip(ftype);
@@ -3003,7 +3007,7 @@ ColumnCryptoMetaData.prototype.write = function(output) {
   return;
 };
 
-ColumnChunk = function(args) {
+var ColumnChunk = module.exports.ColumnChunk = function(args) {
   this.file_path = null;
   this.file_offset = null;
   this.meta_data = null;
@@ -3023,7 +3027,7 @@ ColumnChunk = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field file_offset is unset!');
     }
     if (args.meta_data !== undefined && args.meta_data !== null) {
-      this.meta_data = new ColumnMetaData(args.meta_data);
+      this.meta_data = new ttypes.ColumnMetaData(args.meta_data);
     }
     if (args.offset_index_offset !== undefined && args.offset_index_offset !== null) {
       this.offset_index_offset = args.offset_index_offset;
@@ -3038,7 +3042,7 @@ ColumnChunk = function(args) {
       this.column_index_length = args.column_index_length;
     }
     if (args.crypto_metadata !== undefined && args.crypto_metadata !== null) {
-      this.crypto_metadata = new ColumnCryptoMetaData(args.crypto_metadata);
+      this.crypto_metadata = new ttypes.ColumnCryptoMetaData(args.crypto_metadata);
     }
     if (args.encrypted_column_metadata !== undefined && args.encrypted_column_metadata !== null) {
       this.encrypted_column_metadata = args.encrypted_column_metadata;
@@ -3058,21 +3062,21 @@ ColumnChunk.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.file_path = input.readString().value;
+        this.file_path = input.readString();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I64) {
-        this.file_offset = input.readI64().value;
+        this.file_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.STRUCT) {
-        this.meta_data = new ColumnMetaData();
+        this.meta_data = new ttypes.ColumnMetaData();
         this.meta_data.read(input);
       } else {
         input.skip(ftype);
@@ -3080,35 +3084,35 @@ ColumnChunk.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.I64) {
-        this.offset_index_offset = input.readI64().value;
+        this.offset_index_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 5:
       if (ftype == Thrift.Type.I32) {
-        this.offset_index_length = input.readI32().value;
+        this.offset_index_length = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I64) {
-        this.column_index_offset = input.readI64().value;
+        this.column_index_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I32) {
-        this.column_index_length = input.readI32().value;
+        this.column_index_length = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 8:
       if (ftype == Thrift.Type.STRUCT) {
-        this.crypto_metadata = new ColumnCryptoMetaData();
+        this.crypto_metadata = new ttypes.ColumnCryptoMetaData();
         this.crypto_metadata.read(input);
       } else {
         input.skip(ftype);
@@ -3116,7 +3120,7 @@ ColumnChunk.prototype.read = function(input) {
       break;
       case 9:
       if (ftype == Thrift.Type.STRING) {
-        this.encrypted_column_metadata = input.readBinary().value;
+        this.encrypted_column_metadata = input.readBinary();
       } else {
         input.skip(ftype);
       }
@@ -3182,7 +3186,7 @@ ColumnChunk.prototype.write = function(output) {
   return;
 };
 
-RowGroup = function(args) {
+var RowGroup = module.exports.RowGroup = function(args) {
   this.columns = null;
   this.total_byte_size = null;
   this.num_rows = null;
@@ -3192,7 +3196,7 @@ RowGroup = function(args) {
   this.ordinal = null;
   if (args) {
     if (args.columns !== undefined && args.columns !== null) {
-      this.columns = Thrift.copyList(args.columns, [ColumnChunk]);
+      this.columns = Thrift.copyList(args.columns, [ttypes.ColumnChunk]);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field columns is unset!');
     }
@@ -3207,7 +3211,7 @@ RowGroup = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field num_rows is unset!');
     }
     if (args.sorting_columns !== undefined && args.sorting_columns !== null) {
-      this.sorting_columns = Thrift.copyList(args.sorting_columns, [SortingColumn]);
+      this.sorting_columns = Thrift.copyList(args.sorting_columns, [ttypes.SortingColumn]);
     }
     if (args.file_offset !== undefined && args.file_offset !== null) {
       this.file_offset = args.file_offset;
@@ -3238,7 +3242,7 @@ RowGroup.prototype.read = function(input) {
         var _size25 = _rtmp326.size || 0;
         for (var _i27 = 0; _i27 < _size25; ++_i27) {
           var elem28 = null;
-          elem28 = new ColumnChunk();
+          elem28 = new ttypes.ColumnChunk();
           elem28.read(input);
           this.columns.push(elem28);
         }
@@ -3249,14 +3253,14 @@ RowGroup.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.I64) {
-        this.total_byte_size = input.readI64().value;
+        this.total_byte_size = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I64) {
-        this.num_rows = input.readI64().value;
+        this.num_rows = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -3268,7 +3272,7 @@ RowGroup.prototype.read = function(input) {
         var _size29 = _rtmp330.size || 0;
         for (var _i31 = 0; _i31 < _size29; ++_i31) {
           var elem32 = null;
-          elem32 = new SortingColumn();
+          elem32 = new ttypes.SortingColumn();
           elem32.read(input);
           this.sorting_columns.push(elem32);
         }
@@ -3279,21 +3283,21 @@ RowGroup.prototype.read = function(input) {
       break;
       case 5:
       if (ftype == Thrift.Type.I64) {
-        this.file_offset = input.readI64().value;
+        this.file_offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 6:
       if (ftype == Thrift.Type.I64) {
-        this.total_compressed_size = input.readI64().value;
+        this.total_compressed_size = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 7:
       if (ftype == Thrift.Type.I16) {
-        this.ordinal = input.readI16().value;
+        this.ordinal = input.readI16();
       } else {
         input.skip(ftype);
       }
@@ -3363,7 +3367,7 @@ RowGroup.prototype.write = function(output) {
   return;
 };
 
-TypeDefinedOrder = function(args) {
+var TypeDefinedOrder = module.exports.TypeDefinedOrder = function(args) {
 };
 TypeDefinedOrder.prototype = {};
 TypeDefinedOrder.prototype.read = function(input) {
@@ -3388,11 +3392,11 @@ TypeDefinedOrder.prototype.write = function(output) {
   return;
 };
 
-ColumnOrder = function(args) {
+var ColumnOrder = module.exports.ColumnOrder = function(args) {
   this.TYPE_ORDER = null;
   if (args) {
     if (args.TYPE_ORDER !== undefined && args.TYPE_ORDER !== null) {
-      this.TYPE_ORDER = new TypeDefinedOrder(args.TYPE_ORDER);
+      this.TYPE_ORDER = new ttypes.TypeDefinedOrder(args.TYPE_ORDER);
     }
   }
 };
@@ -3409,7 +3413,7 @@ ColumnOrder.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.TYPE_ORDER = new TypeDefinedOrder();
+        this.TYPE_ORDER = new ttypes.TypeDefinedOrder();
         this.TYPE_ORDER.read(input);
       } else {
         input.skip(ftype);
@@ -3439,7 +3443,7 @@ ColumnOrder.prototype.write = function(output) {
   return;
 };
 
-PageLocation = function(args) {
+var PageLocation = module.exports.PageLocation = function(args) {
   this.offset = null;
   this.compressed_page_size = null;
   this.first_row_index = null;
@@ -3474,21 +3478,21 @@ PageLocation.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I64) {
-        this.offset = input.readI64().value;
+        this.offset = input.readI64();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.I32) {
-        this.compressed_page_size = input.readI32().value;
+        this.compressed_page_size = input.readI32();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.I64) {
-        this.first_row_index = input.readI64().value;
+        this.first_row_index = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -3524,11 +3528,11 @@ PageLocation.prototype.write = function(output) {
   return;
 };
 
-OffsetIndex = function(args) {
+var OffsetIndex = module.exports.OffsetIndex = function(args) {
   this.page_locations = null;
   if (args) {
     if (args.page_locations !== undefined && args.page_locations !== null) {
-      this.page_locations = Thrift.copyList(args.page_locations, [PageLocation]);
+      this.page_locations = Thrift.copyList(args.page_locations, [ttypes.PageLocation]);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field page_locations is unset!');
     }
@@ -3552,7 +3556,7 @@ OffsetIndex.prototype.read = function(input) {
         var _size35 = _rtmp336.size || 0;
         for (var _i37 = 0; _i37 < _size35; ++_i37) {
           var elem38 = null;
-          elem38 = new PageLocation();
+          elem38 = new ttypes.PageLocation();
           elem38.read(input);
           this.page_locations.push(elem38);
         }
@@ -3592,7 +3596,7 @@ OffsetIndex.prototype.write = function(output) {
   return;
 };
 
-ColumnIndex = function(args) {
+var ColumnIndex = module.exports.ColumnIndex = function(args) {
   this.null_pages = null;
   this.min_values = null;
   this.max_values = null;
@@ -3642,7 +3646,7 @@ ColumnIndex.prototype.read = function(input) {
         var _size40 = _rtmp341.size || 0;
         for (var _i42 = 0; _i42 < _size40; ++_i42) {
           var elem43 = null;
-          elem43 = input.readBool().value;
+          elem43 = input.readBool();
           this.null_pages.push(elem43);
         }
         input.readListEnd();
@@ -3657,7 +3661,7 @@ ColumnIndex.prototype.read = function(input) {
         var _size44 = _rtmp345.size || 0;
         for (var _i46 = 0; _i46 < _size44; ++_i46) {
           var elem47 = null;
-          elem47 = input.readBinary().value;
+          elem47 = input.readBinary();
           this.min_values.push(elem47);
         }
         input.readListEnd();
@@ -3672,7 +3676,7 @@ ColumnIndex.prototype.read = function(input) {
         var _size48 = _rtmp349.size || 0;
         for (var _i50 = 0; _i50 < _size48; ++_i50) {
           var elem51 = null;
-          elem51 = input.readBinary().value;
+          elem51 = input.readBinary();
           this.max_values.push(elem51);
         }
         input.readListEnd();
@@ -3682,7 +3686,7 @@ ColumnIndex.prototype.read = function(input) {
       break;
       case 4:
       if (ftype == Thrift.Type.I32) {
-        this.boundary_order = input.readI32().value;
+        this.boundary_order = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -3694,7 +3698,7 @@ ColumnIndex.prototype.read = function(input) {
         var _size52 = _rtmp353.size || 0;
         for (var _i54 = 0; _i54 < _size52; ++_i54) {
           var elem55 = null;
-          elem55 = input.readI64().value;
+          elem55 = input.readI64();
           this.null_counts.push(elem55);
         }
         input.readListEnd();
@@ -3771,7 +3775,7 @@ ColumnIndex.prototype.write = function(output) {
   return;
 };
 
-AesGcmV1 = function(args) {
+var AesGcmV1 = module.exports.AesGcmV1 = function(args) {
   this.aad_prefix = null;
   this.aad_file_unique = null;
   this.supply_aad_prefix = null;
@@ -3800,21 +3804,21 @@ AesGcmV1.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.aad_prefix = input.readBinary().value;
+        this.aad_prefix = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.aad_file_unique = input.readBinary().value;
+        this.aad_file_unique = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.BOOL) {
-        this.supply_aad_prefix = input.readBool().value;
+        this.supply_aad_prefix = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -3850,7 +3854,7 @@ AesGcmV1.prototype.write = function(output) {
   return;
 };
 
-AesGcmCtrV1 = function(args) {
+var AesGcmCtrV1 = module.exports.AesGcmCtrV1 = function(args) {
   this.aad_prefix = null;
   this.aad_file_unique = null;
   this.supply_aad_prefix = null;
@@ -3879,21 +3883,21 @@ AesGcmCtrV1.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRING) {
-        this.aad_prefix = input.readBinary().value;
+        this.aad_prefix = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.aad_file_unique = input.readBinary().value;
+        this.aad_file_unique = input.readBinary();
       } else {
         input.skip(ftype);
       }
       break;
       case 3:
       if (ftype == Thrift.Type.BOOL) {
-        this.supply_aad_prefix = input.readBool().value;
+        this.supply_aad_prefix = input.readBool();
       } else {
         input.skip(ftype);
       }
@@ -3929,15 +3933,15 @@ AesGcmCtrV1.prototype.write = function(output) {
   return;
 };
 
-EncryptionAlgorithm = function(args) {
+var EncryptionAlgorithm = module.exports.EncryptionAlgorithm = function(args) {
   this.AES_GCM_V1 = null;
   this.AES_GCM_CTR_V1 = null;
   if (args) {
     if (args.AES_GCM_V1 !== undefined && args.AES_GCM_V1 !== null) {
-      this.AES_GCM_V1 = new AesGcmV1(args.AES_GCM_V1);
+      this.AES_GCM_V1 = new ttypes.AesGcmV1(args.AES_GCM_V1);
     }
     if (args.AES_GCM_CTR_V1 !== undefined && args.AES_GCM_CTR_V1 !== null) {
-      this.AES_GCM_CTR_V1 = new AesGcmCtrV1(args.AES_GCM_CTR_V1);
+      this.AES_GCM_CTR_V1 = new ttypes.AesGcmCtrV1(args.AES_GCM_CTR_V1);
     }
   }
 };
@@ -3954,7 +3958,7 @@ EncryptionAlgorithm.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.AES_GCM_V1 = new AesGcmV1();
+        this.AES_GCM_V1 = new ttypes.AesGcmV1();
         this.AES_GCM_V1.read(input);
       } else {
         input.skip(ftype);
@@ -3962,7 +3966,7 @@ EncryptionAlgorithm.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRUCT) {
-        this.AES_GCM_CTR_V1 = new AesGcmCtrV1();
+        this.AES_GCM_CTR_V1 = new ttypes.AesGcmCtrV1();
         this.AES_GCM_CTR_V1.read(input);
       } else {
         input.skip(ftype);
@@ -3994,7 +3998,7 @@ EncryptionAlgorithm.prototype.write = function(output) {
   return;
 };
 
-FileMetaData = function(args) {
+var FileMetaData = module.exports.FileMetaData = function(args) {
   this.version = null;
   this.schema = null;
   this.num_rows = null;
@@ -4011,7 +4015,7 @@ FileMetaData = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field version is unset!');
     }
     if (args.schema !== undefined && args.schema !== null) {
-      this.schema = Thrift.copyList(args.schema, [SchemaElement]);
+      this.schema = Thrift.copyList(args.schema, [ttypes.SchemaElement]);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field schema is unset!');
     }
@@ -4021,21 +4025,21 @@ FileMetaData = function(args) {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field num_rows is unset!');
     }
     if (args.row_groups !== undefined && args.row_groups !== null) {
-      this.row_groups = Thrift.copyList(args.row_groups, [RowGroup]);
+      this.row_groups = Thrift.copyList(args.row_groups, [ttypes.RowGroup]);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field row_groups is unset!');
     }
     if (args.key_value_metadata !== undefined && args.key_value_metadata !== null) {
-      this.key_value_metadata = Thrift.copyList(args.key_value_metadata, [KeyValue]);
+      this.key_value_metadata = Thrift.copyList(args.key_value_metadata, [ttypes.KeyValue]);
     }
     if (args.created_by !== undefined && args.created_by !== null) {
       this.created_by = args.created_by;
     }
     if (args.column_orders !== undefined && args.column_orders !== null) {
-      this.column_orders = Thrift.copyList(args.column_orders, [ColumnOrder]);
+      this.column_orders = Thrift.copyList(args.column_orders, [ttypes.ColumnOrder]);
     }
     if (args.encryption_algorithm !== undefined && args.encryption_algorithm !== null) {
-      this.encryption_algorithm = new EncryptionAlgorithm(args.encryption_algorithm);
+      this.encryption_algorithm = new ttypes.EncryptionAlgorithm(args.encryption_algorithm);
     }
     if (args.footer_signing_key_metadata !== undefined && args.footer_signing_key_metadata !== null) {
       this.footer_signing_key_metadata = args.footer_signing_key_metadata;
@@ -4055,7 +4059,7 @@ FileMetaData.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.I32) {
-        this.version = input.readI32().value;
+        this.version = input.readI32();
       } else {
         input.skip(ftype);
       }
@@ -4067,7 +4071,7 @@ FileMetaData.prototype.read = function(input) {
         var _size60 = _rtmp361.size || 0;
         for (var _i62 = 0; _i62 < _size60; ++_i62) {
           var elem63 = null;
-          elem63 = new SchemaElement();
+          elem63 = new ttypes.SchemaElement();
           elem63.read(input);
           this.schema.push(elem63);
         }
@@ -4078,7 +4082,7 @@ FileMetaData.prototype.read = function(input) {
       break;
       case 3:
       if (ftype == Thrift.Type.I64) {
-        this.num_rows = input.readI64().value;
+        this.num_rows = input.readI64();
       } else {
         input.skip(ftype);
       }
@@ -4090,7 +4094,7 @@ FileMetaData.prototype.read = function(input) {
         var _size64 = _rtmp365.size || 0;
         for (var _i66 = 0; _i66 < _size64; ++_i66) {
           var elem67 = null;
-          elem67 = new RowGroup();
+          elem67 = new ttypes.RowGroup();
           elem67.read(input);
           this.row_groups.push(elem67);
         }
@@ -4106,7 +4110,7 @@ FileMetaData.prototype.read = function(input) {
         var _size68 = _rtmp369.size || 0;
         for (var _i70 = 0; _i70 < _size68; ++_i70) {
           var elem71 = null;
-          elem71 = new KeyValue();
+          elem71 = new ttypes.KeyValue();
           elem71.read(input);
           this.key_value_metadata.push(elem71);
         }
@@ -4117,7 +4121,7 @@ FileMetaData.prototype.read = function(input) {
       break;
       case 6:
       if (ftype == Thrift.Type.STRING) {
-        this.created_by = input.readString().value;
+        this.created_by = input.readString();
       } else {
         input.skip(ftype);
       }
@@ -4129,7 +4133,7 @@ FileMetaData.prototype.read = function(input) {
         var _size72 = _rtmp373.size || 0;
         for (var _i74 = 0; _i74 < _size72; ++_i74) {
           var elem75 = null;
-          elem75 = new ColumnOrder();
+          elem75 = new ttypes.ColumnOrder();
           elem75.read(input);
           this.column_orders.push(elem75);
         }
@@ -4140,7 +4144,7 @@ FileMetaData.prototype.read = function(input) {
       break;
       case 8:
       if (ftype == Thrift.Type.STRUCT) {
-        this.encryption_algorithm = new EncryptionAlgorithm();
+        this.encryption_algorithm = new ttypes.EncryptionAlgorithm();
         this.encryption_algorithm.read(input);
       } else {
         input.skip(ftype);
@@ -4148,7 +4152,7 @@ FileMetaData.prototype.read = function(input) {
       break;
       case 9:
       if (ftype == Thrift.Type.STRING) {
-        this.footer_signing_key_metadata = input.readBinary().value;
+        this.footer_signing_key_metadata = input.readBinary();
       } else {
         input.skip(ftype);
       }
@@ -4242,12 +4246,12 @@ FileMetaData.prototype.write = function(output) {
   return;
 };
 
-FileCryptoMetaData = function(args) {
+var FileCryptoMetaData = module.exports.FileCryptoMetaData = function(args) {
   this.encryption_algorithm = null;
   this.key_metadata = null;
   if (args) {
     if (args.encryption_algorithm !== undefined && args.encryption_algorithm !== null) {
-      this.encryption_algorithm = new EncryptionAlgorithm(args.encryption_algorithm);
+      this.encryption_algorithm = new ttypes.EncryptionAlgorithm(args.encryption_algorithm);
     } else {
       throw new Thrift.TProtocolException(Thrift.TProtocolExceptionType.UNKNOWN, 'Required field encryption_algorithm is unset!');
     }
@@ -4269,7 +4273,7 @@ FileCryptoMetaData.prototype.read = function(input) {
     switch (fid) {
       case 1:
       if (ftype == Thrift.Type.STRUCT) {
-        this.encryption_algorithm = new EncryptionAlgorithm();
+        this.encryption_algorithm = new ttypes.EncryptionAlgorithm();
         this.encryption_algorithm.read(input);
       } else {
         input.skip(ftype);
@@ -4277,7 +4281,7 @@ FileCryptoMetaData.prototype.read = function(input) {
       break;
       case 2:
       if (ftype == Thrift.Type.STRING) {
-        this.key_metadata = input.readBinary().value;
+        this.key_metadata = input.readBinary();
       } else {
         input.skip(ftype);
       }

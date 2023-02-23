@@ -1,3 +1,5 @@
+import {LogicalType} from '../../thrift/parquet_types'
+
 export type ParquetCodec = 'PLAIN' | 'RLE'
 export type ParquetCompression = 'UNCOMPRESSED' | 'GZIP' | 'SNAPPY' | 'LZO' | 'BROTLI' | 'LZ4'
 export type RepetitionType = 'REQUIRED' | 'OPTIONAL' | 'REPEATED'
@@ -72,20 +74,17 @@ export interface FieldDefinition {
      * schema does not have a way to represent fields that are both optional and repeated.
      */
     repeated?: boolean
-    fields?: SchemaDefinition
 }
 
-export type ParquetField = CommonParquetField | NestedParquetField
-
-export type CommonParquetField = {
+export type ParquetField = {
     name: string
     path: string
-    key: string
+    key?: string
     primitiveType?: PrimitiveType
     originalType?: OriginalType
     repetitionType: RepetitionType
     typeLength?: number
-    encoding: ParquetCodec
+    encoding?: ParquetCodec
     compression?: ParquetCompression
 
     /**
@@ -123,13 +122,6 @@ export type CommonParquetField = {
      * a non-zero dLevelMax.
      */
     dLevelMax: number
-    fieldCount?: number
-    isNested?: boolean
-}
-
-type NestedParquetField = CommonParquetField & {
-    isNested: true
-    fields: Record<string, CommonParquetField>
 }
 
 export interface ParquetBuffer {
@@ -137,15 +129,7 @@ export interface ParquetBuffer {
     columnData: Record<string, ParquetColumnData>
 }
 
-export type ParquetValueArray =
-    | boolean[]
-    | number[]
-    | string[]
-    | Buffer[]
-    | (string | Buffer)[]
-    | Int32Array
-    | Float32Array
-    | Float64Array
+export type ParquetValueArray = any[]
 
 export interface ParquetColumnData {
     /**
@@ -156,7 +140,7 @@ export interface ParquetColumnData {
      *
      * The field path refers to the field and its parent fields if it is nested.
      */
-    dLevels: Int32Array | number[]
+    dlevels: number[]
 
     /**
      * For fields which have REPEATED fields in their field path, repetition levels may be specified.
@@ -183,7 +167,7 @@ export interface ParquetColumnData {
      * in a row, 1 for the first element of the second set of values for the first repeated field in
      * the field path, and 2 for subsequent elements in a single group/array.
      */
-    rLevels: Int32Array | number[]
+    rlevels: number[]
 
     /**
      * Values read from the column.  May be returned as a primitive
@@ -194,7 +178,7 @@ export interface ParquetColumnData {
      * - Float32Array: FLOAT
      * - Float64Array: DOUBLE
      */
-    values: ParquetValueArray
+    values: any[]
 
     /**
      * Value count

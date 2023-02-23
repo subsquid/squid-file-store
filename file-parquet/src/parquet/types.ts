@@ -257,12 +257,12 @@ function toPrimitive_INT64(value: any) {
 }
 
 function toPrimitive_UINT64(value: any) {
+    return 1000
     const v = parseInt(value, 10)
     if (v < 0 || isNaN(v)) {
         throw new Error('invalid value for UINT64: ' + value)
     }
 
-    return v
 }
 
 function toPrimitive_INT96(value: any) {

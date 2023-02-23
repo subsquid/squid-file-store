@@ -1,23 +1,21 @@
 import assert from 'assert'
-import {Table as ArrowTable, Builder, DataType, makeBuilder, tableToIPC, RecordBatchWriter} from 'apache-arrow'
-import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
+import {ParquetCompression, ParquetSchema, ParquetType, ParquetWriter} from './parquet'
+
+export {ParquetCompression}
 
 export interface Type<T> {
-    arrowDataType: DataType
-    prepare(value: T): any
+    parquetType: ParquetType
 }
 
-export {Compression}
-
 export interface TableOptions {
-    compression?: Compression
+    compression?: ParquetCompression
     dictionary?: boolean
 }
 
 export interface ColumnOptions {
     nullable?: boolean
-    compression?: Compression
+    compression?: ParquetCompression
     dictionary?: boolean
 }
 
@@ -55,7 +53,7 @@ export class Table<T extends TableSchema> implements ITable<Convert<T>> {
                 data: schema[column],
             })
         }
-        this.options = {compression: Compression.UNCOMPRESSED, dictionary: false, ...options}
+        this.options = {compression: 'UNCOMPRESSED', dictionary: false, ...options}
     }
 
     createWriter(): TableWriter<Convert<T>> {
@@ -64,20 +62,13 @@ export class Table<T extends TableSchema> implements ITable<Convert<T>> {
 }
 
 class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
-    private columnBuilders: Record<string, Builder> = {}
-    private writeProperties: WriterProperties
-    private _size = 0
+    private writer: ParquetWriter
+    private _size = Infinity
 
     constructor(private columns: Column[], options: Required<TableOptions>) {
-        let builer = new WriterPropertiesBuilder()
-        for (let column of columns) {
-            this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
-            builer = builer.setColumnDictionaryEnabled(column.name, column.data.options.dictionary)
-            builer = builer.setColumnCompression(column.name, column.data.options.compression)
-        }
-        builer = builer.setCompression(options.compression)
-        builer = builer.setDictionaryEnabled(options.dictionary)
-        this.writeProperties = builer.build()
+        this.writer = new ParquetWriter(
+            new ParquetSchema(Object.fromEntries(columns.map((c) => [c.name, {type: c.data.type.parquetType}])))
+        )
     }
 
     get size() {
@@ -85,16 +76,7 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     }
 
     flush() {
-        this._size = 0
-
-        let columnsData: Record<string, any> = {}
-        for (let column of this.columns) {
-            this.columnBuilders[column.name].finish()
-            columnsData[column.name] = this.columnBuilders[column.name].flush()
-        }
-        let arrowTable = new ArrowTable(columnsData)
-
-        return writeParquet(tableToIPC(arrowTable), this.writeProperties)
+        return this.writer.close()
     }
 
     write(record: T): this {
@@ -102,19 +84,9 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     }
 
     writeMany(records: T[]): this {
-        let newSize = 0
-        for (let column of this.columns) {
-            let columnBuilder = this.columnBuilders[column.name]
-            for (let record of records) {
-                let value = record[column.name]
-                if (value == null) {
-                    assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
-                }
-                columnBuilder.append(value == null ? null : column.data.type.prepare(value))
-            }
-            newSize += columnBuilder.byteLength
+        for (let rec of records) {
+            this.writer.appendRow(rec)
         }
-        this._size = newSize
 
         return this
     }
@@ -128,6 +100,6 @@ export function Column<T extends Type<any>, O extends ColumnOptions>(
 export function Column(type: Type<any>, options?: ColumnOptions): ColumnData {
     return {
         type,
-        options: {compression: Compression.UNCOMPRESSED, dictionary: false, nullable: false, ...options},
+        options: {compression: 'UNCOMPRESSED', dictionary: false, nullable: false, ...options},
     }
 }

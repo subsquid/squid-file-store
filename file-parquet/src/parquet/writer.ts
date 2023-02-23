@@ -1,9 +1,9 @@
 import {ParquetCodecOptions, PARQUET_CODEC} from './codec'
 import * as compression from './compression'
-import {ParquetCodec, ParquetField, ParquetValueArray, PrimitiveType} from './declare'
+import {ParquetCodec, ParquetColumnData, ParquetField, ParquetValueArray, PrimitiveType} from './declare'
 import {ParquetSchema} from './schema'
 import * as util from './util'
-import {ParquetWriteBuffer, ParquetWriteColumnData, shredRecord} from './shred'
+import {ParquetWriteBuffer, shredRecord} from './shred'
 import Int64 from 'node-int64'
 import {
     Encoding,
@@ -19,7 +19,8 @@ import {
     FileMetaData,
     FieldRepetitionType,
     ConvertedType,
-} from './thrift/parquet_types'
+    LogicalType,
+} from '../../thrift/parquet_types'
 
 /**
  * Parquet File Magic String
@@ -44,18 +45,9 @@ const PARQUET_RDLVL_TYPE = 'INT32'
 const PARQUET_RDLVL_ENCODING = 'RLE'
 
 export interface ParquetWriterOptions {
-    baseOffset: number
+    baseOffset?: number
     rowGroupSize?: number
     pageSize?: number
-    useDataPageV2?: boolean
-
-    // Write Stream Options
-    flags?: string
-    encoding?: string
-    fd?: number
-    mode?: number
-    autoClose?: boolean
-    start?: number
 }
 
 /**
@@ -63,7 +55,7 @@ export interface ParquetWriterOptions {
  * buffering/batching for performance, so close() must be called after all rows
  * are written.
  */
-export class ParquetWriter<T> {
+export class ParquetWriter {
     public schema: ParquetSchema
     public envelopeWriter: ParquetEnvelopeWriter
     public rowBuffer: ParquetWriteBuffer
@@ -73,35 +65,34 @@ export class ParquetWriter<T> {
     /**
      * Create a new buffered parquet writer for a given envelope writer
      */
-    constructor(schema: ParquetSchema, envelopeWriter: ParquetEnvelopeWriter, opts: ParquetWriterOptions) {
+    constructor(schema: ParquetSchema, opts?: ParquetWriterOptions) {
         this.schema = schema
-        this.envelopeWriter = envelopeWriter
-        this.rowBuffer = new ParquetWriteBuffer(schema)
-        this.rowGroupSize = opts.rowGroupSize || PARQUET_DEFAULT_ROW_GROUP_SIZE
+        this.envelopeWriter = new ParquetEnvelopeWriter(this.schema, 0)
+        this.rowBuffer = {columnData: {}, rowCount: 0}
+        this.rowGroupSize = opts?.rowGroupSize || PARQUET_DEFAULT_ROW_GROUP_SIZE
         this.closed = false
 
-        try {
-            envelopeWriter.writeHeader()
-        } catch (err) {
-            envelopeWriter.close()
-            throw err
-        }
+        // try {
+        // } catch (err) {
+        //     envelopeWriter.close()
+        //     throw err
+        // }
     }
 
     /**
      * Append a single row to the parquet file. Rows are buffered in memory until
      * rowGroupSize rows are in the buffer or close() is called
      */
-    async appendRow<T>(row: T): Promise<void> {
+    appendRow(row: Record<string, any>): void {
         if (this.closed) {
             throw 'writer was closed'
         }
 
         shredRecord(this.schema, row, this.rowBuffer)
-        if (this.rowBuffer.rowCount >= this.rowGroupSize) {
-            await this.envelopeWriter.writeRowGroup(this.rowBuffer)
-            this.rowBuffer = {rowCount: 0, columnData: {}}
-        }
+        // if (this.rowBuffer.rowCount >= this.rowGroupSize) {
+        //     await this.envelopeWriter.writeRowGroup(this.rowBuffer)
+        //     this.rowBuffer = {rowCount: 0, columnData: {}}
+        // }
     }
 
     /**
@@ -110,20 +101,25 @@ export class ParquetWriter<T> {
      * method twice on the same object or add any rows after the close() method has
      * been called
      */
-    async close(): Promise<void> {
+    close(): Buffer {
         if (this.closed) {
             throw new Error('writer was closed')
         }
 
         this.closed = true
 
-        if (this.rowBuffer.rowCount > 0) {
-            await this.envelopeWriter.writeRowGroup(this.rowBuffer)
-            this.rowBuffer = {rowCount: 0, columnData: {}}
-        }
+        let buf: Buffer[] = []
 
-        await this.envelopeWriter.writeFooter()
-        await this.envelopeWriter.close()
+        // if (this.rowBuffer.rowCount > 0) {
+        buf.push(this.envelopeWriter.writeHeader())
+        buf.push(this.envelopeWriter.writeRowGroup(this.rowBuffer))
+        this.rowBuffer = {rowCount: 0, columnData: {}}
+
+        // }
+
+        buf.push(this.envelopeWriter.writeFooter())
+
+        return Buffer.concat(buf)
     }
 
     /**
@@ -153,38 +149,29 @@ export class ParquetWriter<T> {
  */
 export class ParquetEnvelopeWriter {
     public schema: ParquetSchema
-    public write: (buf: Buffer) => Promise<void>
-    public close: () => Promise<void>
+
     public offset: number
     public rowCount: number
     public rowGroups: RowGroup[]
     public pageSize: number
 
-    constructor(
-        schema: ParquetSchema,
-        writeFn: (buf: Buffer) => Promise<void>,
-        closeFn: () => Promise<void>,
-        fileOffset: number,
-        opts: ParquetWriterOptions
-    ) {
+    constructor(schema: ParquetSchema, fileOffset: number, opts?: ParquetWriterOptions) {
         this.schema = schema
-        this.write = writeFn
-        this.close = closeFn
         this.offset = fileOffset
         this.rowCount = 0
         this.rowGroups = []
-        this.pageSize = opts.pageSize || PARQUET_DEFAULT_PAGE_SIZE
+        this.pageSize = opts?.pageSize || PARQUET_DEFAULT_PAGE_SIZE
     }
 
-    writeSection(buf: Buffer): Promise<void> {
+    writeSection(buf: Buffer): Buffer {
         this.offset += buf.length
-        return this.write(buf)
+        return buf
     }
 
     /**
      * Encode the parquet file header
      */
-    writeHeader(): Promise<void> {
+    writeHeader(): Buffer {
         return this.writeSection(Buffer.from(PARQUET_MAGIC))
     }
 
@@ -192,7 +179,7 @@ export class ParquetEnvelopeWriter {
      * Encode a parquet row group. The records object should be created using the
      * shredRecord method
      */
-    writeRowGroup(records: ParquetWriteBuffer): Promise<void> {
+    writeRowGroup(records: ParquetWriteBuffer): Buffer {
         const rowGroup = encodeRowGroup(this.schema, records, {
             baseOffset: this.offset,
             pageSize: this.pageSize,
@@ -206,7 +193,7 @@ export class ParquetEnvelopeWriter {
     /**
      * Write the parquet file footer
      */
-    writeFooter(): Promise<void> {
+    writeFooter(): Buffer {
         return this.writeSection(encodeFooter(this.schema, this.rowCount, this.rowGroups))
     }
 
@@ -241,17 +228,17 @@ function encodeDataPage(
     column: ParquetField,
     valueCount: number,
     rowCount: number,
-    values: string | any[] | Int32Array | Float32Array | Float64Array,
+    values: any[],
     rlevels: ParquetValueArray,
     dlevels: ParquetValueArray
 ): Buffer {
     /* encode values */
-    let valuesBuf = encodeValues(column.primitiveType, column.encoding, values, {
+    let valuesBuf = encodeValues(column.primitiveType!, column.encoding!, values, {
         typeLength: column.typeLength,
-        bitWidth: column.typeLength,
+        bitWidth: column.typeLength!,
     })
 
-    let valuesBufCompressed = compression.deflate(column.compression, valuesBuf)
+    let valuesBufCompressed = compression.deflate(column.compression!, valuesBuf)
 
     /* encode repetition and definition levels */
     let rLevelsBuf = Buffer.alloc(0)
@@ -271,22 +258,20 @@ function encodeDataPage(
     }
 
     /* build page header */
-    let pageHeader = new PageHeader()
-    pageHeader.type = PageType['DATA_PAGE_V2']
-    pageHeader.data_page_header_v2 = new DataPageHeaderV2()
-    pageHeader.data_page_header_v2.num_values = valueCount
-    pageHeader.data_page_header_v2.num_nulls = valueCount - values.length
-    pageHeader.data_page_header_v2.num_rows = rowCount
-
-    pageHeader.uncompressed_page_size = rLevelsBuf.length + dLevelsBuf.length + valuesBuf.length
-
-    pageHeader.compressed_page_size = rLevelsBuf.length + dLevelsBuf.length + valuesBufCompressed.length
-
-    pageHeader.data_page_header_v2.encoding = Encoding[column.encoding]
-    pageHeader.data_page_header_v2.definition_levels_byte_length = dLevelsBuf.length
-    pageHeader.data_page_header_v2.repetition_levels_byte_length = rLevelsBuf.length
-
-    pageHeader.data_page_header_v2.is_compressed = column.compression !== 'UNCOMPRESSED'
+    let pageHeader = new PageHeader({
+        type: PageType.DATA_PAGE_V2,
+        data_page_header_v2: new DataPageHeaderV2({
+            definition_levels_byte_length: dLevelsBuf.length,
+            repetition_levels_byte_length: rLevelsBuf.length,
+            encoding: Encoding[column.encoding!],
+            num_values: valueCount,
+            num_nulls: valueCount - values.length,
+            num_rows: rowCount,
+            is_compressed: column.compression !== 'UNCOMPRESSED',
+        }),
+        uncompressed_page_size: rLevelsBuf.length + dLevelsBuf.length + valuesBuf.length,
+        compressed_page_size: rLevelsBuf.length + dLevelsBuf.length + valuesBufCompressed.length,
+    })
 
     /* concat page header, repetition and definition levels and values */
     return Buffer.concat([util.serializeThrift(pageHeader), rLevelsBuf, dLevelsBuf, valuesBufCompressed])
@@ -296,7 +281,7 @@ function encodeDataPage(
  * Encode an array of values into a parquet column chunk
  */
 function encodeColumnChunk(
-    values: ParquetWriteColumnData,
+    values: ParquetColumnData,
     opts: {
         column: ParquetField
         baseOffset: number
@@ -319,19 +304,16 @@ function encodeColumnChunk(
     )
 
     /* prepare metadata header */
-    let metadata = new ColumnMetaData()
-    metadata.path_in_schema = opts.column.path
-    metadata.num_values = new Int64(values.count)
-    metadata.data_page_offset = new Int64(opts.baseOffset)
-    metadata.encodings = []
-    metadata.total_uncompressed_size = new Int64(pageBuf.length)
-    metadata.total_compressed_size = new Int64(pageBuf.length)
-
-    metadata.type = Type[opts.column.primitiveType]
-    metadata.codec = CompressionCodec[opts.column.compression]
-
-    metadata.encodings.push(Encoding.RLE)
-    metadata.encodings.push(opts.column.encoding)
+    let metadata = new ColumnMetaData({
+        codec: CompressionCodec[opts.column.compression!],
+        data_page_offset: new Int64(opts.baseOffset),
+        encodings: [Encoding.RLE, Encoding[opts.column.encoding!]],
+        num_values: new Int64(values.count),
+        path_in_schema: opts.column.path.split('.'),
+        total_compressed_size: new Int64(pageBuf.length),
+        total_uncompressed_size: new Int64(pageBuf.length),
+        type: Type[opts.column.primitiveType!],
+    })
 
     /* concat metadata header and data pages */
     let metadataOffset = opts.baseOffset + pageBuf.length
@@ -356,13 +338,13 @@ function encodeRowGroup(
 
     let body = Buffer.alloc(0)
     for (let field of schema.fieldList) {
-        if (field.isNested) {
-            continue
-        }
+        // if (field.fields) {
+        //     continue
+        // }
 
         let cchunkData = encodeColumnChunk(data.columnData[field.path], {
             column: field,
-            baseOffset: opts.baseOffset + body.length,
+            baseOffset: (opts.baseOffset ?? 0) + body.length,
             pageSize: opts.pageSize,
             encoding: field.encoding,
             rowCount: data.rowCount,
@@ -398,15 +380,16 @@ function encodeFooter(schema: ParquetSchema, rowCount: number, rowGroups: RowGro
     metadata.schema.push(schemaRoot)
 
     for (let field of schema.fieldList) {
-        let schemaElem = new SchemaElement()
-        schemaElem.name = field.name
-        schemaElem.repetition_type = FieldRepetitionType[field.repetitionType]
+        let schemaElem = new SchemaElement({
+            name: field.name,
+            repetition_type: FieldRepetitionType[field.repetitionType],
+        })
 
-        if (field.isNested) {
-            schemaElem.num_children = field.fieldCount
-        } else {
-            schemaElem.type = Type[field.primitiveType]
-        }
+        // if (field.fields) {
+        //     schemaElem.num_children = field.fieldCount
+        // } else {
+        schemaElem.type = Type[field.primitiveType!]
+        // }
 
         if (field.originalType) {
             schemaElem.converted_type = ConvertedType[field.originalType]

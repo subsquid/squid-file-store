@@ -27,34 +27,6 @@ export function encodeValues(type: PrimitiveType, values: ParquetValueArray, opt
     }
 }
 
-export function decodeValues(
-    type: PrimitiveType,
-    cursor: CursorBuffer,
-    count: number,
-    opts: ParquetCodecOptions
-): ParquetValueArray {
-    switch (type) {
-        case 'BOOLEAN':
-            return decodeValues_BOOLEAN(cursor, count)
-        case 'INT32':
-            return decodeValues_INT32(cursor, count)
-        case 'INT64':
-            return decodeValues_INT64(cursor, count)
-        case 'INT96':
-            return decodeValues_INT96(cursor, count)
-        case 'FLOAT':
-            return decodeValues_FLOAT(cursor, count)
-        case 'DOUBLE':
-            return decodeValues_DOUBLE(cursor, count)
-        case 'BYTE_ARRAY':
-            return decodeValues_BYTE_ARRAY(cursor, count)
-        case 'FIXED_LEN_BYTE_ARRAY':
-            return decodeValues_FIXED_LEN_BYTE_ARRAY(cursor, count, opts)
-        default:
-            throw new Error(`Unsupported type: ${type}`)
-    }
-}
-
 /**
  * Encode an array of booleans as a bit sequence.
  *
@@ -72,19 +44,6 @@ function encodeValues_BOOLEAN(values: ParquetValueArray): Buffer {
         }
     }
     return buf
-}
-
-/**
- * Read a bit sequence from a buffer to an array of booleans.
- */
-function decodeValues_BOOLEAN(cursor: CursorBuffer, count: number): boolean[] {
-    const values: boolean[] = []
-    for (let i = 0; i < count; i++) {
-        const b = cursor.buffer[cursor.offset + Math.floor(i / 8)]
-        values.push((b & (1 << i % 8)) > 0)
-    }
-    cursor.offset += Math.ceil(count / 8)
-    return values
 }
 
 /**
@@ -107,22 +66,6 @@ function encodeValues_INT32(values: ParquetValueArray): Buffer {
 }
 
 /**
- * Decode values into an Int32Array.
- */
-function decodeValues_INT32(cursor: CursorBuffer, count: number): Int32Array {
-    const values =
-        systemIsLittleEndian && cursor.offset % 4 === 0
-            ? // On little-endian systems we can just use the data as-is
-              new Int32Array(cursor.buffer.buffer, cursor.buffer.byteOffset + cursor.offset, count)
-            : // Otherwise we have to copy and convert the data
-              Int32Array.from(new Array(count), (_, i) =>
-                  cursor.buffer.readInt32LE(cursor.offset + i * Int32Array.BYTES_PER_ELEMENT)
-              )
-    cursor.offset += count * Int32Array.BYTES_PER_ELEMENT
-    return values
-}
-
-/**
  * Encode INT64 values to a buffer.
  */
 function encodeValues_INT64(values: ParquetValueArray): Buffer {
@@ -131,18 +74,6 @@ function encodeValues_INT64(values: ParquetValueArray): Buffer {
         int53.writeInt64LE(values[i] as number, buf, i * 8)
     }
     return buf
-}
-
-/**
- * Decode INT64 values from a buffer to an array of numbers
- */
-function decodeValues_INT64(cursor: CursorBuffer, count: number): number[] {
-    const values: number[] = []
-    for (let i = 0; i < count; i++) {
-        values.push(int53.readInt64LE(cursor.buffer, cursor.offset))
-        cursor.offset += 8
-    }
-    return values
 }
 
 /**
@@ -163,24 +94,6 @@ function encodeValues_INT96(values: ParquetValueArray): Buffer {
 }
 
 /**
- * Decode INT96 values to an array of numbers
- */
-function decodeValues_INT96(cursor: CursorBuffer, count: number): number[] {
-    const values: number[] = []
-    for (let i = 0; i < count; i++) {
-        const low = int53.readInt64LE(cursor.buffer, cursor.offset)
-        const high = cursor.buffer.readUInt32LE(cursor.offset + 8)
-        if (high === 0xffffffff) {
-            values.push(~-low + 1) // truncate to 64 actual precision
-        } else {
-            values.push(low) // truncate to 64 actual precision
-        }
-        cursor.offset += 12
-    }
-    return values
-}
-
-/**
  * Encode FLOAT values from an array of numbers or a Float32Array
  */
 function encodeValues_FLOAT(values: ParquetValueArray): Buffer {
@@ -197,22 +110,6 @@ function encodeValues_FLOAT(values: ParquetValueArray): Buffer {
 }
 
 /**
- * Decode FLOAT values to a Float32Array
- */
-function decodeValues_FLOAT(cursor: CursorBuffer, count: number): Float32Array {
-    const values =
-        systemIsLittleEndian && cursor.offset % 4 === 0
-            ? // On little-endian systems with 4-byte aligned data we can avoid data copying
-              new Float32Array(cursor.buffer.buffer, cursor.buffer.byteOffset + cursor.offset, count)
-            : // Otherwise we have to copy and convert the data
-              Float32Array.from(new Array(count), (_, i) =>
-                  cursor.buffer.readFloatLE(cursor.offset + i * Float32Array.BYTES_PER_ELEMENT)
-              )
-    cursor.offset += count * Float32Array.BYTES_PER_ELEMENT
-    return values
-}
-
-/**
  * Encode DOUBLE values from an array of numbers or a Float64Array.
  */
 function encodeValues_DOUBLE(values: ParquetValueArray): Buffer {
@@ -226,19 +123,6 @@ function encodeValues_DOUBLE(values: ParquetValueArray): Buffer {
         buf.writeDoubleLE(values[i] as number, i * 8)
     }
     return buf
-}
-
-function decodeValues_DOUBLE(cursor: CursorBuffer, count: number): Float64Array {
-    const values =
-        systemIsLittleEndian && cursor.offset % 8 === 0
-            ? // On little-endian systems with 8-byte aligned data we can avoid data copying
-              new Float64Array(cursor.buffer.buffer, cursor.buffer.byteOffset + cursor.offset, count)
-            : // Otherwise we have to copy and convert the data
-              Float64Array.from(new Array(count), (_, i) =>
-                  cursor.buffer.readDoubleLE(cursor.offset + i * Float64Array.BYTES_PER_ELEMENT)
-              )
-    cursor.offset += count * Float64Array.BYTES_PER_ELEMENT
-    return values
 }
 
 function encodeValues_BYTE_ARRAY(values: ParquetValueArray): Buffer {
@@ -259,17 +143,6 @@ function encodeValues_BYTE_ARRAY(values: ParquetValueArray): Buffer {
     return buf
 }
 
-function decodeValues_BYTE_ARRAY(cursor: CursorBuffer, count: number): Buffer[] {
-    const values: Buffer[] = []
-    for (let i = 0; i < count; i++) {
-        const len = cursor.buffer.readUInt32LE(cursor.offset)
-        cursor.offset += 4
-        values.push(cursor.buffer.slice(cursor.offset, cursor.offset + len))
-        cursor.offset += len
-    }
-    return values
-}
-
 function encodeValues_FIXED_LEN_BYTE_ARRAY(values: (Buffer | string)[], opts: ParquetCodecOptions): Buffer {
     if (!opts.typeLength) {
         throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)')
@@ -281,16 +154,4 @@ function encodeValues_FIXED_LEN_BYTE_ARRAY(values: (Buffer | string)[], opts: Pa
         return Buffer.concat(values as Buffer[])
     }
     return Buffer.concat(values.map((val) => (Buffer.isBuffer(val) ? val : Buffer.from(val))))
-}
-
-function decodeValues_FIXED_LEN_BYTE_ARRAY(cursor: CursorBuffer, count: number, opts: ParquetCodecOptions): Buffer[] {
-    const values: Buffer[] = []
-    if (!opts.typeLength) {
-        throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)')
-    }
-    for (let i = 0; i < count; i++) {
-        values.push(cursor.buffer.slice(cursor.offset, cursor.offset + opts.typeLength))
-        cursor.offset += opts.typeLength
-    }
-    return values
 }

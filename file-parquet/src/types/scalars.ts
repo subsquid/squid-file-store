@@ -1,93 +1,49 @@
-import * as Arrow from 'apache-arrow'
 import {Type} from '../table'
 
 export let String = (): Type<string> => ({
-    arrowDataType: new Arrow.Utf8(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'UTF8',
 })
 
 export let Int8 = (): Type<number> => ({
-    arrowDataType: new Arrow.Int8(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'INT_8',
 })
 
 export let Int16 = (): Type<number> => ({
-    arrowDataType: new Arrow.Int16(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'INT_16',
 })
 
 export let Int32 = (): Type<number> => ({
-    arrowDataType: new Arrow.Int32(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'INT_32',
 })
 
 export let Int64 = (): Type<bigint> => ({
-    arrowDataType: new Arrow.Int64(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'INT_64',
 })
 
 export let Uint8 = (): Type<number> => ({
-    arrowDataType: new Arrow.Uint8(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'UINT_8',
 })
 
 export let Uint16 = (): Type<number> => ({
-    arrowDataType: new Arrow.Uint16(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'UINT_16',
 })
 
 export let Uint32 = (): Type<number> => ({
-    arrowDataType: new Arrow.Uint32(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'UINT_32',
 })
 
 export let Uint64 = (): Type<bigint> => ({
-    arrowDataType: new Arrow.Uint64(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'UINT_64',
 })
 
 export let Float = (): Type<number> => ({
-    arrowDataType: new Arrow.Float32(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'FLOAT',
 })
 
 export let Boolean = (): Type<boolean> => ({
-    arrowDataType: new Arrow.Bool(),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'BOOLEAN',
 })
 
 export let Timestamp = (): Type<Date> => ({
-    arrowDataType: new Arrow.Timestamp(Arrow.TimeUnit.MILLISECOND),
-    prepare(value) {
-        return value.valueOf()
-    },
-})
-
-export let Date = (): Type<Date> => ({
-    arrowDataType: new Arrow.Date_(Arrow.DateUnit.DAY),
-    prepare(value) {
-        return value
-    },
+    parquetType: 'TIMESTAMP_MILLIS',
 })

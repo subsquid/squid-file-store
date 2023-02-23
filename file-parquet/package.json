@@ -13,7 +13,8 @@
   "main": "lib/index.js",
   "scripts": {
     "build": "rm -rf lib && tsc",
-    "test": "npx mocha lib/test/*.test.js --exit --timeout 5000"
+    "test": "npx mocha lib/test/*.test.js --exit --timeout 5000",
+    "thrift": "thrift --gen js:node,ts --out thrift/ parquet.thrift"
   },
   "repository": {
     "type": "git",
