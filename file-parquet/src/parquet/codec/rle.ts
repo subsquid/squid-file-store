@@ -1,8 +1,12 @@
-import {encode as varintEncode, decode as varintDecode, encodingLength} from 'varint'
-import {PrimitiveType} from '../declare'
-import {CursorBuffer, ParquetCodecOptions} from './declare'
+import {encode as varintEncode} from 'varint'
+import {Type} from '../../../thrift/parquet_types'
 
-function encodeRunBitpacked(values: number[], opts: ParquetCodecOptions): Buffer {
+export interface RLECodecOptions {
+    bitWidth: number
+    disableEnvelope?: boolean
+}
+
+function encodeRunBitpacked(values: number[], opts: RLECodecOptions): Buffer {
     for (let i = 0; i < values.length % 8; i++) {
         values.push(0)
     }
@@ -17,7 +21,7 @@ function encodeRunBitpacked(values: number[], opts: ParquetCodecOptions): Buffer
     return Buffer.concat([Buffer.from(varintEncode(((values.length / 8) << 1) | 1)), buf])
 }
 
-function encodeRunRepeated(value: number, count: number, opts: ParquetCodecOptions): Buffer {
+function encodeRunRepeated(value: number, count: number, opts: RLECodecOptions): Buffer {
     const buf = Buffer.alloc(Math.ceil(opts.bitWidth / 8))
 
     for (let i = 0; i < buf.length; i++) {
@@ -28,15 +32,11 @@ function encodeRunRepeated(value: number, count: number, opts: ParquetCodecOptio
     return Buffer.concat([Buffer.from(varintEncode(count << 1)), buf])
 }
 
-export function encodeValues(type: PrimitiveType, values: any[], opts: ParquetCodecOptions): Buffer {
-    if (!('bitWidth' in opts)) {
-        throw new Error('bitWidth is required')
-    }
-
+export function encodeValues(type: Type, values: any[], opts: RLECodecOptions): Buffer {
     switch (type) {
-        case 'BOOLEAN':
-        case 'INT32':
-        case 'INT64':
+        case Type.BOOLEAN:
+        case Type.INT32:
+        case Type.INT64:
             values = values.map((x) => parseInt(x, 10))
             break
 
@@ -78,73 +78,11 @@ export function encodeValues(type: PrimitiveType, values: any[], opts: ParquetCo
 
     if (opts.disableEnvelope) {
         return buf
+    } else {
+        const envelope = Buffer.alloc(buf.length + 4)
+        envelope.writeUInt32LE(buf.length)
+        buf.copy(envelope, 4)
+
+        return envelope
     }
-
-    const envelope = Buffer.alloc(buf.length + 4)
-    envelope.writeUInt32LE(buf.length, undefined)
-    buf.copy(envelope, 4)
-
-    return envelope
-}
-
-function decodeRunBitpacked(cursor: CursorBuffer, count: number, opts: ParquetCodecOptions): number[] {
-    if (count % 8 !== 0) {
-        throw new Error('must be a multiple of 8')
-    }
-
-    const values = new Array(count).fill(0)
-    for (let b = 0; b < opts.bitWidth * count; b++) {
-        if (cursor.buffer[cursor.offset + Math.floor(b / 8)] & (1 << b % 8)) {
-            values[Math.floor(b / opts.bitWidth)] |= 1 << b % opts.bitWidth
-        }
-    }
-
-    cursor.offset += opts.bitWidth * (count / 8)
-    return values
-}
-
-function decodeRunRepeated(cursor: CursorBuffer, count: number, opts: ParquetCodecOptions): number[] {
-    let value = 0
-    for (let i = 0; i < Math.ceil(opts.bitWidth / 8); i++) {
-        value << 8
-        value += cursor.buffer[cursor.offset]
-        cursor.offset += 1
-    }
-
-    return new Array(count).fill(value)
-}
-
-export function decodeValues(
-    type: PrimitiveType,
-    cursor: CursorBuffer,
-    count: number,
-    opts: ParquetCodecOptions
-): number[] {
-    if (!('bitWidth' in opts)) {
-        throw new Error('bitWidth is required')
-    }
-
-    if (!opts.disableEnvelope) {
-        cursor.offset += 4
-    }
-
-    let values: number[] = []
-    while (values.length < count) {
-        const header = varintDecode(cursor.buffer, cursor.offset)
-        cursor.offset += encodingLength(header)
-        if (header & 1) {
-            const count = (header >> 1) * 8
-            values.push(...decodeRunBitpacked(cursor, count, opts))
-        } else {
-            const count = header >> 1
-            values.push(...decodeRunRepeated(cursor, count, opts))
-        }
-    }
-    values = values.slice(0, count)
-
-    if (values.length !== count) {
-        throw new Error('invalid RLE encoding')
-    }
-
-    return values
 }

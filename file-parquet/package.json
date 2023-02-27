@@ -40,10 +40,11 @@
     "@subsquid/file-store": "^0.0.1",
     "@types/node": "16.11.56",
     "@types/thrift": "^0.10.12",
-    "typescript": "4.8.2",
-    "@creditkarma/thrift-typescript": "^3.7.6",
     "@types/varint": "^6.0.1",
     "@types/int53": "^1.0.0",
-    "@types/node-int64": "^0.4.29"
+    "@types/node-int64": "^0.4.29",
+    "@types/mocha": "^9.1.1",
+    "mocha": "10.0.0",
+    "typescript": "4.8.2"
   }
 }

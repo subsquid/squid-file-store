@@ -1,6 +1,10 @@
 // import {Column, Table} from '../table'
 // import * as Types from '../types'
 
+import {TableRecord} from '@subsquid/file-store'
+import {Types} from '..'
+import {Table, Column} from '../table'
+
 // import {WriterPropertiesBuilder} from 'parquet-wasm/node/arrow1'
 // import {TableRecord} from '@subsquid/file-store'
 
@@ -8,21 +12,21 @@
 // builder.setCompression(0)
 // builder.setDictionaryEnabled(true)
 
-// export const table = new Table('transfers', {
-//     blockNumber: Column(Types.Uint32()),
-//     extrinsicHash: Column(Types.String(), {nullable: true}),
-//     from: Column(Types.String()),
-//     to: Column(Types.String()),
-//     amount: Column(Types.Uint64()),
-// })
+export const table = new Table('transfers', {
+    blockNumber: Column(Types.Uint32()),
+    extrinsicHash: Column(Types.String(), {nullable: true}),
+    from: Column(Types.String()),
+    to: Column(Types.String()),
+    amount: Column(Types.Uint64()),
+})
 
-// export let record: TableRecord<typeof table> = {
-//     blockNumber: 5089937,
-//     extrinsicHash: null,
-//     from: `EEsp9Duot6U3F1fgA2MXBHeArtkySqpXWYkcBj7wfjC6rLY`,
-//     to: `Cb2QccEAM38pjwmcHHTTuTukUobTHwhakKH4kBo4k8Vur8o`,
-//     amount: 997433334294n,
-// }
+export let record: TableRecord<typeof table> = {
+    blockNumber: 5089937,
+    extrinsicHash: null,
+    from: `EEsp9Duot6U3F1fgA2MXBHeArtkySqpXWYkcBj7wfjC6rLY`,
+    to: `Cb2QccEAM38pjwmcHHTTuTukUobTHwhakKH4kBo4k8Vur8o`,
+    amount: 997433334294n,
+}
 
 // // function generateRecord(): TableRecord<typeof table> {
 // //     return {
