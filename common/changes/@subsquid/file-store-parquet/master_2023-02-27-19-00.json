@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "use own writing instead of arrow",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}

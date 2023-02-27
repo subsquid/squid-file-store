@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "simplify TableRecord return type",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
