@@ -1,6 +1,6 @@
 {
   "name": "@subsquid/file-store-parquet",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -33,10 +33,10 @@
     "varint": "^6.0.0"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^0.0.1"
+    "@subsquid/file-store": "^0.1.0"
   },
   "devDependencies": {
-    "@subsquid/file-store": "^0.0.1",
+    "@subsquid/file-store": "^0.1.0",
     "@types/node": "16.11.56",
     "@types/thrift": "^0.10.12",
     "@types/varint": "^6.0.1",

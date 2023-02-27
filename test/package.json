@@ -11,11 +11,11 @@
     "processor:start": "node lib/processor.js"
   },
   "dependencies": {
-    "@subsquid/file-store": "^0.0.1",
+    "@subsquid/file-store": "^0.1.0",
     "@subsquid/ss58": "^0.1.2",
     "@subsquid/substrate-processor": "^2.2.0",
-    "@subsquid/file-store-csv": "^0.2.0",
-    "@subsquid/file-store-parquet": "^0.1.1",
+    "@subsquid/file-store-csv": "^0.2.1",
+    "@subsquid/file-store-parquet": "^0.2.0",
     "dotenv": "^16.0.3"
   },
   "devDependencies": {
