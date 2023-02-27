@@ -6,7 +6,7 @@ export interface TableWriter<T> {
 }
 
 export interface Table<T> {
-    readonly fileName: string
+    readonly name: string
     createWriter(): TableWriter<T>
 }
 

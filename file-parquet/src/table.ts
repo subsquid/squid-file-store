@@ -1,6 +1,9 @@
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
+import assert from 'assert'
 import * as parquet from '../thrift/parquet_types'
-import {shredSchema} from './parquet/shred'
+import {RowGroupData, ParquetDataPageData} from './parquet/declare'
+import {encodeRowGroup, encodeFooter} from './parquet/encode'
+import {shredRecord, shredSchema} from './parquet/shred'
 
 export type Type<T> = {
     logicalType?: parquet.LogicalType
@@ -9,12 +12,13 @@ export type Type<T> = {
     | {
           isNested?: false
           primitiveType: parquet.Type
-          toPrimitive: (value: T) => any
+          toPrimitive(value: T): any
+          size(value: T): number
       }
     | {
           isNested: true
           children: TableSchema
-          transform: (value: T) => Record<string, any>
+          transform(value: T): Record<string, any>
       }
 )
 
@@ -27,6 +31,8 @@ export type Repetition = keyof typeof parquet.FieldRepetitionType
 
 export interface TableOptions {
     compression?: Compression
+    rowGroupSize?: number
+    pageSize?: number
 }
 
 export interface ColumnOptions {
@@ -68,11 +74,13 @@ export interface Column {
     children?: Column[]
 }
 
+const PARQUET_MAGIC = 'PAR1'
+
 export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     private columns: Column[] = []
     private options: Required<TableOptions>
-    constructor(readonly fileName: string, protected schema: T, options?: TableOptions) {
-        this.options = {compression: 'UNCOMPRESSED', ...options}
+    constructor(readonly name: string, protected schema: T, options?: TableOptions) {
+        this.options = {compression: 'UNCOMPRESSED', pageSize: 8192, rowGroupSize: 4096, ...options}
         this.columns = shredSchema(schema, {
             path: [],
             compression: this.options.compression || 'UNCOMPRESSED',
@@ -87,22 +95,93 @@ export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     }
 }
 
-class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
-    private writer: ParquetWriter
-    private _size = Infinity
+export class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
+    public rowGroups: RowGroupData[] = []
+    public rowCount = 0
 
-    constructor(private columns: Column[], options: Required<TableOptions>) {
-        this.writer = new ParquetWriter(
-            new ParquetSchema(Object.fromEntries(columns.map((c) => [c.name, {type: c.data.type.parquetType}])))
-        )
-    }
+    constructor(private columns: Column[], private options: Required<TableOptions>) {}
 
     get size() {
-        return this._size
+        let size = 0
+        for (let rg of this.rowGroups) {
+            size += rg.size
+        }
+        return size
+    }
+
+    appendRecord(record: Record<string, any>) {
+        let rowGroup: RowGroupData
+        if (this.rowGroups.length == 0 || last(this.rowGroups).size >= this.options.rowGroupSize) {
+            rowGroup = {
+                columnData: {},
+                rowCount: 0,
+                size: 0,
+            }
+            this.rowGroups.push(rowGroup)
+        } else {
+            rowGroup = last(this.rowGroups)
+        }
+
+        let shrededRecord = shredRecord(this.columns, record, {dLevel: 0, rLevel: 0})
+        for (let column of this.columns) {
+            if (column.children != null) continue
+
+            let columnPathStr = column.path.join('.')
+            let columnChunk = rowGroup.columnData[columnPathStr]
+            if (columnChunk == null) {
+                columnChunk = rowGroup.columnData[columnPathStr] = []
+            }
+
+            let dataPage: ParquetDataPageData
+            if (columnChunk.length == 0 || last(columnChunk).size >= this.options.pageSize) {
+                dataPage = {
+                    dLevels: [],
+                    rLevels: [],
+                    values: [],
+                    valueCount: 0,
+                    rowCount: 0,
+                    size: 0,
+                }
+                columnChunk.push(dataPage)
+            } else {
+                dataPage = last(columnChunk)
+            }
+
+            dataPage.values.push(...shrededRecord[columnPathStr].values)
+            dataPage.dLevels.push(...shrededRecord[columnPathStr].dLevels)
+            dataPage.rLevels.push(...shrededRecord[columnPathStr].rLevels)
+            dataPage.valueCount += shrededRecord[columnPathStr].valueCount
+            dataPage.size += shrededRecord[columnPathStr].size
+            dataPage.rowCount += 1
+
+            rowGroup.size += shrededRecord[columnPathStr].size
+        }
+
+        rowGroup.rowCount += 1
+        this.rowCount += 1
     }
 
     flush() {
-        return this.writer.close()
+        let fragments: Buffer[] = []
+        let rowGroups: parquet.RowGroup[] = []
+
+        fragments.push(Buffer.from(PARQUET_MAGIC))
+
+        let offset = PARQUET_MAGIC.length
+        for (let rowGroupData of this.rowGroups) {
+            let {body, metadata} = encodeRowGroup(this.columns, rowGroupData, offset)
+            fragments.push(body)
+            rowGroups.push(metadata)
+
+            offset += body.length
+        }
+
+        fragments.push(encodeFooter(this.columns, this.rowCount, rowGroups))
+        fragments.push(Buffer.from(PARQUET_MAGIC))
+
+        this.rowGroups = []
+
+        return Buffer.concat(fragments)
     }
 
     write(record: T): this {
@@ -111,11 +190,16 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
 
     writeMany(records: T[]): this {
         for (let rec of records) {
-            this.writer.appendRow(rec)
+            this.appendRecord(rec)
         }
 
         return this
     }
+}
+
+function last<T>(arr: T[]): T {
+    assert(arr.length > 0)
+    return arr[arr.length - 1]
 }
 
 export function Column<T extends Type<any>>(type: T): ColumnData<T>

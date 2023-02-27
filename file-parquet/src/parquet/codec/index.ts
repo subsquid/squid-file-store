@@ -1,11 +1,19 @@
-import {ParquetCodec} from '../declare'
-import {ParquetCodecKit} from './declare'
-export * as plain from './plain'
+import {Type, Encoding} from '../../../thrift/parquet_types'
+
+import * as plain from './plain'
+
+export {plain}
 export * as rle from './rle'
 
-export * from './declare'
+export interface Codec {
+    encode(type: Type, values: any[]): Buffer
+}
 
-// export const PARQUET_CODEC: Record<ParquetCodec, ParquetCodecKit> = {
-//     PLAIN,
-//     RLE,
-// }
+export function getCodec(compression: Encoding): Codec {
+    switch (compression) {
+        case Encoding.PLAIN:
+            return plain
+        default:
+            throw new Error(`Unsupported encoding`)
+    }
+}

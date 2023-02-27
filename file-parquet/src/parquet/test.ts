@@ -5,9 +5,8 @@
 import {writeFileSync} from 'fs'
 import {Types} from '..'
 import {CompressionCodec, ConvertedType, Encoding, FieldRepetitionType, Type} from '../../thrift/parquet_types'
-import {TableSchema} from '../table'
+import {TableSchema, TableWriter} from '../table'
 import {shredSchema} from './shred'
-import {ParquetEnvelopeWriter} from './writer'
 
 // let schema = new ParquetSchema({
 //     name: {type: 'UTF8'},
@@ -62,11 +61,7 @@ const defs = {
 
 let schema: TableSchema = {
     docId: {
-        type: {
-            primitiveType: Type.INT32,
-            convertedType: ConvertedType.INT_32,
-            toPrimitive: (v: any) => v,
-        },
+        type: Types.Int32(),
         repetition: 'REQUIRED',
         ...defs,
     },
@@ -76,20 +71,12 @@ let schema: TableSchema = {
             transform: (v: any) => v,
             children: {
                 backward: {
-                    type: {
-                        primitiveType: Type.INT32,
-                        convertedType: ConvertedType.INT_32,
-                        toPrimitive: (v: any) => v,
-                    },
+                    type: Types.Int32(),
                     repetition: 'REPEATED',
                     ...defs,
                 },
                 forward: {
-                    type: {
-                        primitiveType: Type.INT32,
-                        convertedType: ConvertedType.INT_32,
-                        toPrimitive: (v: any) => v,
-                    },
+                    type: Types.Int32(),
                     repetition: 'REPEATED',
                     ...defs,
                 },
@@ -109,20 +96,12 @@ let schema: TableSchema = {
                         transform: (v: any) => v,
                         children: {
                             code: {
-                                type: {
-                                    primitiveType: Type.BYTE_ARRAY,
-                                    convertedType: ConvertedType.UTF8,
-                                    toPrimitive: (v: any) => v,
-                                },
+                                type: Types.String(),
                                 repetition: 'REQUIRED',
                                 ...defs,
                             },
                             country: {
-                                type: {
-                                    primitiveType: Type.BYTE_ARRAY,
-                                    convertedType: ConvertedType.UTF8,
-                                    toPrimitive: (v: any) => v,
-                                },
+                                type: Types.String(),
                                 repetition: 'OPTIONAL',
                                 ...defs,
                             },
@@ -132,11 +111,7 @@ let schema: TableSchema = {
                     ...defs,
                 },
                 url: {
-                    type: {
-                        primitiveType: Type.BYTE_ARRAY,
-                        convertedType: ConvertedType.UTF8,
-                        toPrimitive: (v: any) => v,
-                    },
+                    type: Types.String(),
                     repetition: 'OPTIONAL',
                     ...defs,
                 },
@@ -205,32 +180,36 @@ let schema: TableSchema = {
 // let schema: TableSchema = {
 //     name: {
 //         type: Types.String(),
-//         repetition: FieldRepetitionType.REQUIRED,
-//         encoding: Encoding.PLAIN,
-//         compression: CompressionCodec.GZIP,
+//         repetition: 'REQUIRED',
+//         encoding: 'PLAIN',
+//         compression: 'GZIP',
 //     },
 //     quantity: {
 //         type: Types.Int64(),
-//         repetition: FieldRepetitionType.REQUIRED,
-//         encoding: Encoding.PLAIN,
-//         compression: CompressionCodec.GZIP,
+//         repetition: 'REQUIRED',
+//         encoding: 'PLAIN',
+//         compression: 'GZIP',
 //     },
 //     price: {
 //         type: Types.DOUBLE(),
-//         repetition: FieldRepetitionType.REQUIRED,
-//         encoding: Encoding.PLAIN,
-//         compression: CompressionCodec.GZIP,
+//         repetition: 'REQUIRED',
+//         encoding: 'PLAIN',
+//         compression: 'GZIP',
 //     },
 // }
 
-let w = new ParquetEnvelopeWriter(
+let w = new TableWriter(
     shredSchema(schema, {
         path: [],
         compression: 'UNCOMPRESSED',
         encoding: 'PLAIN',
         dLevel: 0,
         rLevel: 0,
-    })
+    }), {
+        compression: 'UNCOMPRESSED',
+        pageSize: 10000,
+        rowGroupSize: 10000,
+    }
 )
 
 w.appendRecord({

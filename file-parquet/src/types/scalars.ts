@@ -18,6 +18,7 @@ export let String = (): Type<string> => ({
     toPrimitive(value) {
         return Buffer.from(value, 'utf-8')
     },
+    size: (v) => v.length,
 })
 
 export let Int8 = (): Type<number> => ({
@@ -25,19 +26,21 @@ export let Int8 = (): Type<number> => ({
     convertedType: ConvertedType.INT_8,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 8, isSigned: true})}),
     toPrimitive(value) {
-        assert(-0x80 <= value && value <= 0x7f)
+        assert(-0x80 <= value && value <= 0x7f, `value ${value} does not fit into Int8`)
         return value
     },
+    size: () => 4,
 })
 
 export let Int16 = (): Type<number> => ({
     primitiveType: PrimitiveType.INT32,
-    convertedType: ConvertedType.INT_64,
+    convertedType: ConvertedType.INT_32,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 16, isSigned: true})}),
     toPrimitive(value) {
-        assert(-0x8000 <= value && value <= 0x7fff)
+        assert(-0x8000 <= value && value <= 0x7fff, `value ${value} does not fit into Int16`)
         return value
     },
+    size: () => 4,
 })
 
 export let Int32 = (): Type<number> => ({
@@ -45,9 +48,10 @@ export let Int32 = (): Type<number> => ({
     convertedType: ConvertedType.INT_32,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 32, isSigned: true})}),
     toPrimitive(value) {
-        assert(-0x80000000 <= value && value <= 0x7fffffff)
+        assert(-0x80000000 <= value && value <= 0x7fffffff, `value ${value} does not fit into Int32`)
         return value
     },
+    size: () => 4,
 })
 
 export let Int64 = (): Type<bigint> => ({
@@ -55,9 +59,10 @@ export let Int64 = (): Type<bigint> => ({
     convertedType: ConvertedType.INT_64,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 64, isSigned: true})}),
     toPrimitive(value) {
-        assert(-0x8000000000000000n <= value && value <= 0x7fffffffffffffffn)
+        assert(-0x8000000000000000n <= value && value <= 0x7fffffffffffffffn, `value ${value} does not fit into Int64`)
         return value
     },
+    size: () => 8,
 })
 
 export let Uint8 = (): Type<number> => ({
@@ -65,9 +70,10 @@ export let Uint8 = (): Type<number> => ({
     convertedType: ConvertedType.UINT_8,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 8, isSigned: false})}),
     toPrimitive(value) {
-        assert(0 <= value && value <= 0xff)
+        assert(0 <= value && value <= 0xff, `value ${value} does not fit into UInt8`)
         return value
     },
+    size: () => 4,
 })
 
 export let Uint16 = (): Type<number> => ({
@@ -75,9 +81,10 @@ export let Uint16 = (): Type<number> => ({
     convertedType: ConvertedType.UINT_16,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 16, isSigned: false})}),
     toPrimitive(value) {
-        assert(0 <= value && value <= 0xffff)
+        assert(0 <= value && value <= 0xffff, `value ${value} does not fit into UInt16`)
         return value
     },
+    size: () => 4,
 })
 
 export let Uint32 = (): Type<number> => ({
@@ -85,9 +92,10 @@ export let Uint32 = (): Type<number> => ({
     convertedType: ConvertedType.UINT_32,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 32, isSigned: false})}),
     toPrimitive(value) {
-        assert(0 <= value && value <= 0xffffffff)
+        assert(0 <= value && value <= 0xffffffff, `value ${value} does not fit into UInt32`)
         return value
     },
+    size: () => 4,
 })
 
 export let Uint64 = (): Type<bigint> => ({
@@ -95,9 +103,10 @@ export let Uint64 = (): Type<bigint> => ({
     convertedType: ConvertedType.UINT_64,
     logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 64, isSigned: false})}),
     toPrimitive(value) {
-        assert(0 <= value && value <= 0xffffffffffffffffn)
+        assert(0 <= value && value <= 0xffffffffffffffffn, `value ${value} does not fit into UInt64`)
         return value
     },
+    size: () => 8,
 })
 
 export let Float = (): Type<number> => ({
@@ -106,6 +115,7 @@ export let Float = (): Type<number> => ({
         assert(!isNaN(value))
         return value
     },
+    size: () => 4,
 })
 
 export let DOUBLE = (): Type<number> => ({
@@ -114,6 +124,7 @@ export let DOUBLE = (): Type<number> => ({
         assert(!isNaN(value))
         return value
     },
+    size: () => 8,
 })
 
 export let Boolean = (): Type<boolean> => ({
@@ -121,6 +132,7 @@ export let Boolean = (): Type<boolean> => ({
     toPrimitive(value) {
         return value
     },
+    size: () => 1,
 })
 
 export let Timestamp = (): Type<Date> => ({
@@ -133,6 +145,7 @@ export let Timestamp = (): Type<Date> => ({
         }),
     }),
     toPrimitive(value) {
-        return value.valueOf()
+        return BigInt(value.valueOf())
     },
+    size: () => 8,
 })

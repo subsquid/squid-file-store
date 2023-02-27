@@ -80,15 +80,15 @@ export function shredRecord(
     columns: Column[],
     record: Record<string, any> | undefined,
     overwrites: {
-        rLevel?: number
-        dLevel?: number
+        rLevel: number
+        dLevel: number
     }
 ): Record<string, ShrededColumn> {
     let res: Record<string, ShrededColumn> = {}
 
     for (let column of columns) {
         let columnPathStr = column.path.join('.')
-        if (Object.keys(res).some((k) => k.startsWith(columnPathStr))) continue
+        if (columnPathStr in res || Object.keys(res).some((k) => k.startsWith(columnPathStr + '.'))) continue
 
         let field = record?.[column.name]
 
@@ -96,14 +96,14 @@ export function shredRecord(
         switch (column.repetition) {
             case 'REPEATED':
                 assert(Array.isArray(field), `Expected array at column "${columnPathStr}"`)
-                values = field.length == 0 ? undefined : field
+                values = field.length == 0 ? [] : field
                 break
             case 'OPTIONAL':
-                values = field == null ? undefined : [field]
+                values = field == null ? [] : [field]
                 break
             case 'REQUIRED':
                 assert(field != null || record == null, `Missing value at column "${columnPathStr}"`)
-                values = field == null ? undefined : [field]
+                values = field == null ? [] : [field]
                 break
             default:
                 throw new Error(`Unexpected repetition type ${column.repetition} at column "${columnPathStr}"`)
@@ -111,11 +111,11 @@ export function shredRecord(
 
         if (column.children) {
             assert(column.type.isNested)
-            if (values == null) {
+            if (values.length == 0) {
                 mergeShrededRecords(
                     shredRecord(column.children, undefined, {
-                        rLevel: overwrites.rLevel ?? column.rLevelMax,
-                        dLevel: overwrites.dLevel ?? column.dLevelMax - 1,
+                        rLevel: overwrites.rLevel,
+                        dLevel: overwrites.dLevel,
                     }),
                     res
                 )
@@ -125,9 +125,8 @@ export function shredRecord(
                     let value = column.type.transform(values[i])
                     mergeShrededRecords(
                         shredRecord(column.children, value, {
-                            rLevel:
-                                overwrites.rLevel ??
-                                (i === 0 && column.repetition === 'REPEATED' ? column.rLevelMax - 1 : undefined),
+                            rLevel: i === 0 ? overwrites.rLevel : column.rLevelMax,
+                            dLevel: column.dLevelMax,
                         }),
                         res
                     )
@@ -140,27 +139,24 @@ export function shredRecord(
                     dLevels: [],
                     rLevels: [],
                     valueCount: 0,
+                    size: 0,
                 }
             }
 
             assert(!column.type.isNested)
 
-            if (values == null) {
-                res[columnPathStr].rLevels.push(
-                    overwrites.rLevel ?? column.repetition === 'REPEATED' ? column.rLevelMax - 1 : column.rLevelMax
-                )
-                res[columnPathStr].dLevels.push(overwrites.dLevel ?? column.dLevelMax - 1)
+            if (values.length == 0) {
+                res[columnPathStr].rLevels.push(overwrites.rLevel)
+                res[columnPathStr].dLevels.push(overwrites.dLevel)
                 res[columnPathStr].valueCount += 1
             } else {
                 for (let i = 0; i < values.length; i++) {
                     let value = column.type.toPrimitive(values[i])
-                    res[columnPathStr].rLevels.push(
-                        overwrites.rLevel ??
-                            (i === 0 && column.repetition === 'REPEATED' ? column.rLevelMax - 1 : column.rLevelMax)
-                    )
+                    res[columnPathStr].rLevels.push(i === 0 ? overwrites.rLevel : column.rLevelMax)
                     res[columnPathStr].dLevels.push(column.dLevelMax)
                     res[columnPathStr].values.push(value)
                     res[columnPathStr].valueCount += 1
+                    res[columnPathStr].size += column.type.size(value)
                 }
             }
         }
@@ -178,6 +174,7 @@ export function mergeShrededRecords(src: Record<string, ShrededColumn>, dst: Rec
             dst[column].dLevels.push(...src[column].dLevels)
             dst[column].rLevels.push(...src[column].rLevels)
             dst[column].valueCount += src[column].valueCount
+            dst[column].size += src[column].size
         }
     }
 }

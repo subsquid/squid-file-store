@@ -28,7 +28,6 @@
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
     "bson": "^5.0.1",
-    "int53": "^1.0.0",
     "node-int64": "^0.4.0",
     "thrift": "^0.18.0",
     "varint": "^6.0.0"

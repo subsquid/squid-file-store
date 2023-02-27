@@ -1,12 +1,8 @@
-// import {ParquetValueArray, PrimitiveType} from '../declare'
-import {CursorBuffer, ParquetCodecOptions} from './declare'
-import int53 from 'int53'
 import {Type} from '../../../thrift/parquet_types'
-import Int64 from 'node-int64'
 
 const systemIsLittleEndian = new DataView(new Int32Array([1]).buffer).getInt32(0, true) === 1
 
-export function encodeValues(type: Type, values: any[], opts: ParquetCodecOptions): Buffer {
+export function encode(type: Type, values: any[]): Buffer {
     switch (type) {
         case Type.BOOLEAN:
             return encodeValues_BOOLEAN(values)
@@ -21,7 +17,7 @@ export function encodeValues(type: Type, values: any[], opts: ParquetCodecOption
         case Type.BYTE_ARRAY:
             return encodeValues_BYTE_ARRAY(values)
         case Type.FIXED_LEN_BYTE_ARRAY:
-            return encodeValues_FIXED_LEN_BYTE_ARRAY(values as Buffer[], opts)
+            return encodeValues_FIXED_LEN_BYTE_ARRAY(values)
         default:
             throw new Error(`Unsupported type: ${type}`)
     }
@@ -121,8 +117,7 @@ function encodeValues_BYTE_ARRAY(values: Buffer[]): Buffer {
     let buf_len = 0
     for (let i = 0; i < values.length; i++) {
         const value = values[i]
-        const buf = (values[i] = Buffer.from(value))
-        buf_len += 4 + buf.length
+        buf_len += 4 + value.length
     }
     const buf = Buffer.alloc(buf_len)
     let buf_pos = 0
@@ -135,15 +130,9 @@ function encodeValues_BYTE_ARRAY(values: Buffer[]): Buffer {
     return buf
 }
 
-function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Buffer[], opts: ParquetCodecOptions): Buffer {
-    if (!opts.typeLength) {
-        throw new Error('missing option: typeLength (required for FIXED_LEN_BYTE_ARRAY)')
-    }
-    if (!values.every((val) => val.length === opts.typeLength)) {
+function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Buffer[]): Buffer {
+    if (!values.every((val, i, arr) => val.length === arr[0].length)) {
         throw new Error('not all values for FIXED_LEN_BYTE_ARRAY have the correct length')
     }
-    if (values.every((val) => Buffer.isBuffer(val))) {
-        return Buffer.concat(values as Buffer[])
-    }
-    return Buffer.concat(values.map((val) => (Buffer.isBuffer(val) ? val : Buffer.from(val))))
+    return Buffer.concat(values)
 }

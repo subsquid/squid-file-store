@@ -32,7 +32,7 @@ function encodeRunRepeated(value: number, count: number, opts: RLECodecOptions):
     return Buffer.concat([Buffer.from(varintEncode(count << 1)), buf])
 }
 
-export function encodeValues(type: Type, values: any[], opts: RLECodecOptions): Buffer {
+export function encode(type: Type, values: any[], opts: RLECodecOptions): Buffer {
     switch (type) {
         case Type.BOOLEAN:
         case Type.INT32:
