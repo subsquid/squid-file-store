@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Thu, 16 Feb 2023 10:44:40 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Feb 2023 19:04:13 GMT and should not be manually modified.
+
+## 0.2.0
+Mon, 27 Feb 2023 19:04:13 GMT
+
+### Minor changes
+
+- use own writing instead of arrow
 
 ## 0.1.1
 Thu, 16 Feb 2023 10:44:40 GMT
