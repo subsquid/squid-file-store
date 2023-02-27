@@ -1,29 +1,51 @@
-import assert from 'assert'
-import {Table as ArrowTable, Builder, DataType, makeBuilder, tableToIPC, RecordBatchWriter} from 'apache-arrow'
-import {Compression, WriterProperties, WriterPropertiesBuilder, writeParquet} from 'parquet-wasm/node/arrow1'
 import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
+import assert from 'assert'
+import * as parquet from '../thrift/parquet_types'
+import {RowGroupData, ParquetDataPageData} from './parquet/declare'
+import {encodeRowGroup, encodeFooter} from './parquet/encode'
+import {shredRecord, shredSchema} from './parquet/shred'
 
-export interface Type<T> {
-    arrowDataType: DataType
-    prepare(value: T): any
-}
+export type Type<T> = {
+    logicalType?: parquet.LogicalType
+    convertedType?: parquet.ConvertedType
+} & (
+    | {
+          isNested?: false
+          primitiveType: parquet.Type
+          toPrimitive(value: T): any
+          size(value: T): number
+      }
+    | {
+          isNested: true
+          children: TableSchema
+          transform(value: T): Record<string, any>
+      }
+)
 
-export {Compression}
+export type Compression = Extract<
+    keyof typeof parquet.CompressionCodec,
+    'UNCOMPRESSED' | 'GZIP' | 'LZO' | 'BROTLI' | 'LZ4'
+>
+export type Encoding = Extract<keyof typeof parquet.Encoding, 'PLAIN'>
+export type Repetition = keyof typeof parquet.FieldRepetitionType
 
 export interface TableOptions {
     compression?: Compression
-    dictionary?: boolean
+    rowGroupSize?: number
+    pageSize?: number
 }
 
 export interface ColumnOptions {
     nullable?: boolean
     compression?: Compression
-    dictionary?: boolean
+    encoding?: Encoding
 }
 
-export interface ColumnData<T extends Type<any> = Type<any>, O extends ColumnOptions = ColumnOptions> {
-    type: T
-    options: Required<O>
+export interface ColumnData<T = any, N = boolean> {
+    type: Type<T>
+    repetition: N extends true ? 'OPTIONAL' : N extends false ? 'REPEATED' | 'REQUIRED' : Repetition
+    compression?: Compression
+    encoding?: Encoding
 }
 
 export interface TableSchema {
@@ -31,7 +53,7 @@ export interface TableSchema {
 }
 
 type NullableColumns<T extends Record<string, ColumnData>> = {
-    [F in keyof T]: T[F]['options'] extends {nullable: true} ? F : never
+    [F in keyof T]: T[F]['repetition'] extends 'OPTIONAL' ? F : never
 }[keyof T]
 
 type Convert<T extends Record<string, ColumnData>> = {
@@ -42,20 +64,30 @@ type Convert<T extends Record<string, ColumnData>> = {
 
 export interface Column {
     name: string
-    data: ColumnData
+    path: string[]
+    type: Type<any>
+    repetition: Repetition
+    compression: Compression
+    encoding: Encoding
+    rLevelMax: number
+    dLevelMax: number
+    children?: Column[]
 }
+
+const PARQUET_MAGIC = 'PAR1'
 
 export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     private columns: Column[] = []
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
-        for (let column in schema) {
-            this.columns.push({
-                name: column,
-                data: schema[column],
-            })
-        }
-        this.options = {compression: Compression.UNCOMPRESSED, dictionary: false, ...options}
+        this.options = {compression: 'UNCOMPRESSED', pageSize: 8192, rowGroupSize: 4096, ...options}
+        this.columns = shredSchema(schema, {
+            path: [],
+            compression: this.options.compression || 'UNCOMPRESSED',
+            encoding: 'PLAIN',
+            dLevel: 0,
+            rLevel: 0,
+        })
     }
 
     createWriter(): TableWriter<Convert<T>> {
@@ -63,38 +95,93 @@ export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     }
 }
 
-class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
-    private columnBuilders: Record<string, Builder> = {}
-    private writeProperties: WriterProperties
-    private _size = 0
+export class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
+    public rowGroups: RowGroupData[] = []
+    public rowCount = 0
 
-    constructor(private columns: Column[], options: Required<TableOptions>) {
-        let builer = new WriterPropertiesBuilder()
-        for (let column of columns) {
-            this.columnBuilders[column.name] = makeBuilder({type: column.data.type.arrowDataType})
-            builer = builer.setColumnDictionaryEnabled(column.name, column.data.options.dictionary)
-            builer = builer.setColumnCompression(column.name, column.data.options.compression)
-        }
-        builer = builer.setCompression(options.compression)
-        builer = builer.setDictionaryEnabled(options.dictionary)
-        this.writeProperties = builer.build()
-    }
+    constructor(private columns: Column[], private options: Required<TableOptions>) {}
 
     get size() {
-        return this._size
+        let size = 0
+        for (let rg of this.rowGroups) {
+            size += rg.size
+        }
+        return size
+    }
+
+    appendRecord(record: Record<string, any>) {
+        let rowGroup: RowGroupData
+        if (this.rowGroups.length == 0 || last(this.rowGroups).size >= this.options.rowGroupSize) {
+            rowGroup = {
+                columnData: {},
+                rowCount: 0,
+                size: 0,
+            }
+            this.rowGroups.push(rowGroup)
+        } else {
+            rowGroup = last(this.rowGroups)
+        }
+
+        let shrededRecord = shredRecord(this.columns, record, {dLevel: 0, rLevel: 0})
+        for (let column of this.columns) {
+            if (column.children != null) continue
+
+            let columnPathStr = column.path.join('.')
+            let columnChunk = rowGroup.columnData[columnPathStr]
+            if (columnChunk == null) {
+                columnChunk = rowGroup.columnData[columnPathStr] = []
+            }
+
+            let dataPage: ParquetDataPageData
+            if (columnChunk.length == 0 || last(columnChunk).size >= this.options.pageSize) {
+                dataPage = {
+                    dLevels: [],
+                    rLevels: [],
+                    values: [],
+                    valueCount: 0,
+                    rowCount: 0,
+                    size: 0,
+                }
+                columnChunk.push(dataPage)
+            } else {
+                dataPage = last(columnChunk)
+            }
+
+            dataPage.values.push(...shrededRecord[columnPathStr].values)
+            dataPage.dLevels.push(...shrededRecord[columnPathStr].dLevels)
+            dataPage.rLevels.push(...shrededRecord[columnPathStr].rLevels)
+            dataPage.valueCount += shrededRecord[columnPathStr].valueCount
+            dataPage.size += shrededRecord[columnPathStr].size
+            dataPage.rowCount += 1
+
+            rowGroup.size += shrededRecord[columnPathStr].size
+        }
+
+        rowGroup.rowCount += 1
+        this.rowCount += 1
     }
 
     flush() {
-        this._size = 0
+        let fragments: Buffer[] = []
+        let rowGroups: parquet.RowGroup[] = []
 
-        let columnsData: Record<string, any> = {}
-        for (let column of this.columns) {
-            this.columnBuilders[column.name].finish()
-            columnsData[column.name] = this.columnBuilders[column.name].flush()
+        fragments.push(Buffer.from(PARQUET_MAGIC))
+
+        let offset = PARQUET_MAGIC.length
+        for (let rowGroupData of this.rowGroups) {
+            let {body, metadata} = encodeRowGroup(this.columns, rowGroupData, offset)
+            fragments.push(body)
+            rowGroups.push(metadata)
+
+            offset += body.length
         }
-        let arrowTable = new ArrowTable(columnsData)
 
-        return writeParquet(tableToIPC(arrowTable), this.writeProperties)
+        fragments.push(encodeFooter(this.columns, this.rowCount, rowGroups))
+        fragments.push(Buffer.from(PARQUET_MAGIC))
+
+        this.rowGroups = []
+
+        return Buffer.concat(fragments)
     }
 
     write(record: T): this {
@@ -102,32 +189,26 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     }
 
     writeMany(records: T[]): this {
-        let newSize = 0
-        for (let column of this.columns) {
-            let columnBuilder = this.columnBuilders[column.name]
-            for (let record of records) {
-                let value = record[column.name]
-                if (value == null) {
-                    assert(column.data.options.nullable, `Null value in non-nullable column "${column.name}"`)
-                }
-                columnBuilder.append(value == null ? null : column.data.type.prepare(value))
-            }
-            newSize += columnBuilder.byteLength
+        for (let rec of records) {
+            this.appendRecord(rec)
         }
-        this._size = newSize
 
         return this
     }
 }
 
+function last<T>(arr: T[]): T {
+    assert(arr.length > 0)
+    return arr[arr.length - 1]
+}
+
 export function Column<T extends Type<any>>(type: T): ColumnData<T>
-export function Column<T extends Type<any>, O extends ColumnOptions>(
-    type: T,
-    options?: O
-): ColumnData<T, O & ColumnOptions>
-export function Column(type: Type<any>, options?: ColumnOptions): ColumnData {
+export function Column<T extends Type<any>, O extends ColumnOptions>(type: T, options?: O): ColumnData<T, true>
+export function Column(type: Type<any>, options?: ColumnOptions): ColumnData<any> {
     return {
         type,
-        options: {compression: Compression.UNCOMPRESSED, dictionary: false, nullable: false, ...options},
+        repetition: options?.nullable ? 'OPTIONAL' : 'REQUIRED',
+        compression: options?.compression,
+        encoding: options?.encoding,
     }
 }

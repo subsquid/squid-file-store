@@ -10,5 +10,8 @@ export interface Table<T> {
     createWriter(): TableWriter<T>
 }
 
-export type TableRecord<T> = T extends Table<infer R> ? R : never
+type Simplify<T> = {
+    [K in keyof T]: T[K]
+} & {}
 
+export type TableRecord<T> = T extends Table<infer R> ? Simplify<R> : never
