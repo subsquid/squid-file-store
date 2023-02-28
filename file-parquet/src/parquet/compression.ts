@@ -1,9 +1,9 @@
-// import {ParquetCompression} from './declare'
-import * as Util from './util'
-import * as zlib from 'zlib'
+import {gzipSync as gzipCompressSync, brotliCompressSync} from 'zlib'
+import {encode as lz4CompressSync} from 'lz4'
+import {compressSync as snappyCompressSync} from 'snappy'
+import {compressSync as zstdCompressSync} from 'zstd.ts'
+import {compress as lzoCompressSync} from 'lzo'
 import {CompressionCodec as Compression} from '../../thrift/parquet_types'
-import {buffer} from 'stream/consumers'
-// import * as snappyjs from './snappy'
 
 export interface CompressionCodec {
     deflate(value: Buffer): Buffer
@@ -17,30 +17,18 @@ export function getCodec(compression: Compression): CompressionCodec {
             return gzip
         case Compression.BROTLI:
             return brotli
+        case Compression.LZ4:
+            return lz4
+        case Compression.SNAPPY:
+            return snappy
+        case Compression.ZSTD:
+            return zstd
+        case Compression.LZO:
+            return lzo
         default:
             throw new Error(`Unsupported compression`)
     }
 }
-// export const PARQUET_COMPRESSION_METHODS: Record<ParquetCompression, ParquetCompressionKit> = {
-//     UNCOMPRESSED: {
-//         deflate: deflate_identity,
-//     },
-//     GZIP: {
-//         deflate: deflate_gzip,
-//     },
-//     // SNAPPY: {
-//     //     deflate: deflate_snappy,
-//     // },
-//     LZO: {
-//         deflate: deflate_lzo,
-//     },
-//     BROTLI: {
-//         deflate: deflate_brotli,
-//     },
-//     LZ4: {
-//         deflate: deflate_lz4,
-//     },
-// }
 
 const uncompressed: CompressionCodec = {
     deflate(value: Buffer) {
@@ -50,18 +38,36 @@ const uncompressed: CompressionCodec = {
 
 const gzip: CompressionCodec = {
     deflate(value: Buffer) {
-        return zlib.gzipSync(value)
+        return gzipCompressSync(value)
     },
 }
 
-// const snappy: CompressionCodec = {
-//     deflate(value: Buffer) {
-//         return snappyjs.deflate(value)
-//     }
-// }
+const snappy: CompressionCodec = {
+    deflate(value: Buffer) {
+        return snappyCompressSync(value)
+    },
+}
 
 const brotli: CompressionCodec = {
     deflate(value: Buffer) {
-        return zlib.brotliCompressSync(value)
+        return brotliCompressSync(value)
+    },
+}
+
+const lz4: CompressionCodec = {
+    deflate(value: Buffer) {
+        return lz4CompressSync(value)
+    },
+}
+
+const zstd: CompressionCodec = {
+    deflate(value: Buffer) {
+        return zstdCompressSync({input: value})
+    },
+}
+
+const lzo: CompressionCodec = {
+    deflate(value: Buffer) {
+        return lzoCompressSync(value)
     },
 }

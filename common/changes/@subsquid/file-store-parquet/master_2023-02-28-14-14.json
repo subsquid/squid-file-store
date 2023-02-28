@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "add missing compressions",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}
