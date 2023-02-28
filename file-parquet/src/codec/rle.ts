@@ -1,5 +1,5 @@
 import {encode as varintEncode} from 'varint'
-import {Type} from '../../../thrift/parquet_types'
+import {Type} from '../../thrift/parquet_types'
 
 export interface RLECodecOptions {
     bitWidth: number

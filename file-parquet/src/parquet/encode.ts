@@ -1,5 +1,5 @@
-import * as codec from './codec'
-import * as compression from './compression'
+import * as codec from '../codec'
+import * as compression from '../compression'
 import {ParquetColumnChunkData, ParquetDataPageData, RowGroupData} from './declare'
 import * as util from './util'
 import Int64 from 'node-int64'

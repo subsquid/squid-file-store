@@ -1,4 +1,4 @@
-import {Type} from '../../../thrift/parquet_types'
+import {Type} from '../../thrift/parquet_types'
 
 const systemIsLittleEndian = new DataView(new Int32Array([1]).buffer).getInt32(0, true) === 1
 

@@ -1,4 +1,4 @@
-import {Type, Encoding} from '../../../thrift/parquet_types'
+import {Type, Encoding} from '../../thrift/parquet_types'
 
 import * as plain from './plain'
 
