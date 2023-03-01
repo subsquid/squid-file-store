@@ -8,6 +8,7 @@
   "files": [
     "lib",
     "src",
+    "thrift",
     "!src/test"
   ],
   "main": "lib/index.js",
