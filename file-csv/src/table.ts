@@ -90,7 +90,7 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
         if (this.header) {
             table.push(this.header)
         }
-        table.push(...this.records)
+        table = table.concat(this.records)
 
         this.reset()
 

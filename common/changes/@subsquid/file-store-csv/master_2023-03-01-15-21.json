@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-csv",
+      "comment": "use `.concat()` instead of `.push()` on flushing to prevent maximum call stack size exceeded error",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-csv"
+}
