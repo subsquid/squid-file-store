@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-parquet",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@subsquid/file-store-parquet_v0.2.2",
+      "date": "Wed, 01 Mar 2023 14:12:41 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "add \"thrift\" to list of publishing folders"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@subsquid/file-store-parquet_v0.2.1",
       "date": "Tue, 28 Feb 2023 14:16:26 GMT",

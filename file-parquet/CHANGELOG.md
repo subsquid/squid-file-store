@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Tue, 28 Feb 2023 14:16:26 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Mar 2023 14:12:41 GMT and should not be manually modified.
+
+## 0.2.2
+Wed, 01 Mar 2023 14:12:41 GMT
+
+### Patches
+
+- add "thrift" to list of publishing folders
 
 ## 0.2.1
 Tue, 28 Feb 2023 14:16:26 GMT
