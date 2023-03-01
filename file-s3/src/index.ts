@@ -8,6 +8,7 @@ import {
     NotFound,
     PutObjectCommand,
     S3Client,
+    S3ClientConfig,
 } from '@aws-sdk/client-s3'
 import {Dest} from '@subsquid/file-store'
 import {assertNotNull} from '@subsquid/util-internal'
@@ -15,9 +16,9 @@ import {assertNotNull} from '@subsquid/util-internal'
 export class S3Dest implements Dest {
     private client: S3Client
 
-    constructor(dir: string, bucket: string, options?: S3Options)
+    constructor(dir: string, bucket: string, options?: S3ClientConfig)
     constructor(dir: string, bucket: string, client: S3Client)
-    constructor(private dir: string, private bucket: string, optionsOrClient?: S3Options | S3Client) {
+    constructor(private dir: string, private bucket: string, optionsOrClient?: S3ClientConfig | S3Client) {
         if (optionsOrClient instanceof S3Client) {
             this.client = optionsOrClient
         } else {
@@ -232,11 +233,4 @@ export class S3Dest implements Dest {
     private isDir(str: string) {
         return str.endsWith('/')
     }
-}
-
-export interface S3Options {
-    endpoint?: string
-    region?: string
-    accessKeyId?: string
-    secretAccessKey?: string
 }
