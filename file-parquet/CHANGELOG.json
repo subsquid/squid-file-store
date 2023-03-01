@@ -2,6 +2,21 @@
   "name": "@subsquid/file-store-parquet",
   "entries": [
     {
+      "version": "0.2.3",
+      "tag": "@subsquid/file-store-parquet_v0.2.3",
+      "date": "Wed, 01 Mar 2023 14:42:25 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "add missing 'lzo' package dependency"
+          },
+          {
+            "comment": "import compression packages only when needed"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.2",
       "tag": "@subsquid/file-store-parquet_v0.2.2",
       "date": "Wed, 01 Mar 2023 14:12:41 GMT",

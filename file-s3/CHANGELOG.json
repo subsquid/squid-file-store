@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-s3",
   "entries": [
     {
+      "version": "0.1.0",
+      "tag": "@subsquid/file-store-s3_v0.1.0",
+      "date": "Wed, 01 Mar 2023 14:42:25 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "fix s3Dest options type\nmake @aws-sdk/client-s3 peer dependency"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.0.3",
       "tag": "@subsquid/file-store-s3_v0.0.3",
       "date": "Mon, 27 Feb 2023 19:04:13 GMT",

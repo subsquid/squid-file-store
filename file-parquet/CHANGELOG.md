@@ -1,6 +1,14 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Wed, 01 Mar 2023 14:12:41 GMT and should not be manually modified.
+This log was last generated on Wed, 01 Mar 2023 14:42:25 GMT and should not be manually modified.
+
+## 0.2.3
+Wed, 01 Mar 2023 14:42:25 GMT
+
+### Patches
+
+- add missing 'lzo' package dependency
+- import compression packages only when needed
 
 ## 0.2.2
 Wed, 01 Mar 2023 14:12:41 GMT
