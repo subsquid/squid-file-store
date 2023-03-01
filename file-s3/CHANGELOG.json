@@ -8,7 +8,10 @@
       "comments": {
         "minor": [
           {
-            "comment": "fix s3Dest options type\nmake @aws-sdk/client-s3 peer dependency"
+            "comment": "fix s3Dest options type"
+          },
+          {
+            "comment": "make @aws-sdk/client-s3 peer dependency"
           }
         ]
       }
