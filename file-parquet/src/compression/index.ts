@@ -1,8 +1,3 @@
-import {gzipSync as gzipCompressSync, brotliCompressSync} from 'zlib'
-import {encode as lz4CompressSync} from 'lz4'
-import {compressSync as snappyCompressSync} from 'snappy'
-import {compressSync as zstdCompressSync} from 'zstd.ts'
-import {compress as lzoCompressSync} from 'lzo'
 import {CompressionCodec as Compression} from '../../thrift/parquet_types'
 
 export interface CompressionCodec {
@@ -38,36 +33,36 @@ const uncompressed: CompressionCodec = {
 
 const gzip: CompressionCodec = {
     deflate(value: Buffer) {
-        return gzipCompressSync(value)
+        return require('zlib').gzipSync(value)
     },
 }
 
 const snappy: CompressionCodec = {
     deflate(value: Buffer) {
-        return snappyCompressSync(value)
+        return require('snappy').compressSync(value)
     },
 }
 
 const brotli: CompressionCodec = {
     deflate(value: Buffer) {
-        return brotliCompressSync(value)
+        return require('zlib').brotliCompressSync(value)
     },
 }
 
 const lz4: CompressionCodec = {
     deflate(value: Buffer) {
-        return lz4CompressSync(value)
+        return require('lz4').encode(value)
     },
 }
 
 const zstd: CompressionCodec = {
     deflate(value: Buffer) {
-        return zstdCompressSync({input: value})
+        return require('zstd.ts').compressSync({input: value})
     },
 }
 
 const lzo: CompressionCodec = {
     deflate(value: Buffer) {
-        return lzoCompressSync(value)
+        return require('lzo').compress(value)
     },
 }
