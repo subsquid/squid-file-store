@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-csv",
   "entries": [
     {
+      "version": "0.2.2",
+      "tag": "@subsquid/file-store-csv_v0.2.2",
+      "date": "Wed, 01 Mar 2023 15:32:43 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "use `.concat()` instead of `.push()` on flushing to prevent maximum call stack size exceeded error"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.2.1",
       "tag": "@subsquid/file-store-csv_v0.2.1",
       "date": "Mon, 27 Feb 2023 19:04:13 GMT",
