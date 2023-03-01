@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "add missing 'lzo' package dependency",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}

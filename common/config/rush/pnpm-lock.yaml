@@ -27,12 +27,12 @@ specifiers:
   lz4: ^0.6.5
   mocha: ^10.2.0
   node-int64: ^0.4.0
-  simple-zstd: ~1.4.2
-  snappy: ~7.2.2
+  snappy: ^7.2.2
   thrift: ^0.18.0
   typescript: 4.8.2
   upath: ^2.0.1
   varint: ^6.0.0
+  zstd.ts: ^1.1.3
 
 dependencies:
   '@aws-sdk/client-s3': 3.259.0
@@ -61,12 +61,12 @@ dependencies:
   lz4: 0.6.5
   mocha: 10.2.0
   node-int64: 0.4.0
-  simple-zstd: 1.4.2
   snappy: 7.2.2
   thrift: 0.18.0
   typescript: 4.8.2
   upath: 2.0.1
   varint: 6.0.0
+  zstd.ts: 1.1.3
 
 packages:
 
@@ -1613,6 +1613,10 @@ packages:
     engines: {node: '>=8'}
     dev: false
 
+  /bindings/1.2.1:
+    resolution: {integrity: sha512-u4cBQNepWxYA55FunZSM7wMi55yQaN0otnhhilNoWHq0MfOfJeQx0v0mRRpolGOExPjZcl6FtB0BB8Xkb88F0g==}
+    dev: false
+
   /bintrees/1.0.2:
     resolution: {integrity: sha512-VOMgTMwjAaUG580SXn3LacVgjurrbMme7ZZNYGSSV7mmtY6QQRh0Eg3pwIcntQ77DErK1L0NxkbetjcoXzVwKw==}
     dev: false
@@ -2215,6 +2219,13 @@ packages:
       cuint: 0.2.2
       nan: 2.17.0
       xxhashjs: 0.2.2
+    dev: false
+
+  /lzo/0.4.11:
+    resolution: {integrity: sha512-apQHNoW2Alg72FMqaC/7pn03I7umdgSVFt2KRkCXXils4Z9u3QBh1uOtl2O5WmZIDLd9g6Lu4lIdOLmiSTFVCQ==}
+    requiresBuild: true
+    dependencies:
+      bindings: 1.2.1
     dev: false
 
   /micromatch/4.0.5:
@@ -2877,7 +2888,7 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-2l3z4bqAlw2aKrtOJyBOWOV81oAgk8hO9FlvEzEEwSSQ8X5HLtD9hajau6FJZwRzamgI/xyhB1FdS6Gr0OxI9g==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-v23eyi+wtYBK9nN9FlIj1d2MFvr38dKYKqFDYaIvJ813m9473ih1NfvLaW59KAPH26GivWsXVWZhImyZIu71kQ==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
@@ -2891,7 +2902,7 @@ packages:
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-KambRDnM/BMz7ugJcuSlwPWKsk4cBAXvsRk9b9aHU6huUlWu7iocM9nzd2Rq4Bn/rcaJm5XZQWHdHGNlSGenQA==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-jOXOFMHdPvDkG83pJfFwu2ttY1VmtAulVMN8CAawMDqbCuFqsFpEpam5bb1Wi7NxrYTddLo+Sq0zkv1TYYFuGw==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
@@ -2907,6 +2918,7 @@ packages:
       bson: 5.0.1
       int53: 1.0.0
       lz4: 0.6.5
+      lzo: 0.4.11
       mocha: 10.2.0
       node-int64: 0.4.0
       parquet-wasm: 0.4.0-beta.5
@@ -2922,7 +2934,7 @@ packages:
     dev: false
 
   file:projects/file-store-s3.tgz:
-    resolution: {integrity: sha512-x9m7cMOVI1zqI/29AEVfDvQCIaOYhKZJ88cWIQEXxnHaopEJ9vLAZi/5JZwHFsObMEToEqUsHoWhnkJtkv76kA==, tarball: file:projects/file-store-s3.tgz}
+    resolution: {integrity: sha512-aSDctsnZy7SRK9mbQ4qhnbGLLxpCsa86U8YMDZZ9FDnonbB9z4td3eHiuH3wAQu9BWZwPrs8/7qGSgZ9I6PGUw==, tarball: file:projects/file-store-s3.tgz}
     name: '@rush-temp/file-store-s3'
     version: 0.0.0
     dependencies:
@@ -2951,7 +2963,7 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-T4ZUVM2uVs/RynjPTdR8Svcu2HQt3ZNcxmmbFkIKNGAZBD9q1UEyYYcf6SNwt+wYCB9QeUS8FCmg6sb9TNNyxg==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-lWyGSlac61qdsV1wDTnKxg/j94kBtjs52szc5vDFdehr985qxsoDcm9qLsZ+Up1lVG5Qpj2of2hkLNfZX0dACA==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:
