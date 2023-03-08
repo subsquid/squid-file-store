@@ -25,9 +25,11 @@ specifiers:
   dotenv: ^16.0.3
   expect: ^27.5.1
   lz4: ^0.6.5
+  lzo: ^0.4.11
   mocha: ^10.2.0
   node-int64: ^0.4.0
   snappy: ^7.2.2
+  strftime: ~0.10.1
   thrift: ^0.18.0
   typescript: 4.8.2
   upath: ^2.0.1
@@ -59,9 +61,11 @@ dependencies:
   dotenv: 16.0.3
   expect: 27.5.1
   lz4: 0.6.5
+  lzo: 0.4.11
   mocha: 10.2.0
   node-int64: 0.4.0
   snappy: 7.2.2
+  strftime: 0.10.1
   thrift: 0.18.0
   typescript: 4.8.2
   upath: 2.0.1
@@ -1409,6 +1413,13 @@ packages:
       xxhashjs: 0.2.2
     dev: false
 
+  /@types/bson/4.2.0:
+    resolution: {integrity: sha512-ELCPqAdroMdcuxqwMgUpifQyRoTpyYCNr1V9xKyF40VsBobsj+BbWNRvwGchMgBPGqkw655ypkjj2MEF5ywVwg==}
+    deprecated: This is a stub types definition. bson provides its own type definitions, so you do not need this installed.
+    dependencies:
+      bson: 5.0.1
+    dev: false
+
   /@types/command-line-args/5.2.0:
     resolution: {integrity: sha512-UuKzKpJJ/Ief6ufIaIzr3A/0XnluX7RvFgwkV89Yzvm77wCh1kFaFmqN8XEnGcN62EuHdedQjEMb8mYxFLGPyA==}
     dev: false
@@ -1483,6 +1494,10 @@ packages:
 
   /@types/stack-utils/2.0.1:
     resolution: {integrity: sha512-Hl219/BT5fLAaz6NDkSuhzasy49dwQS/DSdu4MdggFB8zcXv7vflBI3xp7FEmkmdDkBUI2bPUNeMttp2knYdxw==}
+    dev: false
+
+  /@types/strftime/0.9.4:
+    resolution: {integrity: sha512-MlicGsqGq8pVXa0umCVrYvno0bNUH/JYGPtlAvV/oU0/0lGtAVs/EtbDi6rz3241K3MF7+l6fuXxb9Ae3nLhJQ==}
     dev: false
 
   /@types/thrift/0.10.12:
@@ -2555,6 +2570,11 @@ packages:
     resolution: {integrity: sha512-AiisoFqQ0vbGcZgQPY1cdP2I76glaVA/RauYR4G4thNFgkTqr90yXTo4LYX60Jl+sIlPNHHdGSwo01AvbKUSVQ==}
     dev: false
 
+  /strftime/0.10.1:
+    resolution: {integrity: sha512-nVvH6JG8KlXFPC0f8lojLgEsPA18lRpLZ+RrJh/NkQV2tqOgZfbas8gcU8SFgnnqR3rWzZPYu6N2A3xzs/8rQg==}
+    engines: {node: '>=0.2.0'}
+    dev: false
+
   /string-width/4.2.3:
     resolution: {integrity: sha512-wKyQRQpjJ0sIp62ErSZdGsjMJWsap5oRNihHhu6G7JVO/9jIB6UyevL+tXuOqrng8j/cxKTWyWUwvSTriiZz/g==}
     engines: {node: '>=8'}
@@ -2888,7 +2908,7 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-v23eyi+wtYBK9nN9FlIj1d2MFvr38dKYKqFDYaIvJ813m9473ih1NfvLaW59KAPH26GivWsXVWZhImyZIu71kQ==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-eYyZDnYJqz1dlIF20fHogODM9x1SVv5BcNgIR0fmHVao2dZowopVKFHdFPx0GJbkVNQvD6zJQ1OoXvVRInURmA==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
@@ -2896,17 +2916,20 @@ packages:
       '@subsquid/util-naming': 0.0.0
       '@types/mocha': 10.0.1
       '@types/node': 16.11.56
+      '@types/strftime': 0.9.4
       expect: 27.5.1
       mocha: 10.2.0
+      strftime: 0.10.1
       typescript: 4.8.2
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-jOXOFMHdPvDkG83pJfFwu2ttY1VmtAulVMN8CAawMDqbCuFqsFpEpam5bb1Wi7NxrYTddLo+Sq0zkv1TYYFuGw==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-YeneCTDeCPEVO1zgLmGeSZm0Uxd1xR0mMUgoJkg72qJNgm5Ur28D/le3e/WisymofuaSFqUTuLbMeANMZdfqTg==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
       '@creditkarma/thrift-typescript': 3.7.6
+      '@types/bson': 4.2.0
       '@types/int53': 1.0.0
       '@types/lz4': 0.6.0
       '@types/mocha': 10.0.1
@@ -2963,7 +2986,7 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-lWyGSlac61qdsV1wDTnKxg/j94kBtjs52szc5vDFdehr985qxsoDcm9qLsZ+Up1lVG5Qpj2of2hkLNfZX0dACA==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-Z4ua2Z/UVw/u9wLh760QarsEh+htl3NT8wC8usSgwomPfIEpHoRvhCe9wgi7KRODzE+Ik+RJfKcobkF4wY2e0g==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:

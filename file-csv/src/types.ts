@@ -1,4 +1,5 @@
 import assert from 'assert'
+import strftime from 'strftime'
 import {Type} from './table'
 
 export function String(): Type<string> {
@@ -41,11 +42,15 @@ export function Boolean(): Type<boolean> {
     }
 }
 
-export function DateTime(): Type<Date> {
+export function DateTime(format?: string): Type<Date> {
     return {
         serialize(value: Date) {
             assert(value instanceof Date)
-            return value.toISOString()
+            if (format == null) {
+                return value.toISOString()
+            } else {
+                return strftime(format, value)
+            }
         },
         isNumeric: false,
     }
