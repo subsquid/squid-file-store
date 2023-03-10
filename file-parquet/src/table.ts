@@ -12,6 +12,7 @@ export type Type<T> = {
     | {
           isNested?: false
           primitiveType: parquet.Type
+          typeLength?: number
           toPrimitive(value: T): any
           size(value: T): number
       }
@@ -75,12 +76,19 @@ export interface Column {
 }
 
 const PARQUET_MAGIC = 'PAR1'
+const DEFAULT_PAGE_SIZE = 8 * 1024
+const DEFAULT_ROW_GROUP_SIZE = 32 * 1024 * 1024
 
 export class Table<T extends TableSchema> implements ITable<Convert<T>> {
     private columns: Column[] = []
     private options: Required<TableOptions>
     constructor(readonly name: string, protected schema: T, options?: TableOptions) {
-        this.options = {compression: 'UNCOMPRESSED', pageSize: 8192, rowGroupSize: 4096, ...options}
+        this.options = {
+            compression: 'UNCOMPRESSED',
+            pageSize: DEFAULT_PAGE_SIZE,
+            rowGroupSize: DEFAULT_ROW_GROUP_SIZE,
+            ...options,
+        }
         this.columns = shredSchema(schema, {
             path: [],
             compression: this.options.compression || 'UNCOMPRESSED',
