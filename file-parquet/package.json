@@ -1,6 +1,6 @@
 {
   "name": "@subsquid/file-store-parquet",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "",
   "publishConfig": {
     "access": "public"
