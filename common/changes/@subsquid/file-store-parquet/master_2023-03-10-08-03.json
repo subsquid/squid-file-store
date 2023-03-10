@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "fix incorrect default row size value",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}
