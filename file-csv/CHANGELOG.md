@@ -1,6 +1,14 @@
 # Change Log - @subsquid/file-store-csv
 
-This log was last generated on Wed, 01 Mar 2023 15:32:43 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Mar 2023 08:07:56 GMT and should not be manually modified.
+
+## 0.3.0
+Fri, 10 Mar 2023 08:07:56 GMT
+
+### Minor changes
+
+- use Numeric type instead of Int and Decimal
+- add format option for DateTime type
 
 ## 0.2.2
 Wed, 01 Mar 2023 15:32:43 GMT

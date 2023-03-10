@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Wed, 01 Mar 2023 14:42:25 GMT and should not be manually modified.
+This log was last generated on Fri, 10 Mar 2023 08:07:56 GMT and should not be manually modified.
+
+## 0.2.4
+Fri, 10 Mar 2023 08:07:56 GMT
+
+### Patches
+
+- fix incorrect default row size value
 
 ## 0.2.3
 Wed, 01 Mar 2023 14:42:25 GMT
