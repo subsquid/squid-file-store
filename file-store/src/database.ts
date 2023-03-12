@@ -12,20 +12,85 @@ interface DatabaseHooks<D extends Dest = Dest> {
 type Tables = Record<string, Table<any>>
 
 export interface DatabaseOptions<T extends Tables, D extends Dest> {
+    /**
+     * A mapping from table handles to Table instances. For each such pair
+     * a TableWriter will be added to BatchContext.store to enable storage of
+     * table rows.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/overview/#database-options
+     *
+     * @example
+     * This adds a `ctx.store.transfersTable` table writer to the batch
+     * context store.
+     * ```
+     * import {
+     *     Table,
+     *     Column,
+     *     Types
+     * } from '@subsquid/file-store-csv'
+     *
+     * tables: {
+     *     transfersTable: new Table('transfers.csv', {
+     *         from: Column(Types.String()),
+     *         to: Column(Types.String()),
+     *         value: Column(Types.Integer())
+     *     }
+     * },
+     * ```
+     */
     tables: T
 
-    dest: D
     /**
-     * Approximate folder size (MB).
-     * @Default 20
+     * A Dest object defining the filesystem connection.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/overview/#database-options
+     *
+     * @example
+     * Write the data to a local './data' folder
+     * ```
+     * import {LocalDest} from '@subsquid/file-store'
+     *
+     * dest: LocalDest('./data')
+     * ```
+     */
+    dest: D
+
+    /**
+     * Amount of in-memory data that will trigger a filesystem
+     * write. Roughly defines the dataset partition size.
+     *
+     * Unit: Megabyte
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/overview/#filesystem-syncs-and-dataset-partitioning
+     *
+     * @default 20
      */
     chunkSizeMb?: number
+
     /**
-     * How often output result after reaching chain head (blocks).
-     * @Default Infinity
+     * If set, the Database will record a dataset partition
+     * upon reaching the blockchain head and then at least
+     * once every syncIntervalBlocks if any new data is available.
+     *
+     * If not set, filesystem writes are triggered only by
+     * the amount of in-memory data reaching the chunkSizeMb
+     * threshold.
+     *
+     * Useful for squids with low output data rates.
+     *
+     * Unit: block
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/overview/#filesystem-syncs-and-dataset-partitioning
      */
     syncIntervalBlocks?: number
 
+    /**
+     * Overrides of the functions that maintain the filesystem record
+     * of the highest indexed block.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/overview/#filesystem-syncs-and-dataset-partitioning
+     * @see https://github.com/subsquid/squid-file-store/blob/master/test/src/processor.ts
+     */
     hooks?: DatabaseHooks<D>
 }
 
@@ -43,6 +108,12 @@ interface StoreConstructor<T extends Tables> {
     new (chunk: () => Chunk<T>): Store<T>
 }
 
+/**
+ * Database interface implementation for storing squid data
+ * to filesystems.
+ *
+ * @see https://docs.subsquid.io/basics/store/file-store/
+ */
 export class Database<T extends Tables, D extends Dest> {
     protected tables: T
     protected dest: D
