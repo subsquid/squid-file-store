@@ -28,20 +28,24 @@ export function encodeDataPage(column: Column, data: ParquetDataPageData): Buffe
     let values = codec.getCodec(Encoding[column.encoding]).encode(column.type.primitiveType, data.values)
     let valuesCompressed = compression.getCodec(CompressionCodec[column.compression]).deflate(values)
 
-    let rLevelsBuf = Buffer.alloc(0)
+    let rLevelsBuf: Buffer
     if (column.rLevelMax > 0) {
         rLevelsBuf = codec.rle.encode(Type.INT32, data.rLevels, {
             bitWidth: util.getBitWidth(column.rLevelMax),
             disableEnvelope: true,
         })
+    } else {
+        rLevelsBuf = Buffer.alloc(0)
     }
 
-    let dLevelsBuf = Buffer.alloc(0)
+    let dLevelsBuf
     if (column.dLevelMax > 0) {
         dLevelsBuf = codec.rle.encode(Type.INT32, data.dLevels, {
             bitWidth: util.getBitWidth(column.dLevelMax),
             disableEnvelope: true,
         })
+    } else {
+        dLevelsBuf = Buffer.alloc(0)
     }
 
     let header = new PageHeader({
@@ -68,75 +72,63 @@ export function encodeDataPage(column: Column, data: ParquetDataPageData): Buffe
 export function encodeColumnChunk(column: Column, data: ParquetColumnChunkData, offset: number) {
     assert(column.children == null && !column.type.isNested, `Trying to encode nested column`)
 
-    let fragments: Buffer[] = []
+    let body = Buffer.alloc(0)
     let valueCount = 0
-    let totalSize = 0
     for (let dataPageData of data) {
         valueCount += dataPageData.valueCount
 
         let dataPage = encodeDataPage(column, dataPageData)
-        totalSize += dataPage.length
 
-        fragments.push(dataPage)
+        dataPage.write
+        body = Buffer.concat([body, dataPage])
     }
 
-    /* prepare metadata header */
     let metadata = new ColumnMetaData({
         codec: CompressionCodec[column.compression],
         data_page_offset: new Int64(offset),
         encodings: [Encoding.RLE, Encoding[column.encoding]],
         num_values: new Int64(valueCount),
         path_in_schema: column.path,
-        total_compressed_size: new Int64(totalSize),
-        total_uncompressed_size: new Int64(totalSize),
+        total_compressed_size: new Int64(body.length),
+        total_uncompressed_size: new Int64(body.length),
         type: column.type.primitiveType,
     })
 
-    /* concat metadata header and data pages */
-    let metadataOffset = offset + totalSize
-    let body = Buffer.concat([...fragments, util.serializeThrift(metadata)])
+    let columnChunk = new ColumnChunk({
+        file_offset: new Int64(offset + body.length),
+        meta_data: metadata,
+    })
 
-    return {body, metadata, metadataOffset}
+    return {body, columnChunk}
 }
 
 /**
  * Encode a list of column values into a parquet row group
  */
-export function encodeRowGroup(
-    columns: Column[],
-    data: RowGroupData,
-    offset: number
-): {
-    body: Buffer
-    metadata: RowGroup
-} {
-    let fragments: Buffer[] = []
+export function encodeRowGroup(columns: Column[], data: RowGroupData, offset: number) {
+    let body = Buffer.alloc(0)
     let columnChunks: ColumnChunk[] = []
     for (let column of columns) {
         if (column.children) continue
 
-        let {body, metadata, metadataOffset} = encodeColumnChunk(column, data.columnData[column.path.join('.')], offset)
-
-        columnChunks.push(
-            new ColumnChunk({
-                file_offset: new Int64(metadataOffset),
-                meta_data: metadata,
-            })
+        let {body: chunkBody, columnChunk} = encodeColumnChunk(
+            column,
+            data.columnData[column.path.join('.')],
+            offset + body.length
         )
 
-        offset += body.length
+        columnChunks.push(columnChunk)
 
-        fragments.push(body)
+        body = Buffer.concat([body, chunkBody])
     }
 
-    let body = Buffer.concat(fragments)
-    let metadata = new RowGroup({
+    let rowGroup = new RowGroup({
         num_rows: new Int64(data.rowCount),
         columns: columnChunks,
         total_byte_size: new Int64(body.length),
     })
 
-    return {body, metadata}
+    return {body, rowGroup}
 }
 
 /**
@@ -167,6 +159,7 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
             )
         } else if (!column.type.isNested) {
             schemaElement.type = column.type.primitiveType
+            schemaElement.type_length = column.type.typeLength
         } else {
             throw new Error(`Unexpected case: column must have children or non-nested type`)
         }

@@ -1,3 +1,4 @@
+import assert from 'assert'
 import {Type} from '../../thrift/parquet_types'
 
 const systemIsLittleEndian = new DataView(new Int32Array([1]).buffer).getInt32(0, true) === 1
@@ -131,8 +132,8 @@ function encodeValues_BYTE_ARRAY(values: Buffer[]): Buffer {
 }
 
 function encodeValues_FIXED_LEN_BYTE_ARRAY(values: Buffer[]): Buffer {
-    if (!values.every((val, i, arr) => val.length === arr[0].length)) {
-        throw new Error('not all values for FIXED_LEN_BYTE_ARRAY have the correct length')
+    for (let v of values) {
+        assert(v.length == values[0].length, 'not all values for FIXED_LEN_BYTE_ARRAY have the correct length')
     }
     return Buffer.concat(values)
 }
