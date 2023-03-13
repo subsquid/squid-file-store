@@ -14,7 +14,6 @@ export type Type<T> = {
           primitiveType: parquet.Type
           typeLength?: number
           toPrimitive(value: T): any
-          size(value: T): number
       }
     | {
           isNested: true

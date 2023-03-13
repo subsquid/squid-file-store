@@ -19,6 +19,7 @@ specifiers:
   '@types/mocha': ^10.0.1
   '@types/node': 16.11.56
   '@types/node-int64': ^0.4.29
+  '@types/strftime': ^0.9.4
   '@types/thrift': ^0.10.12
   '@types/varint': ^6.0.1
   bson: ^5.0.1
@@ -55,6 +56,7 @@ dependencies:
   '@types/mocha': 10.0.1
   '@types/node': 16.11.56
   '@types/node-int64': 0.4.29
+  '@types/strftime': 0.9.4
   '@types/thrift': 0.10.12
   '@types/varint': 6.0.1
   bson: 5.0.1
@@ -1359,6 +1361,10 @@ packages:
     resolution: {integrity: sha512-sNok0jQV6+OpAl3QKaH2VFh8PKZyZ6XHZhZ71LeirOhgfVprKFmEvFG9yQIp7qKe7JGXmolX54zu150OMP9f5w==}
     dev: false
 
+  /@subsquid/util-internal-hex/0.0.2:
+    resolution: {integrity: sha512-EgqYmZjJ6ox885tXBObEAZQZImpRc5pFzQeOLEh78gGPTc39IH3VI4BG0zaomStvgBx+e25M7Y2cc+ae+ttuXQ==}
+    dev: false
+
   /@subsquid/util-internal-http-server/0.1.0:
     resolution: {integrity: sha512-7+lQlGMpKg5Qeavkas2/uBgF4cQQKG5gblhsuPwt/cyDGfIQcwPX9KxJUVQDBE8SL2P62qg8TkzeEYSG89iykg==}
     dependencies:
@@ -1369,6 +1375,12 @@ packages:
     resolution: {integrity: sha512-tkDPXQ+2/2RCO2+O3AtaI71p9TQLOcv2hJWOmgNGzzQrTXp8wbyEZIybm33lsLo2HUmQN/BQKzk4PHkLa36nMQ==}
     dependencies:
       '@subsquid/util-internal-hex': 0.0.1
+    dev: false
+
+  /@subsquid/util-internal-json/0.2.1:
+    resolution: {integrity: sha512-X9bhhKWBcaeZekGEiE15i8xwfq07/aIYDhA+JFdiVT3aygdb9b57V85USuArd6oh3jjHeQ2SBgj6B5rd8m8vlA==}
+    dependencies:
+      '@subsquid/util-internal-hex': 0.0.2
     dev: false
 
   /@subsquid/util-internal-prometheus-server/0.0.2_prom-client@14.1.1:
@@ -2924,11 +2936,12 @@ packages:
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-YeneCTDeCPEVO1zgLmGeSZm0Uxd1xR0mMUgoJkg72qJNgm5Ur28D/le3e/WisymofuaSFqUTuLbMeANMZdfqTg==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-20Qq8kDDEcBMZ0sKFjVwz1B8fFAUGbVlf401RzEMOKGLq1W/xrJYWgRRmdpRJl8QpMOlaT0O3XZfeNXOx7PNQg==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
       '@creditkarma/thrift-typescript': 3.7.6
+      '@subsquid/util-internal-json': 0.2.1
       '@types/bson': 4.2.0
       '@types/int53': 1.0.0
       '@types/lz4': 0.6.0
@@ -2986,7 +2999,7 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-Z4ua2Z/UVw/u9wLh760QarsEh+htl3NT8wC8usSgwomPfIEpHoRvhCe9wgi7KRODzE+Ik+RJfKcobkF4wY2e0g==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-jprNVlF6Wkbv7Vhb4axKVwrzb5nDyiBBx/LwU6VvpqX/ImEskEupRJtRqYYuTDmLBz1eu1r5oS54NeTpfJI5HA==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:

@@ -1,6 +1,7 @@
 import assert from 'assert'
 import {Column, Compression, Encoding, TableSchema} from '../table'
 import {ShrededColumn} from './declare'
+import {getByteSize} from './util'
 
 export function shredSchema(
     schema: TableSchema,
@@ -156,7 +157,7 @@ export function shredRecord(
                     res[columnPathStr].dLevels.push(column.dLevelMax)
                     res[columnPathStr].values.push(value)
                     res[columnPathStr].valueCount += 1
-                    res[columnPathStr].size += column.type.size(value)
+                    res[columnPathStr].size += getByteSize(column.type.primitiveType, value)
                 }
             }
         }
