@@ -170,26 +170,21 @@ export class TableWriter<T extends Record<string, any>> implements ITableWriter<
     }
 
     flush() {
-        let fragments: Buffer[] = []
+        let body = Buffer.from(PARQUET_MAGIC)
         let rowGroups: parquet.RowGroup[] = []
 
-        fragments.push(Buffer.from(PARQUET_MAGIC))
-
-        let offset = PARQUET_MAGIC.length
         for (let rowGroupData of this.rowGroups) {
-            let {body, metadata} = encodeRowGroup(this.columns, rowGroupData, offset)
-            fragments.push(body)
-            rowGroups.push(metadata)
+            let {body: rowGroupBody, rowGroup} = encodeRowGroup(this.columns, rowGroupData, body.length)
+            rowGroups.push(rowGroup)
 
-            offset += body.length
+            body = Buffer.concat([body, rowGroupBody])
         }
 
-        fragments.push(encodeFooter(this.columns, this.rowCount, rowGroups))
-        fragments.push(Buffer.from(PARQUET_MAGIC))
+        body = Buffer.concat([body, encodeFooter(this.columns, this.rowCount, rowGroups), Buffer.from(PARQUET_MAGIC)])
 
         this.rowGroups = []
 
-        return Buffer.concat(fragments)
+        return body
     }
 
     write(record: T): this {
