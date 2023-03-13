@@ -21,7 +21,6 @@ export function String(): Type<string> {
         toPrimitive(value) {
             return Buffer.from(value, 'utf-8')
         },
-        size: (v) => v.length,
     }
 }
 
@@ -34,7 +33,6 @@ export function Int8(): Type<number> {
             assert(-0x80 <= value && value <= 0x7f, `value ${value} does not fit into Int8`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -47,7 +45,6 @@ export function Int16(): Type<number> {
             assert(-0x8000 <= value && value <= 0x7fff, `value ${value} does not fit into Int16`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -60,7 +57,6 @@ export function Int32(): Type<number> {
             assert(-0x80000000 <= value && value <= 0x7fffffff, `value ${value} does not fit into Int32`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -76,7 +72,6 @@ export function Int64(): Type<bigint> {
             )
             return value
         },
-        size: () => 8,
     }
 }
 
@@ -89,7 +84,6 @@ export function Uint8(): Type<number> {
             assert(0 <= value && value <= 0xff, `value ${value} does not fit into UInt8`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -102,7 +96,6 @@ export function Uint16(): Type<number> {
             assert(0 <= value && value <= 0xffff, `value ${value} does not fit into UInt16`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -115,7 +108,6 @@ export function Uint32(): Type<number> {
             assert(0 <= value && value <= 0xffffffff, `value ${value} does not fit into UInt32`)
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -128,7 +120,6 @@ export function Uint64(): Type<bigint> {
             assert(0 <= value && value <= 0xffffffffffffffffn, `value ${value} does not fit into UInt64`)
             return value
         },
-        size: () => 8,
     }
 }
 
@@ -139,7 +130,6 @@ export function Float(): Type<number> {
             assert(!isNaN(value))
             return value
         },
-        size: () => 4,
     }
 }
 
@@ -150,7 +140,6 @@ export function Double(): Type<number> {
             assert(!isNaN(value))
             return value
         },
-        size: () => 8,
     }
 }
 
@@ -160,7 +149,6 @@ export function Boolean(): Type<boolean> {
         toPrimitive(value) {
             return value
         },
-        size: () => 1,
     }
 }
 
@@ -177,7 +165,6 @@ export function Timestamp(): Type<Date> {
         toPrimitive(value) {
             return BigInt(value.valueOf())
         },
-        size: () => 8,
     }
 }
 
@@ -252,19 +239,6 @@ export function Decimal(precision: number, scale = 0): Type<number | bigint> {
                         bytes.writeUInt8(Number(a), this.typeLength - 1 - i)
                     }
                     return bytes
-                default:
-                    throw new Error(`Unexpected PrimitiveType`)
-            }
-        },
-        size() {
-            switch (this.primitiveType) {
-                case PrimitiveType.INT32:
-                    return 4
-                case PrimitiveType.INT64:
-                    return 8
-                case PrimitiveType.FIXED_LEN_BYTE_ARRAY:
-                    assert(this.typeLength != null)
-                    return this.typeLength
                 default:
                     throw new Error(`Unexpected PrimitiveType`)
             }
