@@ -1,24 +1,14 @@
-import {BigDecimal} from '@subsquid/big-decimal'
 import assert from 'assert'
-import {
-    Type as PrimitiveType,
-    ConvertedType,
-    LogicalType,
-    StringType,
-    IntType,
-    TimestampType,
-    TimeUnit,
-    MilliSeconds,
-    DecimalType,
-} from '../../thrift/parquet_types'
+import {BigDecimal} from '@subsquid/big-decimal'
+import * as parquet from '../../thrift/parquet_types'
 import {getBitWidth} from '../parquet/util'
 import {Type} from '../table'
 
 export function String(): Type<string> {
     return {
-        primitiveType: PrimitiveType.BYTE_ARRAY,
-        convertedType: ConvertedType.UTF8,
-        logicalType: new LogicalType({STRING: new StringType()}),
+        primitiveType: parquet.Type.BYTE_ARRAY,
+        convertedType: parquet.ConvertedType.UTF8,
+        logicalType: new parquet.LogicalType({STRING: new parquet.StringType()}),
         toPrimitive(value) {
             return Buffer.from(value, 'utf-8')
         },
@@ -27,9 +17,9 @@ export function String(): Type<string> {
 
 export function Int8(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.INT_8,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 8, isSigned: true})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.INT_8,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 8, isSigned: true})}),
         toPrimitive(value) {
             assert(-0x80 <= value && value <= 0x7f, `value ${value} does not fit into Int8`)
             return value
@@ -39,9 +29,9 @@ export function Int8(): Type<number> {
 
 export function Int16(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.INT_16,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 16, isSigned: true})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.INT_16,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 16, isSigned: true})}),
         toPrimitive(value) {
             assert(-0x8000 <= value && value <= 0x7fff, `value ${value} does not fit into Int16`)
             return value
@@ -51,9 +41,9 @@ export function Int16(): Type<number> {
 
 export function Int32(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.INT_32,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 32, isSigned: true})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.INT_32,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 32, isSigned: true})}),
         toPrimitive(value) {
             assert(-0x80000000 <= value && value <= 0x7fffffff, `value ${value} does not fit into Int32`)
             return value
@@ -63,9 +53,9 @@ export function Int32(): Type<number> {
 
 export function Int64(): Type<bigint> {
     return {
-        primitiveType: PrimitiveType.INT64,
-        convertedType: ConvertedType.INT_64,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 64, isSigned: true})}),
+        primitiveType: parquet.Type.INT64,
+        convertedType: parquet.ConvertedType.INT_64,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 64, isSigned: true})}),
         toPrimitive(value) {
             assert(
                 -0x8000000000000000n <= value && value <= 0x7fffffffffffffffn,
@@ -78,9 +68,9 @@ export function Int64(): Type<bigint> {
 
 export function Uint8(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.UINT_8,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 8, isSigned: false})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.UINT_8,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 8, isSigned: false})}),
         toPrimitive(value) {
             assert(0 <= value && value <= 0xff, `value ${value} does not fit into UInt8`)
             return value
@@ -90,9 +80,9 @@ export function Uint8(): Type<number> {
 
 export function Uint16(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.UINT_16,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 16, isSigned: false})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.UINT_16,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 16, isSigned: false})}),
         toPrimitive(value) {
             assert(0 <= value && value <= 0xffff, `value ${value} does not fit into UInt16`)
             return value
@@ -102,9 +92,9 @@ export function Uint16(): Type<number> {
 
 export function Uint32(): Type<number> {
     return {
-        primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.UINT_32,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 32, isSigned: false})}),
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.UINT_32,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 32, isSigned: false})}),
         toPrimitive(value) {
             assert(0 <= value && value <= 0xffffffff, `value ${value} does not fit into UInt32`)
             return value
@@ -114,9 +104,9 @@ export function Uint32(): Type<number> {
 
 export function Uint64(): Type<bigint> {
     return {
-        primitiveType: PrimitiveType.INT64,
-        convertedType: ConvertedType.UINT_64,
-        logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 64, isSigned: false})}),
+        primitiveType: parquet.Type.INT64,
+        convertedType: parquet.ConvertedType.UINT_64,
+        logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 64, isSigned: false})}),
         toPrimitive(value) {
             assert(0 <= value && value <= 0xffffffffffffffffn, `value ${value} does not fit into UInt64`)
             return value
@@ -126,7 +116,7 @@ export function Uint64(): Type<bigint> {
 
 export function Float(): Type<number> {
     return {
-        primitiveType: PrimitiveType.FLOAT,
+        primitiveType: parquet.Type.FLOAT,
         toPrimitive(value) {
             assert(!isNaN(value))
             return value
@@ -136,7 +126,7 @@ export function Float(): Type<number> {
 
 export function Double(): Type<number> {
     return {
-        primitiveType: PrimitiveType.DOUBLE,
+        primitiveType: parquet.Type.DOUBLE,
         toPrimitive(value) {
             assert(!isNaN(value))
             return value
@@ -146,7 +136,7 @@ export function Double(): Type<number> {
 
 export function Boolean(): Type<boolean> {
     return {
-        primitiveType: PrimitiveType.BOOLEAN,
+        primitiveType: parquet.Type.BOOLEAN,
         toPrimitive(value) {
             return value
         },
@@ -155,11 +145,11 @@ export function Boolean(): Type<boolean> {
 
 export function Timestamp(): Type<Date> {
     return {
-        primitiveType: PrimitiveType.INT64,
-        convertedType: ConvertedType.TIMESTAMP_MILLIS,
-        logicalType: new LogicalType({
-            TIMESTAMP: new TimestampType({
-                unit: new TimeUnit({MILLIS: new MilliSeconds()}),
+        primitiveType: parquet.Type.INT64,
+        convertedType: parquet.ConvertedType.TIMESTAMP_MILLIS,
+        logicalType: new parquet.LogicalType({
+            TIMESTAMP: new parquet.TimestampType({
+                unit: new parquet.TimeUnit({MILLIS: new parquet.MilliSeconds()}),
                 isAdjustedToUTC: true,
             }),
         }),
@@ -173,25 +163,25 @@ export function Decimal(precision: number, scale = 0): Type<number | bigint | Bi
     assert(Number.isSafeInteger(precision) && precision > 0, 'invalid precision')
     assert(Number.isSafeInteger(scale) && scale < precision, 'invalid scale')
 
-    let primitiveType: PrimitiveType
+    let primitiveType: parquet.Type
     let typeLength: number | undefined
 
     if (precision <= 9) {
-        primitiveType = PrimitiveType.INT32
+        primitiveType = parquet.Type.INT32
         typeLength = 4
     } else if (precision <= 18) {
-        primitiveType = PrimitiveType.INT64
+        primitiveType = parquet.Type.INT64
         typeLength = 8
     } else {
-        primitiveType = PrimitiveType.FIXED_LEN_BYTE_ARRAY
+        primitiveType = parquet.Type.FIXED_LEN_BYTE_ARRAY
         typeLength = Math.floor(getBitWidth(10 ** precision) / 8) + 1
     }
 
     return {
         primitiveType,
-        convertedType: ConvertedType.DECIMAL,
-        logicalType: new LogicalType({
-            DECIMAL: new DecimalType({scale, precision}),
+        convertedType: parquet.ConvertedType.DECIMAL,
+        logicalType: new parquet.LogicalType({
+            DECIMAL: new parquet.DecimalType({scale, precision}),
         }),
         scale,
         precision,
@@ -227,11 +217,11 @@ export function Decimal(precision: number, scale = 0): Type<number | bigint | Bi
 
             let n = s + str
             switch (this.primitiveType) {
-                case PrimitiveType.INT32:
+                case parquet.Type.INT32:
                     return Number(n)
-                case PrimitiveType.INT64:
+                case parquet.Type.INT64:
                     return BigInt(n)
-                case PrimitiveType.FIXED_LEN_BYTE_ARRAY:
+                case parquet.Type.FIXED_LEN_BYTE_ARRAY:
                     assert(this.typeLength != null)
                     let bytes = Buffer.alloc(this.typeLength)
                     let v = BigInt(n)

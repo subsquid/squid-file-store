@@ -2,9 +2,6 @@ import assert from 'assert'
 import {TBufferedTransport, TCompactProtocol} from 'thrift'
 import {Type as PrimitiveType} from '../../thrift/parquet_types'
 
-/**
- * Helper function that serializes a thrift object into a buffer
- */
 export function serializeThrift(obj: any): Buffer {
     let buffer: Buffer
     const transport = new TBufferedTransport(undefined, (buf) => {
@@ -18,9 +15,6 @@ export function serializeThrift(obj: any): Buffer {
     return buffer!
 }
 
-/**
- * Get the number of bits required to store a given value
- */
 export function getBitWidth(val: number): number {
     if (val === 0) {
         return 0

@@ -1,24 +1,24 @@
-import * as codec from '../codec'
-import * as compression from '../compression'
-import {ParquetColumnChunkData, ParquetDataPageData, RowGroupData} from './declare'
-import * as util from './util'
+import assert from 'assert'
 import Int64 from 'node-int64'
 import {
-    Encoding,
-    PageHeader,
-    PageType,
-    DataPageHeaderV2,
-    CompressionCodec,
-    RowGroup,
     ColumnChunk,
     ColumnMetaData,
-    SchemaElement,
-    FileMetaData,
+    CompressionCodec,
+    DataPageHeaderV2,
+    Encoding,
     FieldRepetitionType,
+    FileMetaData,
+    PageHeader,
+    PageType,
+    RowGroup,
+    SchemaElement,
     Type,
 } from '../../thrift/parquet_types'
+import * as codec from '../codec'
+import * as compression from '../compression'
 import type {Column} from '../table'
-import assert from 'assert'
+import {ParquetColumnChunkData, ParquetDataPageData, RowGroupData} from './interfaces'
+import * as util from './util'
 
 const PARQUET_VERSION = 2.0
 
@@ -66,9 +66,6 @@ export function encodeDataPage(column: Column, data: ParquetDataPageData): Buffe
     return Buffer.concat([util.serializeThrift(header), rLevelsBuf, dLevelsBuf, valuesCompressed])
 }
 
-/**
- * Encode an array of values into a parquet column chunk
- */
 export function encodeColumnChunk(column: Column, data: ParquetColumnChunkData, offset: number) {
     assert(column.children == null && !column.type.isNested, `Trying to encode nested column`)
 
@@ -102,9 +99,6 @@ export function encodeColumnChunk(column: Column, data: ParquetColumnChunkData, 
     return {body, columnChunk}
 }
 
-/**
- * Encode a list of column values into a parquet row group
- */
 export function encodeRowGroup(columns: Column[], data: RowGroupData, offset: number) {
     let body = Buffer.alloc(0)
     let columnChunks: ColumnChunk[] = []
@@ -131,9 +125,6 @@ export function encodeRowGroup(columns: Column[], data: RowGroupData, offset: nu
     return {body, rowGroup}
 }
 
-/**
- * Encode a parquet file metadata footer
- */
 export function encodeFooter(columns: Column[], rowCount: number, rowGroups: RowGroup[]): Buffer {
     let schema: SchemaElement[] = []
 
