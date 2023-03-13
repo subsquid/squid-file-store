@@ -27,7 +27,7 @@
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
     "@subsquid/util-naming": "^0.0.0",
-    "@subsquid/util-internal-json": "^0.2.0",
+    "@subsquid/util-internal-json": "~0.2.1",
     "strftime": "~0.10.1"
   },
   "peerDependencies": {
