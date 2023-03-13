@@ -3,7 +3,7 @@ import fs from 'fs/promises'
 import path from 'upath'
 
 /**
- * Abstract interface for objects responsible for filesystem interactions.
+ * Interface for objects responsible for filesystem interactions.
  * An implementation is available for each supported filesystem type.
  * For local filesystems use LocalDest from this module.
  *

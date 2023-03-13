@@ -13,7 +13,7 @@ export interface TableWriter<T> {
 }
 
 /**
- * Abstract interface for objects that make TableWriters: objects that
+ * Interface for objects that make TableWriters: objects that
  * buffer tabular data and convert it into format-specific file contents.
  *
  * For available implementations
@@ -29,6 +29,6 @@ type Simplify<T> = {
 } & {}
 
 /**
- * Abstract interface for table rows used by Table and TableWriter objects.
+ * Interface for table rows used by Table and TableWriter objects.
  */
 export type TableRecord<T> = T extends Table<infer R> ? Simplify<R> : never
