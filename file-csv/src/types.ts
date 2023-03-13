@@ -1,3 +1,4 @@
+import {toJSON} from '@subsquid/util-internal-json'
 import assert from 'assert'
 import strftime from 'strftime'
 import {Type} from './table'
@@ -74,3 +75,16 @@ export function DateTime(format?: string): Type<Date> {
  * @deprecated use DateTime
  */
 export const Timestamp = DateTime
+
+type Document = {
+    [k: string]: any
+}
+
+export function JSON<T extends Document = any>(): Type<T> {
+    return {
+        serialize(value: T) {
+            return global.JSON.stringify(toJSON(value))
+        },
+        isNumeric: false,
+    }
+}
