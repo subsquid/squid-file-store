@@ -7,7 +7,23 @@
  */
 export interface TableWriter<T> {
     readonly size: number
+
+    /**
+      * Stores a single row of data into an in-memory buffer.
+      *
+      * @param record - a mapping from column names to data values
+      *
+      * @returns this - this is a chainable function
+      */
     write(record: T): TableWriter<T>
+
+    /**
+      * Stores multiple rows of data into an in-memory buffer.
+      *
+      * @param records - an array of mappings from column names to data values
+      *
+      * @returns this - this is a chainable function
+      */
     writeMany(records: T[]): TableWriter<T>
     flush(): Uint8Array
 }

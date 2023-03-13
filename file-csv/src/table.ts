@@ -81,7 +81,7 @@ export class Table<S extends TableSchema> implements ITable<ColumnsToTypes<S>> {
      *
      * @see https://docs.subsquid.io/basics/store/file-store/csv-table/
      *
-     * @param name - name the CSV file to be stored in every dataset partition
+     * @param name - name of the CSV file in every dataset partition folder
      * @param schema - a mapping from CSV column names to columns (see example)
      * @param options - table options
      *
@@ -162,24 +162,10 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
         this._size = 0
     }
 
-    /**
-     * Stores a single row of data into an in-memory buffer.
-     *
-     * @param record - a mapping from CSV column names to data values
-     *
-     * @returns this - this is a chainable function
-     */
     write(record: T): this {
         return this.writeMany([record])
     }
 
-    /**
-     * Stores multiple rows of data into an in-memory buffer.
-     *
-     * @param record - a mapping from CSV column names to data values
-     *
-     * @returns this - this is a chainable function
-     */
     writeMany(records: T[]): this {
         for (let record of records) {
             let serializedValues: string[] = []
