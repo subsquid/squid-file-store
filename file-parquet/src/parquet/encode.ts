@@ -160,6 +160,8 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
         } else if (!column.type.isNested) {
             schemaElement.type = column.type.primitiveType
             schemaElement.type_length = column.type.typeLength
+            schemaElement.scale = column.type.scale
+            schemaElement.precision = column.type.precision
         } else {
             throw new Error(`Unexpected case: column must have children or non-nested type`)
         }

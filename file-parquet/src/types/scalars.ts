@@ -1,3 +1,4 @@
+import {BigDecimal} from '@subsquid/big-decimal'
 import assert from 'assert'
 import {
     Type as PrimitiveType,
@@ -168,9 +169,9 @@ export function Timestamp(): Type<Date> {
     }
 }
 
-export function Decimal(precision: number, scale = 0): Type<number | bigint> {
+export function Decimal(precision: number, scale = 0): Type<number | bigint | BigDecimal> {
     assert(Number.isSafeInteger(precision) && precision > 0, 'invalid precision')
-    assert(Number.isSafeInteger(scale) && scale > -1 && scale < precision, 'invalid scale')
+    assert(Number.isSafeInteger(scale) && scale < precision, 'invalid scale')
 
     let primitiveType: PrimitiveType
     let typeLength: number | undefined
@@ -188,9 +189,12 @@ export function Decimal(precision: number, scale = 0): Type<number | bigint> {
 
     return {
         primitiveType,
+        convertedType: ConvertedType.DECIMAL,
         logicalType: new LogicalType({
-            DECIMAL: new DecimalType(precision == null ? undefined : {scale, precision}),
+            DECIMAL: new DecimalType({scale, precision}),
         }),
+        scale,
+        precision,
         typeLength,
         toPrimitive(value) {
             let str = value.toString()
@@ -216,7 +220,7 @@ export function Decimal(precision: number, scale = 0): Type<number | bigint> {
             assert(e <= precision - scale, `value ${value} does not fit into Decimal(${precision}, ${scale})`)
             let len = e + scale + (e > 0 ? 0 : 1)
             if (str.length > len) {
-                str = str.slice(0, len)
+                str = str.slice(0, len) || '0'
             } else if (str.length < len) {
                 str = str.padEnd(len, '0')
             }
