@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-csv",
+      "comment": "add JSON type",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-csv"
+}
