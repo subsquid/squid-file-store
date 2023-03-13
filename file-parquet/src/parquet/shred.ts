@@ -1,6 +1,6 @@
 import assert from 'assert'
 import {Column, Compression, Encoding, TableSchema} from '../table'
-import {ShrededColumn} from './declare'
+import {ShrededColumn} from './interfaces'
 import {getByteSize} from './util'
 
 export function shredSchema(
@@ -39,7 +39,7 @@ export function shredSchema(
         columns.push(column)
 
         if (type.isNested) {
-            column.children = shredSchema(type.children, {
+            column.children = shredSchema(type.fields, {
                 path,
                 compression,
                 encoding,

@@ -1,8 +1,8 @@
-import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
 import assert from 'assert'
+import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store'
 import * as parquet from '../thrift/parquet_types'
-import {RowGroupData, ParquetDataPageData} from './parquet/declare'
-import {encodeRowGroup, encodeFooter} from './parquet/encode'
+import {ParquetDataPageData, RowGroupData} from './parquet/interfaces'
+import {encodeFooter, encodeRowGroup} from './parquet/encode'
 import {shredRecord, shredSchema} from './parquet/shred'
 
 export type Type<T> = {
@@ -19,7 +19,7 @@ export type Type<T> = {
       }
     | {
           isNested: true
-          children: TableSchema
+          fields: TableSchema
           transform(value: T): Record<string, any>
       }
 )
