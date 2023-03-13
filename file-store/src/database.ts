@@ -128,6 +128,14 @@ export class Database<T extends Tables, D extends Dest> {
 
     protected StoreConstructor: StoreConstructor<T>
 
+    /**
+     * Database interface implementation for storing squid data
+     * to filesystems.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/
+     *
+     * @param options - a DatabaseOptions object
+     */
     constructor(options: DatabaseOptions<T, D>) {
         this.tables = options.tables
         this.dest = options.dest
