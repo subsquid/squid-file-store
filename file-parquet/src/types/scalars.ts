@@ -39,7 +39,7 @@ export function Int8(): Type<number> {
 export function Int16(): Type<number> {
     return {
         primitiveType: PrimitiveType.INT32,
-        convertedType: ConvertedType.INT_32,
+        convertedType: ConvertedType.INT_16,
         logicalType: new LogicalType({INTEGER: new IntType({bitWidth: 16, isSigned: true})}),
         toPrimitive(value) {
             assert(-0x8000 <= value && value <= 0x7fff, `value ${value} does not fit into Int16`)
