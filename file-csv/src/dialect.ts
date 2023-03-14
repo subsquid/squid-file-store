@@ -15,7 +15,7 @@ export const enum Quote {
     MINIMAL,
 
     /**
-     * Quote strings, booleans and DateTimes.
+     * Quote strings, booleans, DateTimes and JSONs.
      */
     NONNUMERIC,
 

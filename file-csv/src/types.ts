@@ -80,6 +80,16 @@ type Document = {
     [k: string]: any
 }
 
+/**
+ * Supply the type of column JSON as the generic parameter.
+ *
+ * @returns the data type for JSON-valued columns
+ *
+ * @example
+ * ```
+ * JSON<{from: string, to: string, value: bigint}>()
+ * ```
+ */
 export function JSON<T extends Document = any>(): Type<T> {
     return {
         serialize(value: T) {
