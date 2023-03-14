@@ -4,6 +4,9 @@ import * as parquet from '../../thrift/parquet_types'
 import {getBitWidth} from '../parquet/util'
 import {Type} from '../table'
 
+/**
+ * @returns the data type for string columns
+ */
 export function String(): Type<string> {
     return {
         primitiveType: parquet.Type.BYTE_ARRAY,
@@ -15,6 +18,9 @@ export function String(): Type<string> {
     }
 }
 
+/**
+ * @returns the data type for 8-bit signed integer columns
+ */
 export function Int8(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -27,6 +33,9 @@ export function Int8(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 16-bit signed integer columns
+ */
 export function Int16(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -39,6 +48,9 @@ export function Int16(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 32-bit signed integer columns
+ */
 export function Int32(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -51,6 +63,9 @@ export function Int32(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 64-bit signed integer columns
+ */
 export function Int64(): Type<bigint> {
     return {
         primitiveType: parquet.Type.INT64,
@@ -66,6 +81,9 @@ export function Int64(): Type<bigint> {
     }
 }
 
+/**
+ * @returns the data type for 8-bit unsigned integer columns
+ */
 export function Uint8(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -78,6 +96,9 @@ export function Uint8(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 16-bit unsigned integer columns
+ */
 export function Uint16(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -90,6 +111,9 @@ export function Uint16(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 32-bit unsigned integer columns
+ */
 export function Uint32(): Type<number> {
     return {
         primitiveType: parquet.Type.INT32,
@@ -102,6 +126,9 @@ export function Uint32(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 64-bit unsigned integer columns
+ */
 export function Uint64(): Type<bigint> {
     return {
         primitiveType: parquet.Type.INT64,
@@ -114,6 +141,9 @@ export function Uint64(): Type<bigint> {
     }
 }
 
+/**
+ * @returns the data type for 32-bit floating point number columns
+ */
 export function Float(): Type<number> {
     return {
         primitiveType: parquet.Type.FLOAT,
@@ -124,6 +154,9 @@ export function Float(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for 64-bit floating point number columns
+ */
 export function Double(): Type<number> {
     return {
         primitiveType: parquet.Type.DOUBLE,
@@ -134,6 +167,9 @@ export function Double(): Type<number> {
     }
 }
 
+/**
+ * @returns the data type for boolean columns
+ */
 export function Boolean(): Type<boolean> {
     return {
         primitiveType: parquet.Type.BOOLEAN,
@@ -143,6 +179,9 @@ export function Boolean(): Type<boolean> {
     }
 }
 
+/**
+ * @returns the data type for UNIX timestamp columns
+ */
 export function Timestamp(): Type<Date> {
     return {
         primitiveType: parquet.Type.INT64,
@@ -159,6 +198,14 @@ export function Timestamp(): Type<Date> {
     }
 }
 
+/**
+ * @param precision - the number of digits in the number
+ *
+ * @param scale - the number of digits to the right of the decimal point
+ * @default 0
+ *
+ * @returns the data type for fixed precision decimal number columns
+ */
 export function Decimal(precision: number, scale = 0): Type<number | bigint | BigDecimal> {
     assert(Number.isSafeInteger(precision) && precision > 0, 'invalid precision')
     assert(Number.isSafeInteger(scale) && scale < precision, 'invalid scale')
