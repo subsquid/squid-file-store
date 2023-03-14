@@ -2,11 +2,39 @@ import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store
 import {toJSON} from '@subsquid/util-internal-json'
 
 type TableOptions = {
+    /**
+     * Should the JSONL format be used instead of a plain JSON array of records?
+     */
     lines?: boolean
 }
 
+/**
+ * Table interface implementation for writing JSON and JSONL files.
+ *
+ * @see https://docs.subsquid.io/basics/store/file-store/json-table/
+ */
 export class Table<S extends Record<string, any>> implements ITable<S> {
     private options: Required<TableOptions>
+
+    /**
+     * Table interface implementation for writing JSON and JSONL files.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/json-table/
+     *
+     * @param name - name of the output file in every dataset partition folder
+     * @param options - table options
+     *
+     * @example
+     * ```
+     * import {Table} from '@subsquid/file-store-json'
+     *
+     * let transfersTable = new Table<
+     *     from: string,
+     *     to: string,
+     *     value: bigint
+     * >('transfers.jsonl', {lines: true})
+     * ```
+     */
     constructor(readonly name: string, options?: TableOptions) {
         this.options = {lines: false, ...options}
     }
