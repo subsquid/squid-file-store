@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-csv",
+      "comment": "add inline docs",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-csv"
+}
