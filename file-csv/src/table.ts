@@ -13,13 +13,6 @@ export interface Type<T> {
 
 export interface TableOptions {
     /**
-     * Output file extension.
-     *
-     * @default 'csv'
-     */
-    extension?: string
-
-    /**
      * CSV dialect to be used. Defines data formatting details such as
      * escaping, quoting etc. See the dialects object exported by this module
      * for presets or write your own (must implement the Dialect interface).
@@ -102,7 +95,6 @@ export class Table<S extends TableSchema> implements ITable<ColumnsToTypes<S>> {
      *         value: Column(Types.Integer())
      *     },
      *     {
-     *         extension: 'tsv',
      *         dialect: dialects.excelTab,
      *         header: true
      *     }
@@ -116,7 +108,7 @@ export class Table<S extends TableSchema> implements ITable<ColumnsToTypes<S>> {
                 data: schema[column],
             })
         }
-        this.options = {extension: 'csv', header: true, dialect: dialects.excel, ...options}
+        this.options = {header: true, dialect: dialects.excel, ...options}
     }
 
     createWriter(): TableWriter<ColumnsToTypes<S>> {
