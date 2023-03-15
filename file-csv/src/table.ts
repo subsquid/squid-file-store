@@ -3,14 +3,29 @@ import {Table as ITable, TableWriter as ITableWriter} from '@subsquid/file-store
 import {toSnakeCase} from '@subsquid/util-naming'
 import {Dialect, Quote, dialects} from './dialect'
 
+/**
+ * Interface for CSV column data types.
+ */
 export interface Type<T> {
     serialize(value: T): string
     isNumeric: boolean
 }
 
 export interface TableOptions {
-    extension?: string
+    /**
+     * CSV dialect to be used. Defines data formatting details such as
+     * escaping, quoting etc. See the dialects object exported by this module
+     * for presets or write your own (must implement the Dialect interface).
+     *
+     * @default dialects.excel
+     */
     dialect?: Dialect
+
+    /**
+     * Should the Table add a CSV header to the file?
+     *
+     * @default true
+     */
     header?: boolean
 }
 
@@ -45,9 +60,47 @@ type ColumnsToTypes<T extends Record<string, ColumnData>> = {
     [F in Extract<keyof T, NullableColumns<T>>]?: T[F] extends ColumnData<Type<infer R>> ? R | null | undefined : never
 }
 
+/**
+ * Table interface implementation for writing CSV files.
+ *
+ * @see https://docs.subsquid.io/basics/store/file-store/csv-table/
+ */
 export class Table<S extends TableSchema> implements ITable<ColumnsToTypes<S>> {
     private columns: Column[] = []
     private options: Required<TableOptions>
+
+    /**
+     * Table interface implementation for writing CSV files.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/csv-table/
+     *
+     * @param name - name of the CSV file in every dataset partition folder
+     * @param schema - a mapping from CSV column names to columns (see example)
+     * @param options - table options
+     *
+     * @example
+     * ```
+     * import {
+     *     Table,
+     *     Column,
+     *     Types,
+     *     dialect
+     * } from '@subsquid/file-store-csv'
+     *
+     * let transfersTable = new Table(
+     *     'transfers.tsv',
+     *     {
+     *         from: Column(Types.String()),
+     *         to: Column(Types.String()),
+     *         value: Column(Types.Integer())
+     *     },
+     *     {
+     *         dialect: dialects.excelTab,
+     *         header: true
+     *     }
+     * )
+     * ```
+     */
     constructor(readonly name: string, schema: S, options?: TableOptions) {
         for (let column in schema) {
             this.columns.push({
@@ -55,7 +108,7 @@ export class Table<S extends TableSchema> implements ITable<ColumnsToTypes<S>> {
                 data: schema[column],
             })
         }
-        this.options = {extension: 'csv', header: true, dialect: dialects.excel, ...options}
+        this.options = {header: true, dialect: dialects.excel, ...options}
     }
 
     createWriter(): TableWriter<ColumnsToTypes<S>> {
@@ -181,6 +234,12 @@ class TableWriter<T extends Record<string, any>> implements ITableWriter<T> {
     }
 }
 
+/**
+ * Factory function for CSV columns
+ *
+ * @param type - a column data type
+ * @param options - column options, interface: { nullable?: boolean }
+ */
 export function Column<T extends Type<any>>(type: T): ColumnData<T>
 export function Column<T extends Type<any>, O extends ColumnOptions>(
     type: T,

@@ -13,9 +13,39 @@ import {
 import {Dest} from '@subsquid/file-store'
 import {assertNotNull} from '@subsquid/util-internal'
 
+/**
+ * Dest implementation for storing squid data on
+ * S3-compatible cloud services.
+ *
+ * @see https://docs.subsquid.io/basics/store/file-store/s3-dest/
+ */
 export class S3Dest implements Dest {
     private client: S3Client
 
+    /**
+     * Dest implementation for storing squid data on
+     * S3-compatible cloud services.
+     *
+     * @see https://docs.subsquid.io/basics/store/file-store/s3-dest/
+     *
+     * @param dir - the name of the top level dataset folder
+     * @param bucket - the name of the S3 bucket
+     * @param optionsOrClient - an S3Client instance or options for its construction
+     *
+     * The default is to use the environment variables to define the client:
+     * ```
+     * {
+     *     region: process.env.S3_REGION,
+     *     endpoint: process.env.S3_ENDPOINT,
+     *     credentials: {
+     *         secretAccessKey: assertNotNull(process.env.S3_SECRET_ACCESS_KEY),
+     *         accessKeyId: assertNotNull(process.env.S3_ACCESS_KEY_ID),
+     *     },
+     * }
+     * ```
+     * For details on S3Client
+     * @see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html
+     */
     constructor(dir: string, bucket: string, options?: S3ClientConfig)
     constructor(dir: string, bucket: string, client: S3Client)
     constructor(private dir: string, private bucket: string, optionsOrClient?: S3ClientConfig | S3Client) {

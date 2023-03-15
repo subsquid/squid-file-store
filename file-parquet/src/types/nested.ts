@@ -6,6 +6,13 @@ interface ListOptions {
     nullable?: boolean
 }
 
+/**
+ * @param itemType - column type of list items
+ *
+ * @param options - list column options, interface: { nullable?: boolean }
+ *
+ * @returns the data type for columns containing lists
+ */
 export let List = <T, Options extends ListOptions>(
     itemType: Type<T>,
     options?: Options
