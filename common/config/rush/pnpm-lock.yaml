@@ -4,15 +4,17 @@ specifiers:
   '@aws-sdk/client-s3': ^3.245.0
   '@rush-temp/file-store': file:./projects/file-store.tgz
   '@rush-temp/file-store-csv': file:./projects/file-store-csv.tgz
+  '@rush-temp/file-store-json': file:./projects/file-store-json.tgz
   '@rush-temp/file-store-parquet': file:./projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:./projects/file-store-s3.tgz
   '@rush-temp/test': file:./projects/test.tgz
+  '@subsquid/big-decimal': ^0.0.0
   '@subsquid/ss58': ^0.1.2
   '@subsquid/substrate-metadata-explorer': ^1.0.9
   '@subsquid/substrate-processor': ^2.2.0
   '@subsquid/substrate-typegen': ^2.1.0
   '@subsquid/util-internal': ^1.0.0
-  '@subsquid/util-internal-json': ^0.2.0
+  '@subsquid/util-internal-json': ^0.2.1
   '@subsquid/util-naming': ^0.0.0
   '@types/int53': ^1.0.0
   '@types/lz4': ^0.6.0
@@ -30,7 +32,7 @@ specifiers:
   mocha: ^10.2.0
   node-int64: ^0.4.0
   snappy: ^7.2.2
-  strftime: ~0.10.1
+  strftime: ^0.10.1
   thrift: ^0.18.0
   typescript: 4.8.2
   upath: ^2.0.1
@@ -41,15 +43,17 @@ dependencies:
   '@aws-sdk/client-s3': 3.259.0
   '@rush-temp/file-store': file:projects/file-store.tgz
   '@rush-temp/file-store-csv': file:projects/file-store-csv.tgz
+  '@rush-temp/file-store-json': file:projects/file-store-json.tgz
   '@rush-temp/file-store-parquet': file:projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:projects/file-store-s3.tgz
   '@rush-temp/test': file:projects/test.tgz
+  '@subsquid/big-decimal': 0.0.0
   '@subsquid/ss58': 0.1.3
   '@subsquid/substrate-metadata-explorer': 1.0.9
   '@subsquid/substrate-processor': 2.2.0
   '@subsquid/substrate-typegen': 2.1.0
   '@subsquid/util-internal': 1.0.0
-  '@subsquid/util-internal-json': 0.2.0
+  '@subsquid/util-internal-json': 0.2.1
   '@subsquid/util-naming': 0.0.0
   '@types/int53': 1.0.0
   '@types/lz4': 0.6.0
@@ -1209,11 +1213,17 @@ packages:
     dev: false
     optional: true
 
+  /@subsquid/big-decimal/0.0.0:
+    resolution: {integrity: sha512-bdsamXR+wyhaBw7KnWugle9BKkAyrvGSb4cEXf0q0GeKeKZJ/ADkakwT/MuQ4mDQLOxjiin3ZSDJkv7vy4Uvuw==}
+    dependencies:
+      big.js: 6.2.1
+    dev: false
+
   /@subsquid/logger/0.3.0:
     resolution: {integrity: sha512-uflVPTey/6p/KCIpdzP2/Q1RRd3Ec4iLPjqdSFSmFPtai3IDEOQv5dXzUeiDRwa/63Q9tmzsLeKgdW8TDw5c7Q==}
     dependencies:
       '@subsquid/util-internal-hex': 0.0.1
-      '@subsquid/util-internal-json': 0.2.0
+      '@subsquid/util-internal-json': 0.2.1
       supports-color: 8.1.1
     dev: false
 
@@ -1230,7 +1240,7 @@ packages:
     resolution: {integrity: sha512-QaNh4PZoglmfO9L03q7XJ8zcDcvXwVTzXzlWPGvnqAEagGsGBJqAopzyqMAAIytd56gfLKSQkvtKJkWEzNtkuw==}
     dependencies:
       '@subsquid/util-internal-hex': 0.0.1
-      '@subsquid/util-internal-json': 0.2.0
+      '@subsquid/util-internal-json': 0.2.1
     dev: false
 
   /@subsquid/ss58-codec/0.1.1:
@@ -1369,12 +1379,6 @@ packages:
     resolution: {integrity: sha512-7+lQlGMpKg5Qeavkas2/uBgF4cQQKG5gblhsuPwt/cyDGfIQcwPX9KxJUVQDBE8SL2P62qg8TkzeEYSG89iykg==}
     dependencies:
       stoppable: 1.1.0
-    dev: false
-
-  /@subsquid/util-internal-json/0.2.0:
-    resolution: {integrity: sha512-tkDPXQ+2/2RCO2+O3AtaI71p9TQLOcv2hJWOmgNGzzQrTXp8wbyEZIybm33lsLo2HUmQN/BQKzk4PHkLa36nMQ==}
-    dependencies:
-      '@subsquid/util-internal-hex': 0.0.1
     dev: false
 
   /@subsquid/util-internal-json/0.2.1:
@@ -1633,6 +1637,10 @@ packages:
 
   /base64-js/1.5.1:
     resolution: {integrity: sha512-AKpaYlHn8t4SVbOHCy+b5+KKgvR4vrsD8vbvrbiQJps7fKDTkjkDry6ji0rUJjC0kzbNePLwzxq8iypo41qeWA==}
+    dev: false
+
+  /big.js/6.2.1:
+    resolution: {integrity: sha512-bCtHMwL9LeDIozFn+oNhhFoq+yQ3BNdnsLSASUxLciOb1vgvpHsIO1dsENiGMgbb4SkP5TrzWzRiLddn8ahVOQ==}
     dev: false
 
   /binary-extensions/2.2.0:
@@ -2920,11 +2928,11 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-eYyZDnYJqz1dlIF20fHogODM9x1SVv5BcNgIR0fmHVao2dZowopVKFHdFPx0GJbkVNQvD6zJQ1OoXvVRInURmA==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-pfO+aT6dHqTleFdqksQyL9kSlbUFq+SZ61HhRYKcjV6WzKNZGd6tQRGW2l9d1Yn7s80zY1RcYiQQ3PJypC6FHQ==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
-      '@subsquid/util-internal-json': 0.2.0
+      '@subsquid/util-internal-json': 0.2.1
       '@subsquid/util-naming': 0.0.0
       '@types/mocha': 10.0.1
       '@types/node': 16.11.56
@@ -2935,12 +2943,28 @@ packages:
       typescript: 4.8.2
     dev: false
 
+  file:projects/file-store-json.tgz:
+    resolution: {integrity: sha512-295cim8FFkPBry641EorkHbEcP2UvMsKUPN4oppzzcgIxuzGzts1SOB9kHSQCC+pC9d/H1E/ra5Tw9yYcaBL1A==, tarball: file:projects/file-store-json.tgz}
+    name: '@rush-temp/file-store-json'
+    version: 0.0.0
+    dependencies:
+      '@subsquid/util-internal-json': 0.2.1
+      '@subsquid/util-naming': 0.0.0
+      '@types/mocha': 10.0.1
+      '@types/node': 16.11.56
+      '@types/strftime': 0.9.4
+      expect: 27.5.1
+      mocha: 10.2.0
+      typescript: 4.8.2
+    dev: false
+
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-20Qq8kDDEcBMZ0sKFjVwz1B8fFAUGbVlf401RzEMOKGLq1W/xrJYWgRRmdpRJl8QpMOlaT0O3XZfeNXOx7PNQg==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-bQHGct3jldXc5EdPbN4UFeN5lIPi56l0AtMZ2Gp48zDfweLGpmv71N29RPEC1+nGZX7yqa6UAod0fBfOXCr1jg==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
       '@creditkarma/thrift-typescript': 3.7.6
+      '@subsquid/big-decimal': 0.0.0
       '@subsquid/util-internal-json': 0.2.1
       '@types/bson': 4.2.0
       '@types/int53': 1.0.0
@@ -2970,7 +2994,7 @@ packages:
     dev: false
 
   file:projects/file-store-s3.tgz:
-    resolution: {integrity: sha512-aSDctsnZy7SRK9mbQ4qhnbGLLxpCsa86U8YMDZZ9FDnonbB9z4td3eHiuH3wAQu9BWZwPrs8/7qGSgZ9I6PGUw==, tarball: file:projects/file-store-s3.tgz}
+    resolution: {integrity: sha512-wuV8NoSxS3t4gWZFw308Cn6sH+vhc0Rh401gUYzmCa/c27NPXHbkRVSaGpJrhyx51C/XivHUgEHkm90YnY742A==, tarball: file:projects/file-store-s3.tgz}
     name: '@rush-temp/file-store-s3'
     version: 0.0.0
     dependencies:
@@ -2999,7 +3023,7 @@ packages:
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-jprNVlF6Wkbv7Vhb4axKVwrzb5nDyiBBx/LwU6VvpqX/ImEskEupRJtRqYYuTDmLBz1eu1r5oS54NeTpfJI5HA==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-d3m8YbBmX9vt5RVYRiiRaQCCvecNdlAe9UZcYXQ8OMZToLzVLipl8+VOrYS9WO9ZD7EsitcTe5J1PO6l57Pyjw==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:
