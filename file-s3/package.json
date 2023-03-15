@@ -1,6 +1,6 @@
 {
   "name": "@subsquid/file-store-s3",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -30,13 +30,13 @@
     "upath": "^2.0.1"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^0.1.0",
+    "@subsquid/file-store": "^0.2.0",
     "@aws-sdk/client-s3": "^3.245.0"
   },
   "devDependencies": {
     "@types/node": "16.11.56",
     "typescript": "4.8.2",
-    "@subsquid/file-store": "^0.1.0",
+    "@subsquid/file-store": "^0.2.0",
     "@aws-sdk/client-s3": "^3.245.0"
   }
 }
