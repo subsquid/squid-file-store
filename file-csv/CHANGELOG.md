@@ -1,6 +1,14 @@
 # Change Log - @subsquid/file-store-csv
 
-This log was last generated on Fri, 10 Mar 2023 08:07:56 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2023 09:08:21 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 15 Mar 2023 09:08:21 GMT
+
+### Minor changes
+
+- add JSON type
+- add inline docs
 
 ## 0.3.0
 Fri, 10 Mar 2023 08:07:56 GMT

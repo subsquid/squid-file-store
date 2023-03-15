@@ -1,6 +1,20 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Fri, 10 Mar 2023 08:07:56 GMT and should not be manually modified.
+This log was last generated on Wed, 15 Mar 2023 09:08:21 GMT and should not be manually modified.
+
+## 0.3.0
+Wed, 15 Mar 2023 09:08:21 GMT
+
+### Minor changes
+
+- add Decimal type
+- add JSON and BSON types
+- add inline docs
+
+### Patches
+
+- reduce memory usage on serialization
+- fix incorrect ConvertedType for Int16
 
 ## 0.2.4
 Fri, 10 Mar 2023 08:07:56 GMT

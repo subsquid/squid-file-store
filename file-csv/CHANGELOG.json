@@ -2,6 +2,29 @@
   "name": "@subsquid/file-store-csv",
   "entries": [
     {
+      "version": "0.4.0",
+      "tag": "@subsquid/file-store-csv_v0.4.0",
+      "date": "Wed, 15 Mar 2023 09:08:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "add JSON type"
+          },
+          {
+            "comment": "add inline docs"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.3.0",
       "tag": "@subsquid/file-store-csv_v0.3.0",
       "date": "Fri, 10 Mar 2023 08:07:56 GMT",

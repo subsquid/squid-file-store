@@ -1,0 +1,20 @@
+{
+  "name": "@subsquid/file-store-json",
+  "entries": [
+    {
+      "version": "0.0.1",
+      "tag": "@subsquid/file-store-json_v0.0.1",
+      "date": "Wed, 15 Mar 2023 09:08:21 GMT",
+      "comments": {
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          }
+        ]
+      }
+    }
+  ]
+}

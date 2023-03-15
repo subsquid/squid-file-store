@@ -2,6 +2,26 @@
   "name": "@subsquid/file-store-s3",
   "entries": [
     {
+      "version": "0.2.0",
+      "tag": "@subsquid/file-store-s3_v0.2.0",
+      "date": "Wed, 15 Mar 2023 09:08:21 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "add inline docs"
+          }
+        ],
+        "dependency": [
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          },
+          {
+            "comment": "Updating dependency \"@subsquid/file-store\" from `^0.1.0` to `^0.2.0`"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.1.0",
       "tag": "@subsquid/file-store-s3_v0.1.0",
       "date": "Wed, 01 Mar 2023 14:42:25 GMT",
