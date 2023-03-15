@@ -11,7 +11,7 @@ export const Transfers = new Table('transfers.parquet', {
 
 export const Extrinsics = new Table('extrinsics.parquet', {
     blockNumber: Column(Types.Uint32()),
-    timestamp: Column(Types.Timestamp()),
+    timestamp: Column(Types.Decimal()),
     hash: Column(Types.String()),
     signer: Column(Types.String()),
 })

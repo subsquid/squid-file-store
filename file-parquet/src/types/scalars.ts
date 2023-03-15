@@ -198,6 +198,45 @@ export function Timestamp(): Type<Date> {
     }
 }
 
+const MINUTE_MILLIS = 1000 * 60
+const HOUR_MILLIS = MINUTE_MILLIS * 60
+const DAY_MILLIS = HOUR_MILLIS * 24
+
+/**
+ * @returns the data type for number of days from the Unix epoch
+ */
+export function Date(): Type<Date> {
+    return {
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.DATE,
+        logicalType: new parquet.LogicalType({
+            DATE: new parquet.DateType(),
+        }),
+        toPrimitive(value) {
+            return Math.floor(value.getTime() / DAY_MILLIS)
+        },
+    }
+}
+
+/**
+ * @returns the data type for number of milliseconds after midnight
+ */
+export function Time(): Type<Date> {
+    return {
+        primitiveType: parquet.Type.INT32,
+        convertedType: parquet.ConvertedType.TIME_MILLIS,
+        logicalType: new parquet.LogicalType({
+            TIME: new parquet.TimeType({
+                unit: new parquet.TimeUnit({MILLIS: new parquet.MilliSeconds()}),
+                isAdjustedToUTC: true,
+            }),
+        }),
+        toPrimitive(value) {
+            return value.getTime() % DAY_MILLIS
+        },
+    }
+}
+
 /**
  * @param precision - the number of digits in the number
  *
