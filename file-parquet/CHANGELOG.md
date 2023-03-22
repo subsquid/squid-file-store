@@ -1,6 +1,17 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Wed, 15 Mar 2023 09:08:21 GMT and should not be manually modified.
+This log was last generated on Wed, 22 Mar 2023 10:57:33 GMT and should not be manually modified.
+
+## 0.4.0
+Wed, 22 Mar 2023 10:57:33 GMT
+
+### Minor changes
+
+- allow to use `number` as value type for Int64
+
+### Patches
+
+- fix incorrect type inference of nullable column
 
 ## 0.3.0
 Wed, 15 Mar 2023 09:08:21 GMT

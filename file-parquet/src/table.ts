@@ -299,7 +299,10 @@ function last<T>(arr: T[]): T {
  * @param options - column options
  */
 export function Column<T extends Type<any>>(type: T): ColumnData<T>
-export function Column<T extends Type<any>, O extends ColumnOptions>(type: T, options?: O): ColumnData<T, true>
+export function Column<T extends Type<any>, O extends ColumnOptions>(
+    type: T,
+    options?: O
+): ColumnData<T, O['nullable'] extends true ? true : false>
 export function Column(type: Type<any>, options?: ColumnOptions): ColumnData<any> {
     return {
         type,

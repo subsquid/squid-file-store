@@ -15,7 +15,7 @@
     "@subsquid/ss58": "^0.1.2",
     "@subsquid/substrate-processor": "^2.2.0",
     "@subsquid/file-store-csv": "^0.4.0",
-    "@subsquid/file-store-parquet": "^0.3.0",
+    "@subsquid/file-store-parquet": "^0.4.0",
     "dotenv": "^16.0.3"
   },
   "devDependencies": {
