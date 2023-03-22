@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "fix incorrect type inference of nullable column",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}

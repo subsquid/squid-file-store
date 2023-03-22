@@ -1,7 +1,7 @@
 import {Column, Table, Types} from '@subsquid/file-store-parquet'
 
 export const Transfers = new Table('transfers.parquet', {
-    blockNumber: Column(Types.Uint32()),
+    blockNumber: Column(Types.Uint32(), {nullable: false}),
     timestamp: Column(Types.Timestamp()),
     extrinsicHash: Column(Types.String(), {nullable: true}),
     from: Column(Types.String()),
