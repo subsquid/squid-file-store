@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "allow to use `number` as value type for Int64",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}

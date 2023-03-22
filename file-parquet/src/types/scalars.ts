@@ -66,12 +66,13 @@ export function Int32(): Type<number> {
 /**
  * @returns the data type for 64-bit signed integer columns
  */
-export function Int64(): Type<bigint> {
+export function Int64(): Type<bigint | number> {
     return {
         primitiveType: parquet.Type.INT64,
         convertedType: parquet.ConvertedType.INT_64,
         logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 64, isSigned: true})}),
         toPrimitive(value) {
+            value = typeof value === 'number' ? BigInt(value) : value
             assert(
                 -0x8000000000000000n <= value && value <= 0x7fffffffffffffffn,
                 `value ${value} does not fit into Int64`
@@ -129,12 +130,13 @@ export function Uint32(): Type<number> {
 /**
  * @returns the data type for 64-bit unsigned integer columns
  */
-export function Uint64(): Type<bigint> {
+export function Uint64(): Type<bigint | number> {
     return {
         primitiveType: parquet.Type.INT64,
         convertedType: parquet.ConvertedType.UINT_64,
         logicalType: new parquet.LogicalType({INTEGER: new parquet.IntType({bitWidth: 64, isSigned: false})}),
         toPrimitive(value) {
+            value = typeof value === 'number' ? BigInt(value) : value
             assert(0 <= value && value <= 0xffffffffffffffffn, `value ${value} does not fit into UInt64`)
             return value
         },
