@@ -75,7 +75,9 @@ processor.run(db, async (ctx) => {
                 ctx.store.Transfers.write({
                     blockNumber: block.header.height,
                     timestamp: new Date(block.header.timestamp),
-                    extrinsicHash: item.event.extrinsic?.hash,
+                    extrinsicHash: item.event.extrinsic?.hash
+                        ? Buffer.from(item.event.extrinsic.hash, 'utf-8')
+                        : undefined,
                     from: ss58.codec('kusama').encode(rec.from),
                     to: ss58.codec('kusama').encode(rec.to),
                     amount: rec.amount,
@@ -88,7 +90,7 @@ processor.run(db, async (ctx) => {
                         ctx.store.Extrinsics.write({
                             blockNumber: block.header.height,
                             timestamp: new Date(block.header.timestamp),
-                            hash: item.event.extrinsic.hash,
+                            hash: Buffer.from(item.event.extrinsic.hash, 'utf-8'),
                             signer: ss58.codec('kusama').encode(signer),
                         })
                     }

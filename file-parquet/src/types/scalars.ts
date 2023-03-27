@@ -19,7 +19,7 @@ export function String(length?: number): Type<string> {
     }
 
     return {
-        primitiveType: parquet.Type.BYTE_ARRAY,
+        primitiveType,
         convertedType: parquet.ConvertedType.UTF8,
         logicalType: new parquet.LogicalType({STRING: new parquet.StringType()}),
         typeLength,
@@ -31,6 +31,32 @@ export function String(length?: number): Type<string> {
                 )
             }
             return Buffer.from(value, 'utf-8')
+        },
+    }
+}
+
+export function Binary(length?: number): Type<Uint8Array> {
+    let primitiveType: parquet.Type
+    let typeLength: number | undefined
+    if (length != null) {
+        assert(length > 0 && Number.isSafeInteger(length), `invalid length value`)
+        primitiveType = parquet.Type.FIXED_LEN_BYTE_ARRAY
+        typeLength = length
+    } else {
+        primitiveType = parquet.Type.BYTE_ARRAY
+    }
+
+    return {
+        primitiveType: parquet.Type.BYTE_ARRAY,
+        typeLength,
+        toPrimitive(value) {
+            if (typeLength != null) {
+                assert(
+                    value.length == typeLength,
+                    `invalid byte array length, expected ${typeLength} but got ${value.length}`
+                )
+            }
+            return Buffer.from(value, value.byteOffset)
         },
     }
 }
