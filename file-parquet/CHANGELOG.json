@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-parquet",
   "entries": [
     {
+      "version": "0.5.1",
+      "tag": "@subsquid/file-store-parquet_v0.5.1",
+      "date": "Mon, 27 Mar 2023 19:43:20 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix missing type length parameter"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.0",
       "tag": "@subsquid/file-store-parquet_v0.5.0",
       "date": "Mon, 27 Mar 2023 19:31:45 GMT",
