@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-parquet",
   "entries": [
     {
+      "version": "0.5.2",
+      "tag": "@subsquid/file-store-parquet_v0.5.2",
+      "date": "Mon, 27 Mar 2023 20:14:02 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "add binary type"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.5.1",
       "tag": "@subsquid/file-store-parquet_v0.5.1",
       "date": "Mon, 27 Mar 2023 19:43:20 GMT",
