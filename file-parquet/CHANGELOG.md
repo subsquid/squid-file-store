@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Wed, 22 Mar 2023 10:57:33 GMT and should not be manually modified.
+This log was last generated on Mon, 27 Mar 2023 19:31:45 GMT and should not be manually modified.
+
+## 0.5.0
+Mon, 27 Mar 2023 19:31:45 GMT
+
+### Minor changes
+
+- add length option for string type
 
 ## 0.4.0
 Wed, 22 Mar 2023 10:57:33 GMT
