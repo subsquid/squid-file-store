@@ -7,12 +7,25 @@ import {Type} from '../table'
 /**
  * @returns the data type for string columns
  */
-export function String(): Type<string> {
+export function String(length?: number): Type<string> {
+    let primitiveType: parquet.Type
+    let typeLength: number | undefined
+    if (length != null) {
+        assert(length > 0 && Number.isSafeInteger(length), `invalid length value`)
+        primitiveType = parquet.Type.FIXED_LEN_BYTE_ARRAY
+        typeLength = length
+    } else {
+        primitiveType = parquet.Type.BYTE_ARRAY
+    }
+
     return {
         primitiveType: parquet.Type.BYTE_ARRAY,
         convertedType: parquet.ConvertedType.UTF8,
         logicalType: new parquet.LogicalType({STRING: new parquet.StringType()}),
         toPrimitive(value) {
+            if (typeLength != null) {
+                assert(value.length == typeLength, `invalid string length, expected ${typeLength} but got ${value.length}`)
+            }
             return Buffer.from(value, 'utf-8')
         },
     }
@@ -209,18 +222,16 @@ export function Timestamp(): Type<Date> {
  * @returns the data type for fixed precision decimal number columns
  */
 export function Decimal(precision: number, scale = 0): Type<number | bigint | BigDecimal> {
-    assert(Number.isSafeInteger(precision) && precision > 0, 'invalid precision')
-    assert(Number.isSafeInteger(scale) && scale < precision, 'invalid scale')
+    assert(Number.isSafeInteger(precision) && precision > 0, 'invalid precision value')
+    assert(Number.isSafeInteger(scale) && scale < precision, 'invalid scale value')
 
     let primitiveType: parquet.Type
     let typeLength: number | undefined
 
     if (precision <= 9) {
         primitiveType = parquet.Type.INT32
-        typeLength = 4
     } else if (precision <= 18) {
         primitiveType = parquet.Type.INT64
-        typeLength = 8
     } else {
         primitiveType = parquet.Type.FIXED_LEN_BYTE_ARRAY
         typeLength = Math.floor(getBitWidth(10 ** precision) / 8) + 1
