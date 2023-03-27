@@ -22,9 +22,13 @@ export function String(length?: number): Type<string> {
         primitiveType: parquet.Type.BYTE_ARRAY,
         convertedType: parquet.ConvertedType.UTF8,
         logicalType: new parquet.LogicalType({STRING: new parquet.StringType()}),
+        typeLength,
         toPrimitive(value) {
             if (typeLength != null) {
-                assert(value.length == typeLength, `invalid string length, expected ${typeLength} but got ${value.length}`)
+                assert(
+                    value.length == typeLength,
+                    `invalid string length, expected ${typeLength} but got ${value.length}`
+                )
             }
             return Buffer.from(value, 'utf-8')
         },
