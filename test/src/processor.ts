@@ -30,7 +30,7 @@ let db = new Database({
         Extrinsics,
     },
     dest: new LocalDest(`./data`),
-    chunkSizeMb: 10,
+    chunkSizeMb: 5,
     syncIntervalBlocks: 1_000,
     hooks: {
         async onConnect(fs) {
@@ -83,18 +83,18 @@ processor.run(db, async (ctx) => {
                     amount: rec.amount,
                 })
 
-                if (item.event.extrinsic && prevExtrinsic != item.event.extrinsic.hash) {
-                    let signer = getOriginAccountId(item.event.extrinsic.call.origin)
+                // if (item.event.extrinsic && prevExtrinsic != item.event.extrinsic.hash) {
+                //     let signer = getOriginAccountId(item.event.extrinsic.call.origin)
 
-                    if (signer) {
-                        ctx.store.Extrinsics.write({
-                            blockNumber: block.header.height,
-                            timestamp: new Date(block.header.timestamp),
-                            hash: Buffer.from(item.event.extrinsic.hash, 'utf-8'),
-                            signer: ss58.codec('kusama').encode(signer),
-                        })
-                    }
-                }
+                //     if (signer) {
+                //         ctx.store.Extrinsics.write({
+                //             blockNumber: block.header.height,
+                //             timestamp: new Date(block.header.timestamp),
+                //             hash: Buffer.from(item.event.extrinsic.hash, 'utf-8'),
+                //             signer: ss58.codec('kusama').encode(signer),
+                //         })
+                //     }
+                // }
             }
         }
         lastBlock = block.header

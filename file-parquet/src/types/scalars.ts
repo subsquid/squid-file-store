@@ -7,16 +7,11 @@ import {Type} from '../table'
 /**
  * @returns the data type for string columns
  */
-export function String(length?: number): Type<string> {
+export function String(): Type<string> {
     let primitiveType: parquet.Type
     let typeLength: number | undefined
-    if (length != null) {
-        assert(length > 0 && Number.isSafeInteger(length), `invalid length value`)
-        primitiveType = parquet.Type.FIXED_LEN_BYTE_ARRAY
-        typeLength = length
-    } else {
-        primitiveType = parquet.Type.BYTE_ARRAY
-    }
+
+    primitiveType = parquet.Type.BYTE_ARRAY
 
     return {
         primitiveType,

@@ -49,7 +49,7 @@ export function encodeDataPage(column: Column, data: ParquetDataPageData): Buffe
     }
 
     let header = new PageHeader({
-        type: PageType.DATA_PAGE_V2,
+        type: PageType.DATA_PAGE,
         data_page_header_v2: new DataPageHeaderV2({
             definition_levels_byte_length: dLevelsBuf.length,
             repetition_levels_byte_length: rLevelsBuf.length,
@@ -132,6 +132,7 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
         new SchemaElement({
             name: 'root',
             num_children: columns.reduce((count, column) => (column.path.length == 1 ? (count += 1) : count), 0), // FIXME: must be done in more propere way
+            repetition_type: FieldRepetitionType.REQUIRED,
         })
     )
 
@@ -154,7 +155,7 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
             schemaElement.scale = column.type.scale
             schemaElement.precision = column.type.precision
         } else {
-            throw new Error(`Unexpected case: column must have children or non-nested type`)
+            throw new Error(`Unexpected case: column must have children or be non-nested type`)
         }
         schema.push(schemaElement)
     }
@@ -166,6 +167,8 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
         num_rows: new Int64(rowCount),
         row_groups: rowGroups,
     })
+
+    console.dir(metadata)
 
     let metadataEncoded = util.serializeThrift(metadata)
     let footerEncoded = Buffer.alloc(metadataEncoded.length + 4)
