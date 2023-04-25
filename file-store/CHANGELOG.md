@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Wed, 15 Mar 2023 09:08:21 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Apr 2023 08:22:19 GMT and should not be manually modified.
+
+## 0.3.0
+Tue, 25 Apr 2023 08:22:19 GMT
+
+### Minor changes
+
+- output even empty chunk when on head block
 
 ## 0.2.0
 Wed, 15 Mar 2023 09:08:21 GMT

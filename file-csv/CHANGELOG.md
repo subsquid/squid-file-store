@@ -1,6 +1,11 @@
 # Change Log - @subsquid/file-store-csv
 
-This log was last generated on Wed, 15 Mar 2023 09:08:21 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Apr 2023 08:22:19 GMT and should not be manually modified.
+
+## 0.4.1
+Tue, 25 Apr 2023 08:22:19 GMT
+
+_Version update only_
 
 ## 0.4.0
 Wed, 15 Mar 2023 09:08:21 GMT
