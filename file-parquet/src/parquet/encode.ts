@@ -168,8 +168,6 @@ export function encodeFooter(columns: Column[], rowCount: number, rowGroups: Row
         row_groups: rowGroups,
     })
 
-    console.dir(metadata)
-
     let metadataEncoded = util.serializeThrift(metadata)
     let footerEncoded = Buffer.alloc(metadataEncoded.length + 4)
     metadataEncoded.copy(footerEncoded)
