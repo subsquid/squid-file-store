@@ -180,11 +180,10 @@ export class Database<T extends Tables, D extends Dest> {
 
     async transact(from: number, to: number, cb: (store: Store<T>) => Promise<void>): Promise<void> {
         let open = true
-
+        let chunk = this.chunk || this.createChunk()
         let store = new this.StoreConstructor(() => {
             assert(open, `Transaction was already closed`)
-            this.chunk = this.chunk || this.createChunk()
-            return this.chunk
+            return chunk
         })
 
         try {
@@ -199,7 +198,6 @@ export class Database<T extends Tables, D extends Dest> {
 
     async advance(height: number, isHead?: boolean): Promise<void> {
         assert(this.lastCommited != null, `Not connected to database`)
-
         if (this.chunk == null) return
 
         let chunkSize = 0

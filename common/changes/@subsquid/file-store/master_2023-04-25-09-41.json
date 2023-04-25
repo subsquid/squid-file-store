@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "always create chunk on transaction instead of store interaction",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
