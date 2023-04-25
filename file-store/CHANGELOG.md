@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Tue, 25 Apr 2023 09:43:18 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Apr 2023 10:22:38 GMT and should not be manually modified.
+
+## 0.3.2
+Tue, 25 Apr 2023 10:22:38 GMT
+
+### Patches
+
+- don't try to rename transaction folder if it doesn't exist
 
 ## 0.3.1
 Tue, 25 Apr 2023 09:43:18 GMT
