@@ -77,9 +77,11 @@ export class LocalDest implements Dest {
         try {
             await cb(txFs)
             await this.rm(dir)
-            await this.rename(tempDir, dir)
+            if (await this.exists(tempDir)) {
+                await this.rename(tempDir, dir)
+            }
         } catch (e) {
-            await this.rm(tempDir)
+            await this.rm(tempDir).catch()
             throw e
         }
     }

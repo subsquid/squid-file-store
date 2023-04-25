@@ -159,6 +159,7 @@ export class Database<T extends Tables, D extends Dest> {
 
     async connect(): Promise<number> {
         this.lastCommited = await this.hooks.onConnect(this.dest)
+        this.chunk = this.chunk || this.createChunk()
 
         let names = await this.dest.readdir('./')
         for (let name of names) {
@@ -198,6 +199,7 @@ export class Database<T extends Tables, D extends Dest> {
 
     async advance(height: number, isHead?: boolean): Promise<void> {
         assert(this.lastCommited != null, `Not connected to database`)
+
         if (this.chunk == null) return
 
         let chunkSize = 0
@@ -226,11 +228,11 @@ export class Database<T extends Tables, D extends Dest> {
     }
 
     private createChunk(): Chunk<T> {
-        let chunk: Chunk<T> = {} as any
+        this.chunk = {} as Chunk<T>
         for (let name in this.tables) {
-            chunk[name] = this.tables[name].createWriter()
+            this.chunk[name] = this.tables[name].createWriter()
         }
-        return chunk
+        return this.chunk
     }
 }
 

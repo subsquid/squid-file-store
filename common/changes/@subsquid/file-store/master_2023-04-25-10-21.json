@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "don't try to rename transaction folder if it doesn't exist",
+      "type": "patch"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
