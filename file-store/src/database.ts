@@ -212,7 +212,7 @@ export class Database<T extends Tables, D extends Dest> {
 
         if (
             chunkSize >= this.chunkSize * 1024 * 1024 ||
-            (isHead && height - this.lastCommited >= this.updateInterval && chunkSize > 0)
+            (isHead && height - this.lastCommited >= this.updateInterval)
         ) {
             let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
             let chunk = this.chunk
