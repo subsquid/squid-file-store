@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Tue, 25 Apr 2023 08:22:19 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Apr 2023 09:43:18 GMT and should not be manually modified.
+
+## 0.3.1
+Tue, 25 Apr 2023 09:43:18 GMT
+
+### Patches
+
+- always create chunk on transaction instead of store interaction
 
 ## 0.3.0
 Tue, 25 Apr 2023 08:22:19 GMT
