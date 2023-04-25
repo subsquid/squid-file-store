@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-parquet",
+      "comment": "remove `length` param for string type",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-parquet"
+}

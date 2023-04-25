@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "output even empty chunk when on head block",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
