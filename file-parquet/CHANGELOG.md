@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-parquet
 
-This log was last generated on Tue, 25 Apr 2023 08:22:19 GMT and should not be manually modified.
+This log was last generated on Thu, 27 Apr 2023 08:21:38 GMT and should not be manually modified.
+
+## 0.6.1
+Thu, 27 Apr 2023 08:21:38 GMT
+
+### Patches
+
+- fix issue with incorrect data page header
 
 ## 0.6.0
 Tue, 25 Apr 2023 08:22:19 GMT

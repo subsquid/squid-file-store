@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store-parquet",
   "entries": [
     {
+      "version": "0.6.1",
+      "tag": "@subsquid/file-store-parquet_v0.6.1",
+      "date": "Thu, 27 Apr 2023 08:21:38 GMT",
+      "comments": {
+        "patch": [
+          {
+            "comment": "fix issue with incorrect data page header"
+          }
+        ]
+      }
+    },
+    {
       "version": "0.6.0",
       "tag": "@subsquid/file-store-parquet_v0.6.0",
       "date": "Tue, 25 Apr 2023 08:22:19 GMT",
