@@ -49,7 +49,7 @@ export function encodeDataPage(column: Column, data: ParquetDataPageData): Buffe
     }
 
     let header = new PageHeader({
-        type: PageType.DATA_PAGE,
+        type: PageType.DATA_PAGE_V2,
         data_page_header_v2: new DataPageHeaderV2({
             definition_levels_byte_length: dLevelsBuf.length,
             repetition_levels_byte_length: rLevelsBuf.length,
