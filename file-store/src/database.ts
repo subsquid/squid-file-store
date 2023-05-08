@@ -6,7 +6,7 @@ import {assertNotNull} from '@subsquid/util-internal'
 import {createFolderName, isFolderName} from './util'
 
 export interface DatabaseHooks<D extends Dest = Dest> {
-    onStateRead(dest: D): Promise<HashAndHeight>
+    onStateRead(dest: D): Promise<HashAndHeight | undefined>
     onStateUpdate(dest: D, info: HashAndHeight): Promise<void>
 }
 
@@ -95,18 +95,18 @@ export interface DatabaseOptions<T extends Tables, D extends Dest> {
     hooks?: DatabaseHooks<D>
 }
 
-type Chunk<T extends Tables> = {
+type DataBuffer<T extends Tables> = {
     [k in keyof T]: TableWriter<T[k] extends Table<infer R> ? R : never>
 }
 
 type ToStoreWriter<W extends TableWriter<any>> = Pick<W, 'write' | 'writeMany'>
 
 export type Store<T extends Tables> = Readonly<{
-    [k in keyof T]: ToStoreWriter<Chunk<T>[k]>
+    [k in keyof T]: ToStoreWriter<DataBuffer<T>[k]>
 }>
 
 interface StoreConstructor<T extends Tables> {
-    new (chunk: () => Chunk<T>): Store<T>
+    new (chunk: () => DataBuffer<T>): Store<T>
 }
 
 /**
@@ -124,7 +124,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
     private StoreConstructor: StoreConstructor<T>
 
-    private chunk?: Chunk<T>
+    private chunk?: DataBuffer<T>
     private state?: HashAndHeight
 
     /**
@@ -148,7 +148,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         this.hooks = options.hooks || defaultHooks
 
         class Store {
-            constructor(protected chunk: () => Chunk<T>) {}
+            constructor(protected chunk: () => DataBuffer<T>) {}
         }
         for (let name in this.tables) {
             Object.defineProperty(Store.prototype, name, {
@@ -183,7 +183,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
         assert(
             dbState.hash === prevState.hash && dbState.height === prevState.height,
-            'status table was updated by foreign process, make sure no other processor is running'
+            'state was updated by foreign process, make sure no other processor is running'
         )
         assert(prevState.height < newState.height)
         assert(prevState.hash != newState.hash)
@@ -206,8 +206,8 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         }
     }
 
-    private async flush(prevState: HashAndHeight, newState: HashAndHeight, chunk: Chunk<T>) {
-        let folderName = createFolderName(prevState.height, newState.height)
+    private async flush(prevState: HashAndHeight, newState: HashAndHeight, chunk: DataBuffer<T>) {
+        let folderName = createFolderName(prevState.height + 1, newState.height)
         await this.dest.transact(folderName, async (txDest) => {
             for (let tableAlias in this.tables) {
                 await txDest.writeFile(`${this.tables[tableAlias].name}`, chunk[tableAlias].flush())
@@ -215,7 +215,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         })
     }
 
-    private async performUpdates(cb: (store: Store<T>) => Promise<void>, chunk: Chunk<T>): Promise<void> {
+    private async performUpdates(cb: (store: Store<T>) => Promise<void>, chunk: DataBuffer<T>): Promise<void> {
         let running = true
         let store = new this.StoreConstructor(() => {
             assert(running, `too late to perform updates`)
@@ -231,12 +231,15 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
     private async getState(): Promise<HashAndHeight> {
         let state = await this.hooks.onStateRead(this.dest)
+        if (state == null) {
+            state = {height: -1, hash: '0x'}
+        }
         assert(Number.isSafeInteger(state.height))
         return state
     }
 
-    private createChunk(): Chunk<T> {
-        let chunk = {} as Chunk<T>
+    private createChunk(): DataBuffer<T> {
+        let chunk = {} as DataBuffer<T>
         for (let name in this.tables) {
             chunk[name] = this.tables[name].createWriter()
         }
@@ -251,7 +254,7 @@ const defaultHooks: DatabaseHooks = {
             let [height, hash] = await dest.readFile(DEFAULT_STATUS_FILE).then((d) => d.split('\n'))
             return {height: Number(height), hash: hash || '0x'}
         } else {
-            return {height: -1, hash: '0x'}
+            return undefined
         }
     },
     async onStateUpdate(dest, info) {
