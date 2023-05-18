@@ -1,12 +1,13 @@
 import assert from 'assert'
 import {Table, TableWriter} from './table'
 import {Dest, LocalDest} from './dest'
+import {FinalDatabase, FinalTxInfo, HashAndHeight} from '@subsquid/util-internal-processor-tools'
+import {assertNotNull} from '@subsquid/util-internal'
+import {createFolderName, isFolderName} from './util'
 
-type Range = {from: number; to: number}
-
-interface DatabaseHooks<D extends Dest = Dest> {
-    onConnect(dest: D): Promise<number>
-    onFlush(dest: D, range: Range, isHead: boolean): Promise<void>
+export interface DatabaseHooks<D extends Dest = Dest> {
+    onStateRead(dest: D): Promise<HashAndHeight | undefined>
+    onStateUpdate(dest: D, info: HashAndHeight): Promise<void>
 }
 
 type Tables = Record<string, Table<any>>
@@ -94,18 +95,18 @@ export interface DatabaseOptions<T extends Tables, D extends Dest> {
     hooks?: DatabaseHooks<D>
 }
 
-type Chunk<T extends Tables> = {
+type DataBuffer<T extends Tables> = {
     [k in keyof T]: TableWriter<T[k] extends Table<infer R> ? R : never>
 }
 
 type ToStoreWriter<W extends TableWriter<any>> = Pick<W, 'write' | 'writeMany'>
 
 export type Store<T extends Tables> = Readonly<{
-    [k in keyof T]: ToStoreWriter<Chunk<T>[k]>
+    [k in keyof T]: ToStoreWriter<DataBuffer<T>[k]>
 }>
 
 interface StoreConstructor<T extends Tables> {
-    new (chunk: () => Chunk<T>): Store<T>
+    new (chunk: () => DataBuffer<T>): Store<T>
 }
 
 /**
@@ -114,19 +115,17 @@ interface StoreConstructor<T extends Tables> {
  *
  * @see https://docs.subsquid.io/basics/store/file-store/
  */
-export class Database<T extends Tables, D extends Dest> {
-    protected tables: T
-    protected dest: D
+export class Database<T extends Tables, D extends Dest> implements FinalDatabase<Store<T>> {
+    private tables: T
+    private dest: D
+    private chunkSize: number
+    private updateInterval: number
+    private hooks: DatabaseHooks<D>
 
-    protected chunkSize: number
-    protected updateInterval: number
+    private StoreConstructor: StoreConstructor<T>
 
-    protected chunk?: Chunk<T>
-    protected lastCommited?: number
-
-    protected hooks: DatabaseHooks<D>
-
-    protected StoreConstructor: StoreConstructor<T>
+    private chunk?: DataBuffer<T>
+    private state?: HashAndHeight
 
     /**
      * Database interface implementation for storing squid data
@@ -139,13 +138,17 @@ export class Database<T extends Tables, D extends Dest> {
     constructor(options: DatabaseOptions<T, D>) {
         this.tables = options.tables
         this.dest = options.dest
-        this.chunkSize = options?.chunkSizeMb && options.chunkSizeMb > 0 ? options.chunkSizeMb : 20
-        this.updateInterval =
-            options?.syncIntervalBlocks && options.syncIntervalBlocks > 0 ? options.syncIntervalBlocks : Infinity
+
+        this.chunkSize = options?.chunkSizeMb ?? 20
+        assert(this.chunkSize > 0, `invalid chunk size ${this.chunkSize}`)
+
+        this.updateInterval = options?.syncIntervalBlocks || Infinity
+        assert(this.updateInterval > 0, `invalid update interval ${this.updateInterval}`)
+
         this.hooks = options.hooks || defaultHooks
 
         class Store {
-            constructor(protected chunk: () => Chunk<T>) {}
+            constructor(protected chunk: () => DataBuffer<T>) {}
         }
         for (let name in this.tables) {
             Object.defineProperty(Store.prototype, name, {
@@ -157,98 +160,104 @@ export class Database<T extends Tables, D extends Dest> {
         this.StoreConstructor = Store as any
     }
 
-    async connect(): Promise<number> {
-        this.lastCommited = await this.hooks.onConnect(this.dest)
-        this.chunk = this.chunk || this.createChunk()
+    async connect(): Promise<HashAndHeight> {
+        this.state = await this.getState()
 
         let names = await this.dest.readdir('./')
         for (let name of names) {
-            if (!/^(\d+)-(\d+)$/.test(name)) continue
+            if (!isFolderName(name)) continue
 
             let chunkStart = Number(name.split('-')[0])
-            if (chunkStart > this.lastCommited) {
+            if (chunkStart > this.state.height) {
                 await this.dest.rm(name)
             }
         }
 
-        return this.lastCommited
+        return this.state
     }
 
-    async close(): Promise<void> {
-        this.chunk = undefined
-        this.lastCommited = undefined
-    }
+    async transact(info: FinalTxInfo, cb: (store: Store<T>) => Promise<void>): Promise<void> {
+        let dbState = await this.getState()
+        let prevState = assertNotNull(this.state, 'not connected')
+        let {nextHead: newState} = info
 
-    async transact(from: number, to: number, cb: (store: Store<T>) => Promise<void>): Promise<void> {
-        let open = true
-        let chunk = this.chunk || this.createChunk()
-        let store = new this.StoreConstructor(() => {
-            assert(open, `Transaction was already closed`)
-            return chunk
-        })
+        assert(
+            dbState.hash === prevState.hash && dbState.height === prevState.height,
+            'state was updated by foreign process, make sure no other processor is running'
+        )
+        assert(prevState.height < newState.height)
+        assert(prevState.hash != newState.hash)
 
-        try {
-            await cb(store)
-        } catch (e: any) {
-            open = false
-            throw e
-        }
-
-        open = false
-    }
-
-    async advance(height: number, isHead?: boolean): Promise<void> {
-        assert(this.lastCommited != null, `Not connected to database`)
-
-        if (this.chunk == null) return
+        this.chunk = this.chunk || this.createChunk()
+        await this.performUpdates(cb, this.chunk)
 
         let chunkSize = 0
         for (let name in this.chunk) {
             chunkSize += this.chunk[name].size
         }
 
-        let from = this.lastCommited + 1
-        let to = height
-
         if (
             chunkSize >= this.chunkSize * 1024 * 1024 ||
-            (isHead && height - this.lastCommited >= this.updateInterval)
+            (info.isOnTop && newState.height - prevState.height >= this.updateInterval)
         ) {
-            let folderName = from.toString().padStart(10, '0') + '-' + to.toString().padStart(10, '0')
-            let chunk = this.chunk
-            await this.dest.transact(folderName, async (txDest) => {
-                for (let tableAlias in this.tables) {
-                    await txDest.writeFile(`${this.tables[tableAlias].name}`, chunk[tableAlias].flush())
-                }
-            })
-            await this.hooks.onFlush(this.dest, {from, to}, isHead ?? false)
-
-            this.lastCommited = height
+            await this.flush(prevState, newState, this.chunk)
+            await this.hooks.onStateUpdate(this.dest, newState)
+            this.state = newState
         }
     }
 
-    private createChunk(): Chunk<T> {
-        this.chunk = {} as Chunk<T>
-        for (let name in this.tables) {
-            this.chunk[name] = this.tables[name].createWriter()
+    private async flush(prevState: HashAndHeight, newState: HashAndHeight, chunk: DataBuffer<T>) {
+        let folderName = createFolderName(prevState.height + 1, newState.height)
+        await this.dest.transact(folderName, async (txDest) => {
+            for (let tableAlias in this.tables) {
+                await txDest.writeFile(`${this.tables[tableAlias].name}`, chunk[tableAlias].flush())
+            }
+        })
+    }
+
+    private async performUpdates(cb: (store: Store<T>) => Promise<void>, chunk: DataBuffer<T>): Promise<void> {
+        let running = true
+        let store = new this.StoreConstructor(() => {
+            assert(running, `too late to perform updates`)
+            return chunk
+        })
+
+        try {
+            await cb(store)
+        } finally {
+            running = false
         }
-        return this.chunk
+    }
+
+    private async getState(): Promise<HashAndHeight> {
+        let state = await this.hooks.onStateRead(this.dest)
+        if (state == null) {
+            state = {height: -1, hash: '0x'}
+        }
+        assert(Number.isSafeInteger(state.height))
+        return state
+    }
+
+    private createChunk(): DataBuffer<T> {
+        let chunk = {} as DataBuffer<T>
+        for (let name in this.tables) {
+            chunk[name] = this.tables[name].createWriter()
+        }
+        return chunk
     }
 }
 
-let DEFAULT_STATUS_FILE = `status.txt`
-
+const DEFAULT_STATUS_FILE = `status.txt`
 const defaultHooks: DatabaseHooks = {
-    async onConnect(dest) {
+    async onStateRead(dest) {
         if (await dest.exists(DEFAULT_STATUS_FILE)) {
-            let height = await dest.readFile(DEFAULT_STATUS_FILE).then(Number)
-            assert(Number.isSafeInteger(height))
-            return height
+            let [height, hash] = await dest.readFile(DEFAULT_STATUS_FILE).then((d) => d.split('\n'))
+            return {height: Number(height), hash: hash || '0x'}
         } else {
-            return -1
+            return undefined
         }
     },
-    async onFlush(dest, range) {
-        await dest.writeFile(DEFAULT_STATUS_FILE, range.to.toString())
+    async onStateUpdate(dest, info) {
+        await dest.writeFile(DEFAULT_STATUS_FILE, info.height + '\n' + info.hash)
     },
 }
