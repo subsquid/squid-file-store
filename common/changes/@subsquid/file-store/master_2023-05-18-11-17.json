@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "adapt for ArrowSquid",
+      "type": "major"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
