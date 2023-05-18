@@ -15,11 +15,13 @@ specifiers:
   '@subsquid/evm-typegen': 3.0.0
   '@subsquid/substrate-metadata-explorer': ^2.0.0
   '@subsquid/substrate-typegen': ^3.0.0
+  '@subsquid/util-internal': ^2.0.0
   '@subsquid/util-internal-json': ^0.2.1
   '@subsquid/util-naming': ^0.0.0
   '@types/int53': ^1.0.0
   '@types/lz4': ^0.6.0
   '@types/mocha': ^10.0.1
+  '@types/node': 20.0.0
   '@types/node-int64': ^0.4.29
   '@types/semver': ^7.3.13
   '@types/strftime': ^0.9.4
@@ -28,7 +30,7 @@ specifiers:
   bson: ^5.0.1
   commander: ^10.0.1
   dotenv: ^16.0.3
-  ethers: ~6.3.0
+  ethers: ^6.3.0
   expect: ^27.5.1
   jsonc-parser: ^3.2.0
   latest-version: ^5.1.0
@@ -41,6 +43,7 @@ specifiers:
   strftime: ^0.10.1
   thrift: ^0.18.0
   type-fest: ^3.0.0
+  typescript: 5.0.4
   upath: ^2.0.1
   varint: ^6.0.0
   zstd.ts: ^1.1.3
@@ -60,11 +63,13 @@ dependencies:
   '@subsquid/evm-typegen': 3.0.0_ethers@6.3.0
   '@subsquid/substrate-metadata-explorer': 2.0.0
   '@subsquid/substrate-typegen': 3.0.0
+  '@subsquid/util-internal': 2.0.0
   '@subsquid/util-internal-json': 0.2.1
   '@subsquid/util-naming': 0.0.0
   '@types/int53': 1.0.0
   '@types/lz4': 0.6.0
   '@types/mocha': 10.0.1
+  '@types/node': 20.0.0
   '@types/node-int64': 0.4.29
   '@types/semver': 7.5.0
   '@types/strftime': 0.9.4
@@ -86,6 +91,7 @@ dependencies:
   strftime: 0.10.1
   thrift: 0.18.0
   type-fest: 3.10.0_typescript@5.0.4
+  typescript: 5.0.4
   upath: 2.0.1
   varint: 6.0.0
   zstd.ts: 1.1.3
@@ -1107,7 +1113,7 @@ packages:
     dependencies:
       '@types/istanbul-lib-coverage': 2.0.4
       '@types/istanbul-reports': 3.0.1
-      '@types/node': 18.7.23
+      '@types/node': 20.2.0
       '@types/yargs': 16.0.5
       chalk: 4.1.2
     dev: false
@@ -1676,7 +1682,7 @@ packages:
   /@types/int53/1.0.0:
     resolution: {integrity: sha512-9JK7NCXuyW9EEHuomfWPM6/b7acxoM4k6uzuD1ks+qaR9UjSFe54x7C2HXOUOkJRLXj6wcRLfBs7Ezig3w4HlQ==}
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 20.2.0
     dev: false
 
   /@types/istanbul-lib-coverage/2.0.4:
@@ -1704,7 +1710,7 @@ packages:
   /@types/lz4/0.6.0:
     resolution: {integrity: sha512-HxdNqDQYShhilOdOny0VFDmZQXksfXcz+1cIjO30pJ4y1NpBeWS/hvP8QWTIaen+OEKAwnUtz37kW/Et4tmSuA==}
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 20.2.0
     dev: false
 
   /@types/mocha/10.0.1:
@@ -1714,15 +1720,15 @@ packages:
   /@types/node-int64/0.4.29:
     resolution: {integrity: sha512-rHXvenLTj/CcsmNAebaBOhxQ2MqEGl3yXZZcZ21XYR+gzGTTcpOy2N4IxpvTCz48loyQNatHvfn6GhIbbZ1R3Q==}
     dependencies:
-      '@types/node': 18.7.23
-    dev: false
-
-  /@types/node/16.11.56:
-    resolution: {integrity: sha512-aFcUkv7EddxxOa/9f74DINReQ/celqH8DiB3fRYgVDM2Xm5QJL8sl80QKuAnGvwAsMn+H3IFA6WCrQh1CY7m1A==}
+      '@types/node': 20.2.0
     dev: false
 
   /@types/node/18.7.23:
     resolution: {integrity: sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==}
+    dev: false
+
+  /@types/node/20.0.0:
+    resolution: {integrity: sha512-cD2uPTDnQQCVpmRefonO98/PPijuOnnEy5oytWJFPY1N9aJCz2wJ5kSGWO+zJoed2cY2JxQh6yBuUq4vIn61hw==}
     dev: false
 
   /@types/node/20.2.0:
@@ -1758,7 +1764,7 @@ packages:
   /@types/thrift/0.10.12:
     resolution: {integrity: sha512-5BIQz+lJDwFCsShtLVm2o/1oXrAps9aDd1czeMP0JvYzDQqZ3cRees8ahBkMR0AGIxZR+OFvcRe7GI/v+Udc4Q==}
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 20.2.0
       '@types/node-int64': 0.4.29
       '@types/q': 1.5.5
     dev: false
@@ -1766,7 +1772,7 @@ packages:
   /@types/varint/6.0.1:
     resolution: {integrity: sha512-fQdOiZpDMBvaEdl12P1x7xlTPRAtd7qUUtVaWgkCy8DC//wCv19nqFFtrnR3y/ac6VFY0UUvYuQqfKzZTSE26w==}
     dependencies:
-      '@types/node': 18.7.23
+      '@types/node': 20.2.0
     dev: false
 
   /@types/yargs-parser/21.0.0:
@@ -3252,12 +3258,6 @@ packages:
     hasBin: true
     dev: false
 
-  /typescript/4.8.2:
-    resolution: {integrity: sha512-C0I1UsrrDHo2fYI5oaCGbSejwX4ch+9Y5jTQELvovfmFkK3HHSZJB8MSJcWLmCUBzQBchCrZ9rMRV6GuNrvGtw==}
-    engines: {node: '>=4.2.0'}
-    hasBin: true
-    dev: false
-
   /typescript/5.0.4:
     resolution: {integrity: sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==}
     engines: {node: '>=12.20'}
@@ -3474,38 +3474,38 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-yoKAWBqUmvoF88VDqDZx8k8gT7Z8yqnypx/HJuoo6+y6ZgX+Dn6CWSMlAzpmyiJyWwdwJ44Yv+oeMmp6Cpmjzw==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-tiHEZctmYZolhd12LjH2zIhQEsEvjV8CHaJ5887ajm5diHNkgDmMwz8GNfaz/6qGPoyP5lo8Nz0QGivUaqNy4g==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal-json': 0.2.1
       '@subsquid/util-naming': 0.0.0
       '@types/mocha': 10.0.1
-      '@types/node': 16.11.56
+      '@types/node': 20.0.0
       '@types/strftime': 0.9.4
       expect: 27.5.1
       mocha: 10.2.0
       strftime: 0.10.1
-      typescript: 4.8.2
+      typescript: 5.0.4
     dev: false
 
   file:projects/file-store-json.tgz:
-    resolution: {integrity: sha512-/4RmF7HJJppApVz18QkEXj5kQyWpfbkJ3VOxhq04mCBFH5xeo5X+YgNjxe3DcwVwD7gUs28zKmwgSBbQJUBiPg==, tarball: file:projects/file-store-json.tgz}
+    resolution: {integrity: sha512-w2DcnIcFMY9sLuCWnUoOLK2iphEggLHfxI4SPynFjTFM5cCKr5mq9YBABtMYqb7NXP/SsiLL+dfQV9hNISKMPg==, tarball: file:projects/file-store-json.tgz}
     name: '@rush-temp/file-store-json'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal-json': 0.2.1
       '@subsquid/util-naming': 0.0.0
       '@types/mocha': 10.0.1
-      '@types/node': 16.11.56
+      '@types/node': 20.0.0
       '@types/strftime': 0.9.4
       expect: 27.5.1
       mocha: 10.2.0
-      typescript: 4.8.2
+      typescript: 5.0.4
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-oJxtTNoisYksk5lKqsnRLbuoWx3iuUmRdYDn8BvpaqqNVYC+10aKvJPKx38suUQlGV7aqsb00hNirtOJCch3AQ==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-rve6uEreJZecPL2zrp+iTbfIO6QR908kjn5fcADHs4kcAmNs3/0E9cc34JFflLYOqDBh8kGaDm4dwMMKTycEwA==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
@@ -3516,7 +3516,7 @@ packages:
       '@types/int53': 1.0.0
       '@types/lz4': 0.6.0
       '@types/mocha': 10.0.1
-      '@types/node': 16.11.56
+      '@types/node': 20.0.0
       '@types/node-int64': 0.4.29
       '@types/thrift': 0.10.12
       '@types/varint': 6.0.1
@@ -3531,7 +3531,7 @@ packages:
       simple-zstd: 1.4.2
       snappy: 7.2.2
       thrift: 0.18.0
-      typescript: 4.8.2
+      typescript: 5.0.4
       varint: 6.0.0
       zstd.ts: 1.1.3
     transitivePeerDependencies:
@@ -3540,14 +3540,14 @@ packages:
     dev: false
 
   file:projects/file-store-s3.tgz:
-    resolution: {integrity: sha512-WB7j4/dDbrHjwXM/DPIcYxDlPHQlEgKOPPYfKImPSQ7iNSsfXBQTU3J1hYtpgVnzNv28ZuFg+yjXdJqb8U3mJw==, tarball: file:projects/file-store-s3.tgz}
+    resolution: {integrity: sha512-eNS61de3KLBTwXDdEI5fvYrF0BTdNT+v2JXSOuL/wAc35v/IuuMUp0cRyipGn28KdJWoGM2WSpxxtv3mi5NT5g==, tarball: file:projects/file-store-s3.tgz}
     name: '@rush-temp/file-store-s3'
     version: 0.0.0
     dependencies:
       '@aws-sdk/client-s3': 3.259.0
-      '@subsquid/util-internal': 1.1.0
-      '@types/node': 16.11.56
-      typescript: 4.8.2
+      '@subsquid/util-internal': 2.0.0
+      '@types/node': 20.0.0
+      typescript: 5.0.4
       upath: 2.0.1
     transitivePeerDependencies:
       - '@aws-sdk/signature-v4-crt'
@@ -3555,22 +3555,22 @@ packages:
     dev: false
 
   file:projects/file-store.tgz:
-    resolution: {integrity: sha512-cP+0LJ/AiHJY7fzsUZ8ajg6xfFmN1OXxmkxN6uQ/XnakiPKt+XRtGa+QFIc4p+LvkXpRNfMUQlEA8ditGgE9HA==, tarball: file:projects/file-store.tgz}
+    resolution: {integrity: sha512-NFXShX7Re+kEd+5vr0nf9P4893uUuo7iGIHaaG8kpO6XbQld9vJuovj295+pm7CDGua4dEzFJM8gpzSqaUUMMA==, tarball: file:projects/file-store.tgz}
     name: '@rush-temp/file-store'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal': 2.0.0
       '@subsquid/util-internal-processor-tools': 0.0.1
       '@types/mocha': 10.0.1
-      '@types/node': 16.11.56
+      '@types/node': 20.0.0
       dotenv: 16.0.3
       mocha: 10.2.0
-      typescript: 4.8.2
+      typescript: 5.0.4
       upath: 2.0.1
     dev: false
 
   file:projects/test.tgz:
-    resolution: {integrity: sha512-OCUsfH0Q3WeL9jg08dbgLL5/cLoUMuYENYehJ2DPBvyFzyIdnceWstZsdZh7qAsam5Cdy3P/ZlrSssNBYkCN6Q==, tarball: file:projects/test.tgz}
+    resolution: {integrity: sha512-GOXEeEwCAgpXsGKwXv2Nn4JL2R8g6O63qhsaeR68R8S9vTpWJOeueUfUc1d1OOytOyc77wWgyNxDGugr/zX4Yg==, tarball: file:projects/test.tgz}
     name: '@rush-temp/test'
     version: 0.0.0
     dependencies:
@@ -3581,10 +3581,10 @@ packages:
       '@subsquid/substrate-metadata-explorer': 2.0.0
       '@subsquid/substrate-processor': 2.2.0
       '@subsquid/substrate-typegen': 3.0.0
-      '@types/node': 16.11.56
+      '@types/node': 20.0.0
       dotenv: 16.0.3
       ethers: 6.3.0
-      typescript: 4.8.2
+      typescript: 5.0.4
     transitivePeerDependencies:
       - bufferutil
       - encoding
@@ -3593,12 +3593,12 @@ packages:
     dev: false
 
   file:projects/workspace.tgz:
-    resolution: {integrity: sha512-NasivJI+lyv6TWEPuMWD16oCsfeQ+8BG2XD+f6xnMlcsmiGWaLc86SM6bHmOh7fCCz0z/HyCzPvxUqctkEiZbQ==, tarball: file:projects/workspace.tgz}
+    resolution: {integrity: sha512-c4+2YKuQ+sD3Ve8GC1NCGzys+hzW+nqHF0YAWz4Ism91OwMVt1mH/03LHxN3NGPeSibSxgROf5soDgpv/iryiQ==, tarball: file:projects/workspace.tgz}
     name: '@rush-temp/workspace'
     version: 0.0.0
     dependencies:
       '@subsquid/util-internal': 2.0.0
-      '@types/node': 20.2.0
+      '@types/node': 20.0.0
       '@types/semver': 7.5.0
       commander: 10.0.1
       jsonc-parser: 3.2.0
