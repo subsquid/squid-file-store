@@ -1,6 +1,6 @@
 {
   "name": "@subsquid/file-store-parquet",
-  "version": "0.6.1",
+  "version": "1.0.0",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -40,10 +40,10 @@
     "zstd.ts": "^1.1.3"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^0.3.2"
+    "@subsquid/file-store": "^1.0.0"
   },
   "devDependencies": {
-    "@subsquid/file-store": "^0.3.2",
+    "@subsquid/file-store": "^1.0.0",
     "@types/int53": "^1.0.0",
     "@types/lz4": "^0.6.0",
     "@types/mocha": "^10.0.1",
