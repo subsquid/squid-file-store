@@ -14,11 +14,11 @@
     "@subsquid/archive-registry": "^2.1.7",
     "@subsquid/evm-processor": "^1.0.1",
     "@subsquid/evm-typegen": "3.0.0",
-    "@subsquid/file-store-csv": "~0.4.1",
+    "@subsquid/file-store-csv": "~1.0.0",
     "dotenv": "^16.0.3",
     "ethers": "^6.3.0",
-    "@subsquid/file-store": "^0.3.2",
-    "@subsquid/file-store-parquet": "^0.6.1"
+    "@subsquid/file-store": "^1.0.0",
+    "@subsquid/file-store-parquet": "^1.0.0"
   },
   "devDependencies": {
     "@subsquid/substrate-metadata-explorer": "^2.0.0",
