@@ -450,6 +450,11 @@
                "packageName": "test",
                "projectFolder": "test",
                "shouldPublish": false
+          },
+          {
+             "packageName": "workspace",
+             "projectFolder": "ops/workspace",
+             "shouldPublish": false
           }
      ]
 }

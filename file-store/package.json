@@ -31,10 +31,10 @@
   },
   "devDependencies": {
     "@types/mocha": "^10.0.1",
-    "@types/node": "16.11.56",
+    "@types/node": "20.0.0",
     "dotenv": "^16.0.3",
     "mocha": "^10.2.0",
-    "typescript": "4.8.2"
+    "typescript": "5.0.4"
   },
   "peerDependencies": {
     "@subsquid/util-internal-processor-tools": "^0.0.1"

@@ -48,10 +48,10 @@
     "@types/lz4": "^0.6.0",
     "@types/mocha": "^10.0.1",
     "@types/node-int64": "^0.4.29",
-    "@types/node": "16.11.56",
+    "@types/node": "20.0.0",
     "@types/thrift": "^0.10.12",
     "@types/varint": "^6.0.1",
     "mocha": "^10.2.0",
-    "typescript": "4.8.2"
+    "typescript": "5.0.4"
   }
 }

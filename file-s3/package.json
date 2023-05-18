@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
-    "@subsquid/util-internal": "^1.0.0",
+    "@subsquid/util-internal": "^2.0.0",
     "upath": "^2.0.1"
   },
   "peerDependencies": {
@@ -34,8 +34,8 @@
     "@aws-sdk/client-s3": "^3.245.0"
   },
   "devDependencies": {
-    "@types/node": "16.11.56",
-    "typescript": "4.8.2",
+    "@types/node": "20.0.0",
+    "typescript": "5.0.4",
     "@subsquid/file-store": "^0.3.2",
     "@aws-sdk/client-s3": "^3.245.0"
   }
