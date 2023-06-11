@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Thu, 18 May 2023 11:26:02 GMT and should not be manually modified.
+This log was last generated on Sun, 11 Jun 2023 17:49:17 GMT and should not be manually modified.
+
+## 1.1.0
+Sun, 11 Jun 2023 17:49:17 GMT
+
+### Minor changes
+
+- bump packages
 
 ## 1.0.0
 Thu, 18 May 2023 11:26:02 GMT
