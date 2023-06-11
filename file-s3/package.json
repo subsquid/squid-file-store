@@ -30,13 +30,13 @@
     "upath": "^2.0.1"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^1.0.0",
+    "@subsquid/file-store": "^1.1.0",
     "@aws-sdk/client-s3": "^3.245.0"
   },
   "devDependencies": {
     "@types/node": "20.0.0",
     "typescript": "5.0.4",
-    "@subsquid/file-store": "^1.0.0",
+    "@subsquid/file-store": "^1.1.0",
     "@aws-sdk/client-s3": "^3.245.0"
   }
 }
