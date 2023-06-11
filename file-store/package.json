@@ -37,6 +37,6 @@
     "typescript": "5.0.4"
   },
   "peerDependencies": {
-    "@subsquid/util-internal-processor-tools": "^0.0.1"
+    "@subsquid/util-internal-processor-tools": "^1.2.0"
   }
 }
