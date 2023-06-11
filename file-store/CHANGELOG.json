@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store",
   "entries": [
     {
+      "version": "1.1.0",
+      "tag": "@subsquid/file-store_v1.1.0",
+      "date": "Sun, 11 Jun 2023 17:46:58 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "bump packages"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.0.0",
       "tag": "@subsquid/file-store_v1.0.0",
       "date": "Thu, 18 May 2023 11:26:02 GMT",
