@@ -26,17 +26,17 @@
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
-    "@subsquid/util-internal": "^2.0.0",
+    "@subsquid/util-internal": "^2.4.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
     "@types/mocha": "^10.0.1",
-    "@types/node": "20.0.0",
-    "dotenv": "^16.0.3",
+    "@types/node": "20.4.4",
+    "dotenv": "^16.3.1",
     "mocha": "^10.2.0",
-    "typescript": "5.0.4"
+    "typescript": "5.1.6"
   },
   "peerDependencies": {
-    "@subsquid/util-internal-processor-tools": "^1.2.0"
+    "@subsquid/util-internal-processor-tools": "^2.0.0"
   }
 }

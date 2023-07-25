@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-json",
+      "comment": "arrowsquid release",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-json"
+}

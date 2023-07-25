@@ -11,19 +11,19 @@
     "processor:start": "node lib/processor.js"
   },
   "dependencies": {
-    "@subsquid/archive-registry": "^2.1.7",
-    "@subsquid/evm-processor": "^1.0.1",
-    "@subsquid/evm-typegen": "3.0.0",
+    "@subsquid/archive-registry": "^3.2.0",
+    "@subsquid/evm-processor": "^1.7.3",
+    "@subsquid/evm-typegen": "3.2.1",
     "@subsquid/file-store-csv": "~1.0.0",
-    "dotenv": "^16.0.3",
-    "ethers": "^6.3.0",
+    "dotenv": "^16.3.1",
+    "ethers": "^6.6.5",
     "@subsquid/file-store": "^1.1.0",
     "@subsquid/file-store-parquet": "^1.0.0"
   },
   "devDependencies": {
-    "@subsquid/substrate-metadata-explorer": "^2.0.0",
-    "@subsquid/substrate-typegen": "^3.0.0",
-    "@types/node": "20.0.0",
-    "typescript": "5.0.4"
+    "@subsquid/substrate-metadata-explorer": "^1.1.2",
+    "@subsquid/substrate-typegen": "^2.2.1",
+    "@types/node": "20.4.4",
+    "typescript": "5.1.6"
   }
 }
