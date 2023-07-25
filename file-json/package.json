@@ -1,6 +1,6 @@
 {
   "name": "@subsquid/file-store-json",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "",
   "publishConfig": {
     "access": "public"
@@ -30,7 +30,7 @@
     "@subsquid/util-internal-json": "^1.2.0"
   },
   "peerDependencies": {
-    "@subsquid/file-store": "^1.1.0"
+    "@subsquid/file-store": "^1.2.0"
   },
   "devDependencies": {
     "@types/node": "20.4.4",
@@ -38,7 +38,7 @@
     "expect": "^29.6.1",
     "mocha": "^10.2.0",
     "typescript": "5.1.6",
-    "@subsquid/file-store": "^1.1.0",
+    "@subsquid/file-store": "^1.2.0",
     "@types/strftime": "^0.9.4"
   }
 }
