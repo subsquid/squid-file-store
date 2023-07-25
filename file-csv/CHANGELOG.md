@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store-csv
 
-This log was last generated on Thu, 18 May 2023 11:26:02 GMT and should not be manually modified.
+This log was last generated on Tue, 25 Jul 2023 11:14:25 GMT and should not be manually modified.
+
+## 1.1.0
+Tue, 25 Jul 2023 11:14:25 GMT
+
+### Minor changes
+
+- arrowsquid release
 
 ## 1.0.0
 Thu, 18 May 2023 11:26:02 GMT
