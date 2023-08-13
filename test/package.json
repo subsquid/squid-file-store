@@ -12,11 +12,11 @@
   },
   "dependencies": {
     "@subsquid/archive-registry": "^3.2.0",
-    "@subsquid/evm-processor": "^1.7.3",
+    "@subsquid/evm-processor": "^1.8.0",
     "@subsquid/evm-typegen": "3.2.1",
     "@subsquid/file-store-csv": "~1.1.0",
     "dotenv": "^16.3.1",
-    "ethers": "^6.6.5",
+    "ethers": "^6.7.0",
     "@subsquid/file-store": "^1.2.0",
     "@subsquid/file-store-parquet": "^1.1.0"
   },

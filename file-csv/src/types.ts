@@ -15,6 +15,7 @@ export function String(): Type<string> {
         isNumeric: false,
     }
 }
+export type String = ReturnType<typeof String>
 
 /**
  * @returns the data type for numeric columns
@@ -28,6 +29,7 @@ export function Numeric(): Type<number | bigint> {
         isNumeric: true,
     }
 }
+export type Numeric = ReturnType<typeof Numeric>
 
 /**
  * @deprecated use Numeric
@@ -51,6 +53,7 @@ export function Boolean(): Type<boolean> {
         isNumeric: false,
     }
 }
+export type Boolean = ReturnType<typeof Boolean>
 
 /**
  * @param format - a strftime-compatible data format string. ISO format is used if undefined.
@@ -70,6 +73,7 @@ export function DateTime(format?: string): Type<Date> {
         isNumeric: false,
     }
 }
+export type DateTime = ReturnType<typeof DateTime>
 
 /**
  * @deprecated use DateTime
@@ -98,3 +102,4 @@ export function JSON<T extends Document = any>(): Type<T> {
         isNumeric: false,
     }
 }
+export type JSON = ReturnType<typeof JSON>

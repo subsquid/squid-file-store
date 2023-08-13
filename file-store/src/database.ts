@@ -1,8 +1,8 @@
-import assert from 'assert'
-import {Table, TableWriter} from './table'
-import {Dest, LocalDest} from './dest'
-import {FinalDatabase, FinalTxInfo, HashAndHeight} from '@subsquid/util-internal-processor-tools'
 import {assertNotNull} from '@subsquid/util-internal'
+import {FinalDatabase, FinalTxInfo, HashAndHeight} from '@subsquid/util-internal-processor-tools'
+import assert from 'assert'
+import {Dest} from './dest'
+import {Table, TableWriter} from './table'
 import {createFolderName, isFolderName} from './util'
 
 export interface DatabaseHooks<D extends Dest = Dest> {
@@ -197,11 +197,8 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         }
 
         if (
-            chunkSize > 0 && 
-            (
-                chunkSize >= this.chunkSize * 1024 * 1024 ||
-                (info.isOnTop && newState.height - prevState.height >= this.updateInterval)
-            )
+            chunkSize >= this.chunkSize * 1024 * 1024 ||
+            (info.isOnTop && chunkSize > 0 && newState.height - prevState.height >= this.updateInterval)
         ) {
             await this.flush(prevState, newState, this.chunk)
             await this.hooks.onStateUpdate(this.dest, newState)

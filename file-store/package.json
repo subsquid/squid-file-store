@@ -26,7 +26,7 @@
   },
   "homepage": "https://github.com/subsquid/squid-csv-store#readme",
   "dependencies": {
-    "@subsquid/util-internal": "^2.4.0",
+    "@subsquid/util-internal": "^2.5.0",
     "upath": "^2.0.1"
   },
   "devDependencies": {
