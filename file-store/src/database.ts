@@ -233,6 +233,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         let state = await this.hooks.onStateRead(this.dest)
         if (state == null) {
             state = {height: -1, hash: '0x'}
+            await this.hooks.onStateUpdate(this.dest, state)
         }
         assert(Number.isSafeInteger(state.height))
         return state
