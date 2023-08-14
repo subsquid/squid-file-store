@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-csv",
+      "comment": "bump packages",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-csv"
+}

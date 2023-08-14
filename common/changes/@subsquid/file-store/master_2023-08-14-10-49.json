@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "do not write empty chunks",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
