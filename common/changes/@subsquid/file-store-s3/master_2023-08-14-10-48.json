@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-s3",
+      "comment": "",
+      "type": "none"
+    }
+  ],
+  "packageName": "@subsquid/file-store-s3"
+}

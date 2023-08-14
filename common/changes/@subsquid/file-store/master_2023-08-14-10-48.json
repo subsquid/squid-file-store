@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "write state if it is not exist",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
