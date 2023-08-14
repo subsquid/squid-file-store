@@ -198,9 +198,11 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
         if (
             chunkSize >= this.chunkSize * 1024 * 1024 ||
-            (info.isOnTop && chunkSize > 0 && newState.height - prevState.height >= this.updateInterval)
+            (info.isOnTop && newState.height - prevState.height >= this.updateInterval)
         ) {
-            await this.flush(prevState, newState, this.chunk)
+            if (chunkSize > 0) {
+                await this.flush(prevState, newState, this.chunk)
+            }
             await this.hooks.onStateUpdate(this.dest, newState)
             this.state = newState
         }
