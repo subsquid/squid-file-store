@@ -1,6 +1,14 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Tue, 25 Jul 2023 11:14:25 GMT and should not be manually modified.
+This log was last generated on Mon, 14 Aug 2023 10:52:49 GMT and should not be manually modified.
+
+## 1.3.0
+Mon, 14 Aug 2023 10:52:49 GMT
+
+### Minor changes
+
+- write state if it is not exist
+- do not write empty chunks
 
 ## 1.2.0
 Tue, 25 Jul 2023 11:14:25 GMT
