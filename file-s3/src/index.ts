@@ -169,7 +169,7 @@ export class S3Dest implements Dest {
                 for (let CommonPrefix of ls.CommonPrefixes) {
                     if (!CommonPrefix.Prefix) continue
 
-                    let folderName = CommonPrefix.Prefix.slice(dir.length, CommonPrefix.Prefix.length - 1)
+                    let folderName = CommonPrefix.Prefix.slice(this.path(dir).length, CommonPrefix.Prefix.length - 1)
                     names.add(folderName)
                 }
             }
@@ -177,9 +177,9 @@ export class S3Dest implements Dest {
             // process file names
             if (ls.Contents) {
                 for (let Content of ls.Contents) {
-                    if (!Content.Key || Content.Key == dir) continue
+                    if (!Content.Key || Content.Key == this.path(dir)) continue
 
-                    let fileName = Content.Key.slice(dir.length)
+                    let fileName = Content.Key.slice(this.path(dir).length)
                     names.add(fileName)
                 }
             }
