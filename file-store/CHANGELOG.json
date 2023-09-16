@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store",
   "entries": [
     {
+      "version": "1.4.0",
+      "tag": "@subsquid/file-store_v1.4.0",
+      "date": "Sat, 16 Sep 2023 21:46:49 GMT",
+      "comments": {
+        "minor": [
+          {
+            "comment": "allow to force save data"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.3.0",
       "tag": "@subsquid/file-store_v1.3.0",
       "date": "Mon, 14 Aug 2023 10:52:49 GMT",
