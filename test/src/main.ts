@@ -18,6 +18,7 @@ const processor = new EvmBatchProcessor()
             hash: true,
         },
     })
+    .setFinalityConfirmation(10)
     .addLog({
         range: {from: 6_082_465},
         address: ['0xa0b86991c6218b36c1d19d4a2e9eb0ce3606eb48'],
@@ -31,7 +32,7 @@ let db = new Database({
         CsvTransafers,
     },
     dest: new LocalDest(`./data`),
-    chunkSizeMb: 1,
+    chunkSizeMb: 100000000,
     syncIntervalBlocks: 1_000,
     hooks: {
         async onStateRead(fs) {
@@ -47,6 +48,8 @@ let db = new Database({
         },
     },
 })
+
+let forced = false
 
 processor.run(db, async (ctx) => {
     for (let block of ctx.blocks) {
@@ -65,4 +68,5 @@ processor.run(db, async (ctx) => {
             }
         }
     }
+    ctx.store.forced = forced = !forced
 })

@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "allow to force save data",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}

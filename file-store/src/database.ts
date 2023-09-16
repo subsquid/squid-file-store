@@ -7,7 +7,7 @@ import {createFolderName, isFolderName} from './util'
 
 export interface DatabaseHooks<D extends Dest = Dest> {
     onStateRead(dest: D): Promise<HashAndHeight | undefined>
-    onStateUpdate(dest: D, info: HashAndHeight): Promise<void>
+    onStateUpdate(dest: D, state: HashAndHeight, prev?: HashAndHeight): Promise<void>
 }
 
 type Tables = Record<string, Table<any>>
@@ -103,7 +103,9 @@ type ToStoreWriter<W extends TableWriter<any>> = Pick<W, 'write' | 'writeMany'>
 
 export type Store<T extends Tables> = Readonly<{
     [k in keyof T]: ToStoreWriter<DataBuffer<T>[k]>
-}>
+}> & {
+    forced: boolean
+}
 
 interface StoreConstructor<T extends Tables> {
     new (chunk: () => DataBuffer<T>): Store<T>
@@ -126,6 +128,8 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
     private chunk?: DataBuffer<T>
     private state?: HashAndHeight
+
+    private forced = false
 
     /**
      * Database interface implementation for storing squid data
@@ -197,14 +201,16 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         }
 
         if (
+            this.forced ||
             chunkSize >= this.chunkSize * 1024 * 1024 ||
             (info.isOnTop && newState.height - prevState.height >= this.updateInterval)
         ) {
             if (chunkSize > 0) {
                 await this.flush(prevState, newState, this.chunk)
             }
-            await this.hooks.onStateUpdate(this.dest, newState)
+            await this.hooks.onStateUpdate(this.dest, newState, prevState)
             this.state = newState
+            this.forced = false
         }
     }
 
@@ -226,6 +232,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
         try {
             await cb(store)
+            this.forced = store.forced
         } finally {
             running = false
         }
