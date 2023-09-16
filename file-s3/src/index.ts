@@ -169,7 +169,7 @@ export class S3Dest implements Dest {
                 for (let CommonPrefix of ls.CommonPrefixes) {
                     if (!CommonPrefix.Prefix) continue
 
-                    let folderName = CommonPrefix.Prefix.slice(this.path(dir).length, CommonPrefix.Prefix.length - 1)
+                    let folderName = CommonPrefix.Prefix.slice(this.toDir(this.dir).length, CommonPrefix.Prefix.length - 1)
                     names.add(folderName)
                 }
             }
