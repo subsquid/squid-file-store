@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store-s3",
+      "comment": "handle prefixes correctly",
+      "type": "minor"
+    }
+  ],
+  "packageName": "@subsquid/file-store-s3"
+}
