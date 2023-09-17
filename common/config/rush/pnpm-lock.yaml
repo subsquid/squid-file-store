@@ -7,7 +7,8 @@ specifiers:
   '@rush-temp/file-store-json': file:./projects/file-store-json.tgz
   '@rush-temp/file-store-parquet': file:./projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:./projects/file-store-s3.tgz
-  '@rush-temp/test': file:./projects/test.tgz
+  '@rush-temp/test-dest': file:./projects/test-dest.tgz
+  '@rush-temp/test-store': file:./projects/test-store.tgz
   '@rush-temp/workspace': file:./projects/workspace.tgz
   '@subsquid/archive-registry': ^3.2.0
   '@subsquid/big-decimal': ^1.0.0
@@ -55,7 +56,8 @@ dependencies:
   '@rush-temp/file-store-json': file:projects/file-store-json.tgz
   '@rush-temp/file-store-parquet': file:projects/file-store-parquet.tgz
   '@rush-temp/file-store-s3': file:projects/file-store-s3.tgz
-  '@rush-temp/test': file:projects/test.tgz
+  '@rush-temp/test-dest': file:projects/test-dest.tgz
+  '@rush-temp/test-store': file:projects/test-store.tgz
   '@rush-temp/workspace': file:projects/workspace.tgz
   '@subsquid/archive-registry': 3.2.0
   '@subsquid/big-decimal': 1.0.0
@@ -1330,14 +1332,6 @@ packages:
       node-fetch: 3.3.1
     dev: false
 
-  /@subsquid/logger/0.3.0:
-    resolution: {integrity: sha512-uflVPTey/6p/KCIpdzP2/Q1RRd3Ec4iLPjqdSFSmFPtai3IDEOQv5dXzUeiDRwa/63Q9tmzsLeKgdW8TDw5c7Q==}
-    dependencies:
-      '@subsquid/util-internal-hex': 0.0.1
-      '@subsquid/util-internal-json': 0.2.1
-      supports-color: 8.1.1
-    dev: false
-
   /@subsquid/logger/0.3.1:
     resolution: {integrity: sha512-Hi0aWeVgK0OZ3L2KxRejLCHIBIs6k3AR8FEb9RCKgQvqHK8DDNuMFANo4obHqXDZpDF+Ef+T050Oz5n4O1u3lA==}
     dependencies:
@@ -1352,15 +1346,6 @@ packages:
       '@subsquid/util-internal-hex': 1.2.0
       '@subsquid/util-internal-json': 1.2.0
       supports-color: 8.1.1
-    dev: false
-
-  /@subsquid/rpc-client/1.0.2:
-    resolution: {integrity: sha512-/z4cG3+yvRHkE0DZUyhTcyTvFPMo+DddEmh1eMXu2iFKHzE3XZqO0em04a3BL9HxF0FNXyi7XslGWWLsiKnm3Q==}
-    dependencies:
-      '@subsquid/util-timeout': 0.0.0
-      websocket: 1.0.34
-    transitivePeerDependencies:
-      - supports-color
     dev: false
 
   /@subsquid/rpc-client/2.0.0:
@@ -1385,31 +1370,11 @@ packages:
       - supports-color
     dev: false
 
-  /@subsquid/scale-codec/1.1.0:
-    resolution: {integrity: sha512-QaNh4PZoglmfO9L03q7XJ8zcDcvXwVTzXzlWPGvnqAEagGsGBJqAopzyqMAAIytd56gfLKSQkvtKJkWEzNtkuw==}
-    dependencies:
-      '@subsquid/util-internal-hex': 0.0.1
-      '@subsquid/util-internal-json': 0.2.1
-    dev: false
-
   /@subsquid/scale-codec/1.1.1:
     resolution: {integrity: sha512-gDI0TnF0LXG5+nwXW6TUkTBVfbTcPqtPeAqAwy6Z9EtetHK8IoogkewIILisXcbVun2M66cZR+i/VABbaVy2Sw==}
     dependencies:
       '@subsquid/util-internal-hex': 0.0.2
       '@subsquid/util-internal-json': 0.2.1
-    dev: false
-
-  /@subsquid/ss58-codec/0.1.1:
-    resolution: {integrity: sha512-QWlapl7Yo+q1Mm2ovPZrOLBZCeKfGyDHb2vNTtb4iDt3UTi9CSA0OPokVCzqalFAjSL8GIO9nLVFGZT4uvCTAw==}
-    dependencies:
-      base-x: 3.0.9
-      blake2b: 2.1.4
-    dev: false
-
-  /@subsquid/ss58/0.1.3:
-    resolution: {integrity: sha512-IvBTj/toP/yrcQmaYOI6GZXjmmGo7V4autsxiWHpXbUsalMEh7QFu3orv3dc/N6ctQGeozbKlU+rgW0pKEjZ7Q==}
-    dependencies:
-      '@subsquid/ss58-codec': 0.1.1
     dev: false
 
   /@subsquid/substrate-metadata-explorer/1.1.2:
@@ -1428,49 +1393,12 @@ packages:
       - supports-color
     dev: false
 
-  /@subsquid/substrate-metadata/2.2.1:
-    resolution: {integrity: sha512-10MyVp/X/E+0sqSQyhM4uyp0N9Vh5LZoJuy/L0faXVyH/5oAM2mARW9wJs4+4Ee1utFPQOfTydvFnJWYkzjfbg==}
-    dependencies:
-      '@subsquid/scale-codec': 1.1.0
-      '@subsquid/util-internal': 1.0.0
-      '@subsquid/util-naming': 0.0.1
-    dev: false
-
   /@subsquid/substrate-metadata/2.3.0:
     resolution: {integrity: sha512-jHmeShjbQdvAYhRQ/62yOaPlGr5veKdF9idazCEUYMHQsy0U/TNPtsGyAwmLU/9qvwqpCe775XBEetlb9pa9FA==}
     dependencies:
       '@subsquid/scale-codec': 1.1.1
       '@subsquid/util-internal': 1.1.0
       '@subsquid/util-naming': 0.0.2
-    dev: false
-
-  /@subsquid/substrate-processor/2.2.0:
-    resolution: {integrity: sha512-7SW2w3vXfoT1zp0oerwm5eDe5SD6kVq5wbUx3SB3O1oqcJtgTw+hJykX1HPzIjXmQQmN8Wt+UdtxzD9gJ1YvHA==}
-    peerDependencies:
-      '@subsquid/typeorm-store': ^0.2.0
-    peerDependenciesMeta:
-      '@subsquid/typeorm-store':
-        optional: true
-    dependencies:
-      '@subsquid/logger': 0.3.0
-      '@subsquid/rpc-client': 1.0.2
-      '@subsquid/scale-codec': 1.1.0
-      '@subsquid/substrate-metadata': 2.2.1
-      '@subsquid/typeorm-config': 2.0.0
-      '@subsquid/util-internal': 1.0.0
-      '@subsquid/util-internal-binary-heap': 0.0.0
-      '@subsquid/util-internal-code-printer': 0.1.0
-      '@subsquid/util-internal-counters': 0.0.1
-      '@subsquid/util-internal-gql-request': 0.1.1
-      '@subsquid/util-internal-hex': 0.0.1
-      '@subsquid/util-internal-prometheus-server': 0.0.2_prom-client@14.1.1
-      '@subsquid/util-xxhash': 0.1.1
-      blake2b: 2.1.4
-      prom-client: 14.1.1
-    transitivePeerDependencies:
-      - encoding
-      - supports-color
-      - typeorm
     dev: false
 
   /@subsquid/substrate-typegen/2.2.1:
@@ -1491,27 +1419,8 @@ packages:
       - supports-color
     dev: false
 
-  /@subsquid/typeorm-config/2.0.0:
-    resolution: {integrity: sha512-TJ/ksxTLTEHqY6NiYM5S9JXFdUEROTjTY+PKQv3ixoQuuidNzIGRwwGvzMnSKNl9s1V5ADcwWIEbmcPBZjHURg==}
-    peerDependencies:
-      typeorm: ^0.3.6
-    peerDependenciesMeta:
-      typeorm:
-        optional: true
-    dependencies:
-      '@subsquid/util-naming': 0.0.1
-    dev: false
-
-  /@subsquid/util-internal-binary-heap/0.0.0:
-    resolution: {integrity: sha512-eVtdf442+L10G4lgSHCcxgNzYEcrdZ3WKy7Y7CGkhKLJhKuOlgDtEwklZmh1/lM+37AQn9XnX/VpxTaJ2vA2sg==}
-    dev: false
-
   /@subsquid/util-internal-binary-heap/1.0.0:
     resolution: {integrity: sha512-88auuc8yNFmCZugmJSTYzS7WM/nN2obKGQCgrl8Jty5rJUFbqazGSi8icqftKhv6MPtUMJ3PSTRLiTFXAUGnAA==}
-    dev: false
-
-  /@subsquid/util-internal-code-printer/0.1.0:
-    resolution: {integrity: sha512-qVlW3cvEo64gbjxLCBRu95eDORKDZmSxGpILbtNWq34Gg8fChSsnvdyL2rN9vIU/sMZtcPhL52RdDJI0lVWv9Q==}
     dev: false
 
   /@subsquid/util-internal-code-printer/0.1.1:
@@ -1545,28 +1454,12 @@ packages:
       jsonc-parser: 3.2.0
     dev: false
 
-  /@subsquid/util-internal-counters/0.0.1:
-    resolution: {integrity: sha512-cZOrsBWGDSV+0JuWBesGLxIXaXMG2aclNVsOnfZ3jV1ACXepLF8fM/U1ilaBBXIYxPjEeGoWNCcj0LRSQt6yFQ==}
-    dev: false
-
   /@subsquid/util-internal-counters/0.0.2:
     resolution: {integrity: sha512-x/O+56bR/X41ZEKjxZy0IqiapKCN9gGJB7G8md+idvGeC15kw8r5pg2Ck9tulB07VQEOqWLNNuvobrfvH0hNkg==}
     dev: false
 
   /@subsquid/util-internal-counters/1.3.0:
     resolution: {integrity: sha512-/Eeu9d3gW50nFSp49PDYrioIJdczR+wPlXBCe8EIMTUFEySIhhxFPB7y4JqL2pnUrK2UqAgyKoTx0diqP6fdxA==}
-    dev: false
-
-  /@subsquid/util-internal-gql-request/0.1.1:
-    resolution: {integrity: sha512-KBCtokrwi7jjEqucUhHm/x4hmZvmJjxkEoYEhPCLwPirzOCtcNWjmsgaE41hGfbd8VnTeo2cji9cjGjSvwGvkw==}
-    dependencies:
-      node-fetch: 2.6.8
-    transitivePeerDependencies:
-      - encoding
-    dev: false
-
-  /@subsquid/util-internal-hex/0.0.1:
-    resolution: {integrity: sha512-sNok0jQV6+OpAl3QKaH2VFh8PKZyZ6XHZhZ71LeirOhgfVprKFmEvFG9yQIp7qKe7JGXmolX54zu150OMP9f5w==}
     dev: false
 
   /@subsquid/util-internal-hex/0.0.2:
@@ -1583,12 +1476,6 @@ packages:
       '@subsquid/logger': 0.3.1
       '@subsquid/util-internal': 1.1.0
       node-fetch: 3.3.1
-    dev: false
-
-  /@subsquid/util-internal-http-server/0.1.0:
-    resolution: {integrity: sha512-7+lQlGMpKg5Qeavkas2/uBgF4cQQKG5gblhsuPwt/cyDGfIQcwPX9KxJUVQDBE8SL2P62qg8TkzeEYSG89iykg==}
-    dependencies:
-      stoppable: 1.1.0
     dev: false
 
   /@subsquid/util-internal-http-server/1.2.0:
@@ -1618,15 +1505,6 @@ packages:
       '@subsquid/util-internal-prometheus-server': 1.2.0_prom-client@14.2.0
       '@subsquid/util-internal-range': 0.0.0
       prom-client: 14.2.0
-    dev: false
-
-  /@subsquid/util-internal-prometheus-server/0.0.2_prom-client@14.1.1:
-    resolution: {integrity: sha512-ODLBH03RkDm34AHkInQ6M5gcm5LCtI9wBAoOlKtqCcgTSIflELJKfmvqGCd3hhPyw0t6PJ2LQayrX3rth/nOqw==}
-    peerDependencies:
-      prom-client: ^14.0.1
-    dependencies:
-      '@subsquid/util-internal-http-server': 0.1.0
-      prom-client: 14.1.1
     dev: false
 
   /@subsquid/util-internal-prometheus-server/1.2.0_prom-client@14.2.0:
@@ -1662,23 +1540,12 @@ packages:
       - supports-color
     dev: false
 
-  /@subsquid/util-internal/1.0.0:
-    resolution: {integrity: sha512-uiGA6LwrgqZzg/1M8CL4CQdZ5k8yZmR1fEor6wGOf366RyL5tyXCETrhI5xsX/AXCO+nPAtahemOqqJKTAAbkQ==}
-    dev: false
-
   /@subsquid/util-internal/1.1.0:
     resolution: {integrity: sha512-O6m666RDcWEw4vb3bmeNZKlAa1rGOHQvS0nhZFTBXnxZpqK/pU5N0jrQ7X/3is0pY2RKxFoxTurZjhv4QdxtqA==}
     dev: false
 
   /@subsquid/util-internal/2.5.0:
     resolution: {integrity: sha512-uewLh2aZheCmMGXqJQwDSlQ5ZTCpkzEG3LAsSqzSwrE7fpTz+XzXTyv1E7wmDRy0CuAYuuILhS6sG+PVgEAK3Q==}
-    dev: false
-
-  /@subsquid/util-naming/0.0.1:
-    resolution: {integrity: sha512-qxvZX/JJ8zqBxsGrVATu/M3Q3vGWXPO5L0AGIGtNUaBZm8T3WlzKUn6+MDuxU18xaLS50xEpYa91tUgIqga9WA==}
-    dependencies:
-      camelcase: 6.3.0
-      inflected: 2.1.0
     dev: false
 
   /@subsquid/util-naming/0.0.2:
@@ -1695,19 +1562,8 @@ packages:
       inflected: 2.1.0
     dev: false
 
-  /@subsquid/util-timeout/0.0.0:
-    resolution: {integrity: sha512-xvuGKuIc9Dm0rEu7fVAIaIylASGn1+edwYdG5IpXB9IVz5RGG1oeGJybY98hlcwVKAZfzFSMKnaEDqI9jKYwmg==}
-    dev: false
-
   /@subsquid/util-timeout/1.0.0:
     resolution: {integrity: sha512-6LiXYuRKIFcuUOsHPL3qN+cYDZJiCPGQFDdBECrZvXM/FtjF6dloX9JS4LJ7lMHsnKsu7v78+ioiUYpk1Jlyug==}
-    dev: false
-
-  /@subsquid/util-xxhash/0.1.1:
-    resolution: {integrity: sha512-O3VaBHYuCe8OuCJocL0FWB9OLu3eh2ZcLvhd3ymad74YW/I8mN/XBSfbjqz0D0xU3SVNyUdtdjt8MGS1Js2K2A==}
-    dependencies:
-      xxhash-wasm: 1.0.2
-      xxhashjs: 0.2.2
     dev: false
 
   /@szmarczak/http-timer/1.1.2:
@@ -1924,18 +1780,8 @@ packages:
     resolution: {integrity: sha512-csOlWGAcRFJaI6m+F2WKdnMKr4HhdhFVBk0H/QbJFMCr+uO2kwohwXQPxw/9OCxp05r5ghVBFSyioixx3gfkNQ==}
     dev: false
 
-  /b4a/1.6.1:
-    resolution: {integrity: sha512-AsKjNhz72yxteo/0EtQEiwkMUgk/tGmycXlbG4g3Ard2/ULtNLUykGOkeK0egmN27h0xMAhb76jYccW+XTBExA==}
-    dev: false
-
   /balanced-match/1.0.2:
     resolution: {integrity: sha512-3oSeUO0TMV67hN1AmbXsK4yaqU7tjiHlbxRDZOpH0KW9+CeX4bRAaX0Anxt0tx2MrpRpWwQaPwIlISEJhYU5Pw==}
-    dev: false
-
-  /base-x/3.0.9:
-    resolution: {integrity: sha512-H7JU6iBHTal1gp56aKoaa//YUxEaAOUiydvrV/pILqIHXTtqxSkATOnDA2u+jZ/61sD+L/412+7kzXRtWukhpQ==}
-    dependencies:
-      safe-buffer: 5.2.1
     dev: false
 
   /base64-js/1.5.1:
@@ -1957,20 +1803,6 @@ packages:
 
   /bintrees/1.0.2:
     resolution: {integrity: sha512-VOMgTMwjAaUG580SXn3LacVgjurrbMme7ZZNYGSSV7mmtY6QQRh0Eg3pwIcntQ77DErK1L0NxkbetjcoXzVwKw==}
-    dev: false
-
-  /blake2b-wasm/2.4.0:
-    resolution: {integrity: sha512-S1kwmW2ZhZFFFOghcx73+ZajEfKBqhP82JMssxtLVMxlaPea1p9uoLiUZ5WYyHn0KddwbLc+0vh4wR0KBNoT5w==}
-    dependencies:
-      b4a: 1.6.1
-      nanoassert: 2.0.0
-    dev: false
-
-  /blake2b/2.1.4:
-    resolution: {integrity: sha512-AyBuuJNI64gIvwx13qiICz6H6hpmjvYS5DGkG6jbXMOT8Z3WUJ3V1X0FlhIoT1b/5JtHE3ki+xjtMvu1nn+t9A==}
-    dependencies:
-      blake2b-wasm: 2.4.0
-      nanoassert: 2.0.0
     dev: false
 
   /bowser/2.11.0:
@@ -2827,10 +2659,6 @@ packages:
     resolution: {integrity: sha512-2ZTgtl0nJsO0KQCjEpxcIr5D+Yv90plTitZt9JBfQvVJDS5seMl3FOvsh3+9CoYWXf/1l5OaZzzF6nDm4cagaQ==}
     dev: false
 
-  /nanoassert/2.0.0:
-    resolution: {integrity: sha512-7vO7n28+aYO4J+8w96AzhmU8G+Y/xpPDJz/se19ICsqj/momRbb9mh9ZUtkoJ5X3nTnPdhEJyc0qnM6yAsHBaA==}
-    dev: false
-
   /nanoid/3.3.3:
     resolution: {integrity: sha512-p1sjXuopFs0xg+fPASzQ28agW1oHD7xDsd9Xkf3T15H3c/cifrFHVwrh74PdoklAPi+i7MdRsE47vm2r6JoB+w==}
     engines: {node: ^10 || ^12 || ^13.7 || ^14 || >=15.0.1}
@@ -2984,13 +2812,6 @@ packages:
       duplex-maker: 1.0.0
       quotemeta: 0.0.0
       tempfile: 1.1.1
-    dev: false
-
-  /prom-client/14.1.1:
-    resolution: {integrity: sha512-hFU32q7UZQ59bVJQGUtm3I2PrJ3gWvoCkilX9sF165ks1qflhugVCeK+S1JjJYHvyt3o5kj68+q3bchormjnzw==}
-    engines: {node: '>=10'}
-    dependencies:
-      tdigest: 0.1.2
     dev: false
 
   /prom-client/14.2.0:
@@ -3510,10 +3331,6 @@ packages:
     engines: {node: '>=0.4'}
     dev: false
 
-  /xxhash-wasm/1.0.2:
-    resolution: {integrity: sha512-ibF0Or+FivM9lNrg+HGJfVX8WJqgo+kCLDc4vx6xMeTce7Aj+DLttKbxxRR/gNLSAelRc1omAPlJ77N/Jem07A==}
-    dev: false
-
   /xxhashjs/0.2.2:
     resolution: {integrity: sha512-AkTuIuVTET12tpsVIQo+ZU6f/qDmKuRUcjaqR+OIvm+aCBsZ95i7UVY5WJ9TMsSaZ0DA2WxoZ4acu0sPH+OKAw==}
     dependencies:
@@ -3572,7 +3389,7 @@ packages:
     dev: false
 
   file:projects/file-store-csv.tgz:
-    resolution: {integrity: sha512-dKrPMWSCQkGVKlYAmyo6Gp0L+U1ECtuN8QBH72HukNDUBbWR/HIg743t5lWwSTKN0yXLdZTlkCLCo9Hqb6aMQw==, tarball: file:projects/file-store-csv.tgz}
+    resolution: {integrity: sha512-zzVZQJYGayvSoLTkiQD9ANBxdsgg7pYWED6a8nueUWe78Lj/w14M+IoNtrzjt417oWHbMjqPXzPKeAVeTqtLRQ==, tarball: file:projects/file-store-csv.tgz}
     name: '@rush-temp/file-store-csv'
     version: 0.0.0
     dependencies:
@@ -3588,7 +3405,7 @@ packages:
     dev: false
 
   file:projects/file-store-json.tgz:
-    resolution: {integrity: sha512-0Rtc5/g7zvxQHBj5eeF52EjjIj1Mf4k5RhZrZ00yJoMlSJHPnm8WFdmyTVBAOuefbcwkCWT0na2iFvycUFfsCQ==, tarball: file:projects/file-store-json.tgz}
+    resolution: {integrity: sha512-VoA+aCEkWLPZwU/KNFiuU919ugAxDPici1x6dEYXx5Ye8/guo8Qrg16BMZQ+ox4s7KRxRLyU0gpnb/Z7+ny7RA==, tarball: file:projects/file-store-json.tgz}
     name: '@rush-temp/file-store-json'
     version: 0.0.0
     dependencies:
@@ -3603,7 +3420,7 @@ packages:
     dev: false
 
   file:projects/file-store-parquet.tgz:
-    resolution: {integrity: sha512-8n3JM3NpgrT7FjFcK7ZecywUxoaHsFW20EdOq0cxJf2BaZfzbglDSnGcl3hSbZOitEO973zsB7N1o4fAehw2OQ==, tarball: file:projects/file-store-parquet.tgz}
+    resolution: {integrity: sha512-AlKkqAtof1nbvKW0nBjpnhExTx5QUF36C6MzFRyd53aPaC1c2g3hQb+w+OXWQoUUmp/7fMSx6FoXV15PtTBE6g==, tarball: file:projects/file-store-parquet.tgz}
     name: '@rush-temp/file-store-parquet'
     version: 0.0.0
     dependencies:
@@ -3638,7 +3455,7 @@ packages:
     dev: false
 
   file:projects/file-store-s3.tgz:
-    resolution: {integrity: sha512-ioL0B6x/QYTyKxEqbRvEcTHnLOe2PP2aWIQ06/y4aegW99N+/oArAkQ2++jZ65m9xYbHh9y+HYi+qaTNFgxdeg==, tarball: file:projects/file-store-s3.tgz}
+    resolution: {integrity: sha512-JUyNSzRK+jeiAOYilN5LP6LTD+sltLCraOKv0jefAUT/897v2xCODeTx74c5o2KPDVw6/iqK2pJ6l27aeyEQOg==, tarball: file:projects/file-store-s3.tgz}
     name: '@rush-temp/file-store-s3'
     version: 0.0.0
     dependencies:
@@ -3653,7 +3470,7 @@ packages:
     dev: false
 
   file:projects/file-store.tgz:
-    resolution: {integrity: sha512-9lomQouQsf2FTKnhK3uauWG6SLtXEuhxBp3iTub5NhWS7c0J+1JEolCKc13gdxY9Y0Wx07sWZ3z56+opMo9+cA==, tarball: file:projects/file-store.tgz}
+    resolution: {integrity: sha512-18rwTm/Yf8P+02MEovIwQLb1slrpStpEyh/0Xs0SavZa22FblH1ymTBMQATdk5xC9SDraXbsYm88goaq2V6eDw==, tarball: file:projects/file-store.tgz}
     name: '@rush-temp/file-store'
     version: 0.0.0
     dependencies:
@@ -3667,17 +3484,25 @@ packages:
       upath: 2.0.1
     dev: false
 
-  file:projects/test.tgz:
-    resolution: {integrity: sha512-FiLgunpSZoaTLhdUHbLJdXgA14jfQ9X6jLTBFmZKDgjNxo1CaiWxICpqMkLL+2YAByNyJRo6iG0Xeq/AAw1PRA==, tarball: file:projects/test.tgz}
-    name: '@rush-temp/test'
+  file:projects/test-dest.tgz:
+    resolution: {integrity: sha512-hGz/hUEGVnfxNcl49tA+AhenVuXVTWsxLk5u1W1AxmBE/AkJBtHQ/Yfmvv80TTVli5rAU5IJXBUZCdOg4R/ZDw==, tarball: file:projects/test-dest.tgz}
+    name: '@rush-temp/test-dest'
+    version: 0.0.0
+    dependencies:
+      '@types/node': 20.4.4
+      dotenv: 16.3.1
+      typescript: 5.1.6
+    dev: false
+
+  file:projects/test-store.tgz:
+    resolution: {integrity: sha512-AyFOgax4YZxKO3pnME04+fjJyryF3UNRITaPyTFdDRAlwQ1y7g+NVpLDEv98Z4+0tBQa32Z+w3VkOkIW3fMUcw==, tarball: file:projects/test-store.tgz}
+    name: '@rush-temp/test-store'
     version: 0.0.0
     dependencies:
       '@subsquid/archive-registry': 3.2.0
       '@subsquid/evm-processor': 1.8.0
       '@subsquid/evm-typegen': 3.2.1_ethers@6.7.0
-      '@subsquid/ss58': 0.1.3
       '@subsquid/substrate-metadata-explorer': 1.1.2
-      '@subsquid/substrate-processor': 2.2.0
       '@subsquid/substrate-typegen': 2.2.1
       '@types/node': 20.4.4
       dotenv: 16.3.1

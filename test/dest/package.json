@@ -1,0 +1,21 @@
+{
+  "name": "test-dest",
+  "version": "0.0.0",
+  "private": true,
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "build": "rm -rf lib && tsc",
+    "update": "npx npm-check-updates --filter /subsquid/ --upgrade",
+    "processor:start": "node lib/processor.js"
+  },
+  "dependencies": {
+    "dotenv": "~16.3.1",
+    "@subsquid/file-store-s3": "^1.2.0"
+  },
+  "devDependencies": {
+    "@types/node": "20.4.4",
+    "typescript": "5.1.6"
+  }
+}

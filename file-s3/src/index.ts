@@ -66,7 +66,7 @@ export class S3Dest implements Dest {
     }
 
     async exists(name: string) {
-        if (this.isDir(name)) {
+        if (isDir(name)) {
             return this.existsDir(name)
         } else {
             let isFileExist = await this.existsFile(name)
@@ -97,11 +97,13 @@ export class S3Dest implements Dest {
     }
 
     private async existsDir(dir: string) {
-        dir = this.toDir(dir)
+        dir = toDir(dir)
+
+        let prefix = toPrefix(this.path(dir))
         let ls = await this.client.send(
             new ListObjectsV2Command({
                 Bucket: this.bucket,
-                Prefix: this.path(dir),
+                Prefix: prefix,
                 MaxKeys: 1,
             })
         )
@@ -135,7 +137,7 @@ export class S3Dest implements Dest {
     }
 
     async mkdir(dir: string): Promise<void> {
-        dir = this.toDir(dir)
+        dir = toDir(dir)
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
@@ -145,18 +147,19 @@ export class S3Dest implements Dest {
     }
 
     async readdir(dir: string): Promise<string[]> {
-        dir = this.toDir(dir)
+        dir = toDir(dir)
 
         if (!(await this.exists(dir))) return []
 
         let names = new Set<string>()
 
+        let prefix = toPrefix(this.path(dir))
         let ContinuationToken: string | undefined
         while (true) {
             let ls = await this.client.send(
                 new ListObjectsV2Command({
                     Bucket: this.bucket,
-                    Prefix: this.path(dir),
+                    Prefix: prefix,
                     Delimiter: '/',
                     ContinuationToken: ContinuationToken ? ContinuationToken : undefined,
                 })
@@ -169,7 +172,7 @@ export class S3Dest implements Dest {
                 for (let CommonPrefix of ls.CommonPrefixes) {
                     if (!CommonPrefix.Prefix) continue
 
-                    let folderName = CommonPrefix.Prefix.slice(dir.length, CommonPrefix.Prefix.length - 1)
+                    let folderName = CommonPrefix.Prefix.slice(prefix.length, CommonPrefix.Prefix.length - 1)
                     names.add(folderName)
                 }
             }
@@ -177,9 +180,9 @@ export class S3Dest implements Dest {
             // process file names
             if (ls.Contents) {
                 for (let Content of ls.Contents) {
-                    if (!Content.Key || Content.Key == dir) continue
+                    if (!Content.Key || Content.Key == prefix) continue
 
-                    let fileName = Content.Key.slice(dir.length)
+                    let fileName = Content.Key.slice(prefix.length)
                     names.add(fileName)
                 }
             }
@@ -195,7 +198,7 @@ export class S3Dest implements Dest {
     }
 
     async rm(name: string): Promise<void> {
-        if (this.isDir(name)) {
+        if (isDir(name)) {
             return this.rmDir(name)
         }
 
@@ -215,7 +218,7 @@ export class S3Dest implements Dest {
     }
 
     private async rmDir(dir: string): Promise<void> {
-        dir = this.toDir(dir)
+        dir = toDir(dir)
 
         let ContinuationToken: string | undefined
         while (true) {
@@ -255,12 +258,16 @@ export class S3Dest implements Dest {
     path(...paths: string[]) {
         return path.join(this.dir, ...paths)
     }
+}
 
-    private toDir(str: string) {
-        return this.isDir(str) ? str : str + '/'
-    }
+function toDir(str: string) {
+    return isDir(str) ? str : str + '/'
+}
 
-    private isDir(str: string) {
-        return str.endsWith('/')
-    }
+function isDir(str: string) {
+    return str.endsWith('/')
+}
+
+function toPrefix(path: string) {
+    return path.startsWith('/') ? path.slice(1) : path
 }
