@@ -1,6 +1,17 @@
 # Change Log - @subsquid/file-store-s3
 
-This log was last generated on Mon, 14 Aug 2023 10:52:49 GMT and should not be manually modified.
+This log was last generated on Sun, 17 Sep 2023 11:53:20 GMT and should not be manually modified.
+
+## 2.0.0
+Sun, 17 Sep 2023 11:53:20 GMT
+
+### Breaking changes
+
+- create S3Dest from s3 format url instead of separate path and bucket
+
+### Minor changes
+
+- handle prefixes correctly
 
 ## 1.2.0
 Mon, 14 Aug 2023 10:52:49 GMT
