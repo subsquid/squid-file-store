@@ -11,7 +11,7 @@
     "processor:start": "node lib/processor.js"
   },
   "dependencies": {
-    "dotenv": "~16.3.1",
+    "dotenv": "^16.3.1",
     "@subsquid/file-store-s3": "^1.2.0"
   },
   "devDependencies": {
