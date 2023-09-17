@@ -1,5 +1,5 @@
 import assert from 'assert'
-import path from 'upath'
+import upath from 'upath'
 import {
     DeleteObjectsCommand,
     GetObjectCommand,
@@ -21,6 +21,8 @@ import {assertNotNull} from '@subsquid/util-internal'
  */
 export class S3Dest implements Dest {
     private client: S3Client
+    private dir: string
+    private bucket: string
 
     /**
      * Dest implementation for storing squid data on
@@ -28,8 +30,7 @@ export class S3Dest implements Dest {
      *
      * @see https://docs.subsquid.io/basics/store/file-store/s3-dest/
      *
-     * @param dir - the name of the top level dataset folder
-     * @param bucket - the name of the S3 bucket
+     * @param url - s3://bucket/path
      * @param optionsOrClient - an S3Client instance or options for its construction
      *
      * The default is to use the environment variables to define the client:
@@ -46,9 +47,13 @@ export class S3Dest implements Dest {
      * For details on S3Client
      * @see https://docs.aws.amazon.com/AWSJavaScriptSDK/v3/latest/clients/client-s3/interfaces/s3clientconfig.html
      */
-    constructor(dir: string, bucket: string, options?: S3ClientConfig)
-    constructor(dir: string, bucket: string, client: S3Client)
-    constructor(private dir: string, private bucket: string, optionsOrClient?: S3ClientConfig | S3Client) {
+    constructor(url: string, options?: S3ClientConfig)
+    constructor(url: string, client: S3Client)
+    constructor(url: string, optionsOrClient?: S3ClientConfig | S3Client) {
+        let {dir, bucket} = parseS3Url(url)
+        this.dir = dir
+        this.bucket = bucket
+
         if (optionsOrClient instanceof S3Client) {
             this.client = optionsOrClient
         } else {
@@ -83,7 +88,7 @@ export class S3Dest implements Dest {
             await this.client.send(
                 new HeadObjectCommand({
                     Bucket: this.bucket,
-                    Key: this.path(name),
+                    Key: this.key(name),
                 })
             )
         } catch (e) {
@@ -99,7 +104,7 @@ export class S3Dest implements Dest {
     private async existsDir(dir: string) {
         dir = toDir(dir)
 
-        let prefix = toPrefix(this.path(dir))
+        let prefix = this.key(dir)
         let ls = await this.client.send(
             new ListObjectsV2Command({
                 Bucket: this.bucket,
@@ -119,7 +124,7 @@ export class S3Dest implements Dest {
         let res = await this.client.send(
             new GetObjectCommand({
                 Bucket: this.bucket,
-                Key: this.path(name),
+                Key: this.key(name),
             })
         )
         assert(res.Body != null)
@@ -130,7 +135,7 @@ export class S3Dest implements Dest {
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: this.path(name),
+                Key: this.key(name),
                 Body: ArrayBuffer.isView(data) ? data : Buffer.from(data, 'utf-8'),
             })
         )
@@ -141,7 +146,7 @@ export class S3Dest implements Dest {
         await this.client.send(
             new PutObjectCommand({
                 Bucket: this.bucket,
-                Key: this.path(dir),
+                Key: this.key(dir),
             })
         )
     }
@@ -149,11 +154,13 @@ export class S3Dest implements Dest {
     async readdir(dir: string): Promise<string[]> {
         dir = toDir(dir)
 
-        if (!(await this.exists(dir))) return []
+        if (!(await this.exists(dir))) {
+            throw new Error(`No such directory '${dir}'`)
+        }
 
         let names = new Set<string>()
 
-        let prefix = toPrefix(this.path(dir))
+        let prefix = this.key(dir)
         let ContinuationToken: string | undefined
         while (true) {
             let ls = await this.client.send(
@@ -207,7 +214,7 @@ export class S3Dest implements Dest {
                 new DeleteObjectsCommand({
                     Bucket: this.bucket,
                     Delete: {
-                        Objects: [{Key: this.path(name)}],
+                        Objects: [{Key: this.key(name)}],
                         Quiet: true,
                     },
                 })
@@ -220,12 +227,13 @@ export class S3Dest implements Dest {
     private async rmDir(dir: string): Promise<void> {
         dir = toDir(dir)
 
+        let prefix = this.key(dir)
         let ContinuationToken: string | undefined
         while (true) {
             let ls = await this.client.send(
                 new ListObjectsV2Command({
                     Bucket: this.bucket,
-                    Prefix: this.path(dir),
+                    Prefix: prefix,
                     ContinuationToken: ContinuationToken ? ContinuationToken : undefined,
                 })
             )
@@ -251,12 +259,17 @@ export class S3Dest implements Dest {
     }
 
     async transact(dir: string, cb: (dest: S3Dest) => Promise<void>): Promise<void> {
-        let txDest = new S3Dest(this.path(dir), this.bucket, this.client)
+        let txDest = new S3Dest(createS3Url(this.bucket, this.path(dir)), this.client)
         await cb(txDest)
     }
 
     path(...paths: string[]) {
-        return path.join(this.dir, ...paths)
+        return upath.join('/', this.dir, ...paths)
+    }
+
+    private key(...paths: string[]) {
+        let path = this.path(...paths)
+        return path.startsWith('/') ? path.slice(1) : path
     }
 }
 
@@ -268,6 +281,16 @@ function isDir(str: string) {
     return str.endsWith('/')
 }
 
-function toPrefix(path: string) {
-    return path.startsWith('/') ? path.slice(1) : path
+function parseS3Url(str: string) {
+    let url = new URL(str)
+    assert(url.protocol === 's3:', `Invalid s3 url: ${url}`)
+
+    return {
+        bucket: url.host,
+        dir: url.pathname || '/',
+    }
+}
+
+function createS3Url(bucket: string, path: string) {
+    return new URL(path, `s3://${bucket}`).toString()
 }
