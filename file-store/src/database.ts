@@ -1,9 +1,10 @@
-import {assertNotNull} from '@subsquid/util-internal'
+import {assertNotNull, def} from '@subsquid/util-internal'
 import {FinalDatabase, FinalTxInfo, HashAndHeight} from '@subsquid/util-internal-processor-tools'
 import assert from 'assert'
 import {Dest} from './dest'
 import {Table, TableWriter} from './table'
 import {createFolderName, isFolderName} from './util'
+import {createLogger} from '@subsquid/logger'
 
 export interface DatabaseHooks<D extends Dest = Dest> {
     onStateRead(dest: D): Promise<HashAndHeight | undefined>
@@ -69,19 +70,7 @@ export interface DatabaseOptions<T extends Tables, D extends Dest> {
     chunkSizeMb?: number
 
     /**
-     * If set, the Database will record a dataset partition
-     * upon reaching the blockchain head and then at least
-     * once every syncIntervalBlocks if any new data is available.
-     *
-     * If not set, filesystem writes are triggered only by
-     * the amount of in-memory data reaching the chunkSizeMb
-     * threshold.
-     *
-     * Useful for squids with low output data rates.
-     *
-     * Unit: block
-     *
-     * @see https://docs.subsquid.io/basics/store/file-store/overview/#filesystem-syncs-and-dataset-partitioning
+     * @deprecated use `Store.setForceFlush()` instead
      */
     syncIntervalBlocks?: number
 
@@ -101,11 +90,38 @@ type DataBuffer<T extends Tables> = {
 
 type ToStoreWriter<W extends TableWriter<any>> = Pick<W, 'write' | 'writeMany'>
 
-export type Store<T extends Tables> = Readonly<{
-    [k in keyof T]: ToStoreWriter<DataBuffer<T>[k]>
-}> & {
-    forced: boolean
+abstract class BaseStore<T extends Tables> {
+    static create<T extends Tables>(tables: T): StoreConstructor<T> {
+        const S = class extends BaseStore<T> {}
+
+        for (let name in tables) {
+            Object.defineProperty(S.prototype, name, {
+                get(this: InstanceType<typeof S>) {
+                    return this.chunk()[name]
+                },
+            })
+        }
+
+        return S as any
+    }
+
+    private _isForced = false
+
+    get isForced() {
+        return this._isForced
+    }
+
+    constructor(protected chunk: () => DataBuffer<T>) {}
+
+    setForceFlush(value: boolean) {
+        this._isForced = value
+    }
 }
+
+export type Store<T extends Tables> = BaseStore<T> &
+    Readonly<{
+        [k in keyof T]: ToStoreWriter<DataBuffer<T>[k]>
+    }>
 
 interface StoreConstructor<T extends Tables> {
     new (chunk: () => DataBuffer<T>): Store<T>
@@ -121,7 +137,6 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
     private tables: T
     private dest: D
     private chunkSize: number
-    private updateInterval: number
     private hooks: DatabaseHooks<D>
 
     private StoreConstructor: StoreConstructor<T>
@@ -129,7 +144,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
     private chunk?: DataBuffer<T>
     private state?: HashAndHeight
 
-    private forced = false
+    private isForced = false
 
     /**
      * Database interface implementation for storing squid data
@@ -146,22 +161,17 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
         this.chunkSize = options?.chunkSizeMb ?? 20
         assert(this.chunkSize > 0, `invalid chunk size ${this.chunkSize}`)
 
-        this.updateInterval = options?.syncIntervalBlocks || Infinity
-        assert(this.updateInterval > 0, `invalid update interval ${this.updateInterval}`)
+        if (options?.syncIntervalBlocks != null) {
+            const log = this.getLogger()
+            log.warn(
+                '`syncIntervalBlocks` option is deprecated and no longer has any effect. ' +
+                    'Please consider using `Store.setForceFlush()` isntead.'
+            )
+        }
 
         this.hooks = options.hooks || defaultHooks
 
-        class Store {
-            constructor(protected chunk: () => DataBuffer<T>) {}
-        }
-        for (let name in this.tables) {
-            Object.defineProperty(Store.prototype, name, {
-                get(this: Store) {
-                    return this.chunk()[name]
-                },
-            })
-        }
-        this.StoreConstructor = Store as any
+        this.StoreConstructor = BaseStore.create(this.tables)
     }
 
     async connect(): Promise<HashAndHeight> {
@@ -200,17 +210,13 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
             chunkSize += this.chunk[name].size
         }
 
-        if (
-            this.forced ||
-            chunkSize >= this.chunkSize * 1024 * 1024 ||
-            (info.isOnTop && newState.height - prevState.height >= this.updateInterval)
-        ) {
+        if (this.isForced || chunkSize >= this.chunkSize * 1024 * 1024) {
             if (chunkSize > 0) {
                 await this.flush(prevState, newState, this.chunk)
             }
             await this.hooks.onStateUpdate(this.dest, newState, prevState)
             this.state = newState
-            this.forced = false
+            this.isForced = false
         }
     }
 
@@ -232,7 +238,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
 
         try {
             await cb(store)
-            this.forced = store.forced
+            this.isForced = store.isForced
         } finally {
             running = false
         }
@@ -254,6 +260,11 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
             chunk[name] = this.tables[name].createWriter()
         }
         return chunk
+    }
+
+    @def
+    private getLogger() {
+        return createLogger('sqd:file-store')
     }
 }
 

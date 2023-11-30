@@ -68,5 +68,6 @@ processor.run(db, async (ctx) => {
             }
         }
     }
-    ctx.store.forced = forced = !forced
+
+    ctx.store.setForceFlush((forced = !forced))
 })
