@@ -165,7 +165,7 @@ export class Database<T extends Tables, D extends Dest> implements FinalDatabase
             const log = this.getLogger()
             log.warn(
                 '`syncIntervalBlocks` option is deprecated and no longer has any effect. ' +
-                    'Please consider using `Store.setForceFlush()` isntead.'
+                    'Please consider using `Store.setForceFlush()` instead.'
             )
         }
 
