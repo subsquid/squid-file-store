@@ -70,7 +70,7 @@ export interface DatabaseOptions<T extends Tables, D extends Dest> {
     chunkSizeMb?: number
 
     /**
-     * @deprecated use `Store.setForceFlush()` instead
+     * @deprecated Use {@link Store.setForceFlush} instead
      */
     syncIntervalBlocks?: number
 
