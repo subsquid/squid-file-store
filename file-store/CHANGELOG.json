@@ -2,6 +2,18 @@
   "name": "@subsquid/file-store",
   "entries": [
     {
+      "version": "2.0.0",
+      "tag": "@subsquid/file-store_v2.0.0",
+      "date": "Sun, 03 Dec 2023 10:17:03 GMT",
+      "comments": {
+        "major": [
+          {
+            "comment": "add `Store.setForceFlush()` method"
+          }
+        ]
+      }
+    },
+    {
       "version": "1.4.0",
       "tag": "@subsquid/file-store_v1.4.0",
       "date": "Sat, 16 Sep 2023 21:46:49 GMT",

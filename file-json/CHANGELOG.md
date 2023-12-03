@@ -1,6 +1,11 @@
 # Change Log - @subsquid/file-store-json
 
-This log was last generated on Mon, 14 Aug 2023 10:52:49 GMT and should not be manually modified.
+This log was last generated on Sun, 03 Dec 2023 10:17:03 GMT and should not be manually modified.
+
+## 1.2.1
+Sun, 03 Dec 2023 10:17:03 GMT
+
+_Version update only_
 
 ## 1.2.0
 Mon, 14 Aug 2023 10:52:49 GMT

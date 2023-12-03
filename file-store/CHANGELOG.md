@@ -1,6 +1,13 @@
 # Change Log - @subsquid/file-store
 
-This log was last generated on Sat, 16 Sep 2023 21:46:49 GMT and should not be manually modified.
+This log was last generated on Sun, 03 Dec 2023 10:17:03 GMT and should not be manually modified.
+
+## 2.0.0
+Sun, 03 Dec 2023 10:17:03 GMT
+
+### Breaking changes
+
+- add `Store.setForceFlush()` method
 
 ## 1.4.0
 Sat, 16 Sep 2023 21:46:49 GMT

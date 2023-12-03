@@ -1,6 +1,11 @@
 # Change Log - @subsquid/file-store-s3
 
-This log was last generated on Sun, 17 Sep 2023 11:53:20 GMT and should not be manually modified.
+This log was last generated on Sun, 03 Dec 2023 10:17:03 GMT and should not be manually modified.
+
+## 2.0.1
+Sun, 03 Dec 2023 10:17:03 GMT
+
+_Version update only_
 
 ## 2.0.0
 Sun, 17 Sep 2023 11:53:20 GMT
