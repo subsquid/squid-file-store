@@ -1,0 +1,10 @@
+{
+  "changes": [
+    {
+      "packageName": "@subsquid/file-store",
+      "comment": "add `Store.setForceFlush()` method",
+      "type": "major"
+    }
+  ],
+  "packageName": "@subsquid/file-store"
+}
